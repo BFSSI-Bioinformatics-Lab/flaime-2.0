@@ -11,7 +11,7 @@ const columns = [
     { field: 'productCategory', headerName: 'Category', width: 100 }
 ];
 
-const Table = () => {
+const TempTable = () => {
     const [products, setProducts] = useState([]);
 
     
@@ -39,4 +39,4 @@ const Table = () => {
   )
 }
 
-export default Table
+export default TempTable
