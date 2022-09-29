@@ -10,6 +10,8 @@ import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import Tooltip from '@mui/material/Tooltip';
 
+import { Link } from "react-router-dom";
+
 
 const Header = () => {
 
@@ -63,9 +65,12 @@ const Header = () => {
                         },
                     }}}
                 >
-                    <MenuItem onClick={handleClose}>Product Browser</MenuItem>
-                    <MenuItem onClick={handleClose}>Batch Browser</MenuItem>
-                    <MenuItem onClick={handleClose}>Report Builder</MenuItem>
+                    <MenuItem component={Link} to='/tools/product-browser'
+                    onClick={handleClose}>Product Browser</MenuItem>
+                    <MenuItem component={Link} to='/tools/batch-browser'
+                    onClick={handleClose}>Batch Browser</MenuItem>
+                    <MenuItem component={Link} to='/tools/report-builder'
+                    onClick={handleClose}>Report Builder</MenuItem>
                 </Menu>
 
                 <Button
@@ -95,9 +100,12 @@ const Header = () => {
                         },
                     }}}
                 >
-                    <MenuItem onClick={handleClose}>By Store</MenuItem>
-                    <MenuItem onClick={handleClose}>By Category</MenuItem>
-                    <MenuItem onClick={handleClose}>By Nutrient</MenuItem>
+                    <MenuItem component={Link} to='/reports/store'
+                    onClick={handleClose}>By Store</MenuItem>
+                    <MenuItem component={Link} to='/reports/category'
+                    onClick={handleClose}>By Category</MenuItem>
+                    <MenuItem component={Link} to='/reports/nutrient'
+                    onClick={handleClose}>By Nutrient</MenuItem>
                 </Menu>
 
                 <Button
@@ -127,9 +135,12 @@ const Header = () => {
                         },
                     }}}
                 >
-                    <MenuItem onClick={handleClose}>Quality</MenuItem>
-                    <MenuItem onClick={handleClose}>Download</MenuItem>
-                    <MenuItem onClick={handleClose}>Visualizations</MenuItem>
+                    <MenuItem component={Link} to='/data/quality'
+                    onClick={handleClose}>Quality</MenuItem>
+                    <MenuItem component={Link} to='/data/download'
+                    onClick={handleClose}>Download</MenuItem>
+                    <MenuItem component={Link} to='/data/visualizations'
+                    onClick={handleClose}>Visualizations</MenuItem>
                 </Menu>
 
                 <Button
