@@ -11,6 +11,8 @@ import MenuItem from "@mui/material/MenuItem";
 import Tooltip from '@mui/material/Tooltip';
 
 import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+
 
 
 const Header = () => {
@@ -28,12 +30,19 @@ const Header = () => {
         setAnchorEl3(null);
     };
 
+    let navigate = useNavigate(); 
+    const routeHome = () =>{ 
+        let path = '/'; 
+        navigate(path);
+    }
+
     return (
         // <div>Header</div>
         <Box sx={{ flexGrow: 1 }}>
             <AppBar position="static">
                 <Toolbar sx={{ background: '#732C02'}}>
-                <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+                <Typography variant="h6" component="div" 
+                sx={{ flexGrow: 1, cursor:'pointer' }} onClick={routeHome}>
                     FLAIME
                 </Typography>
 
@@ -151,6 +160,7 @@ const Header = () => {
                     // onClick={handleClick}
                     color="inherit"
                     sx={{ mr: 2 }}
+                    component={Link} to="/about"
                 >
                     About
                 </Button>
