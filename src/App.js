@@ -4,6 +4,7 @@ import Header from "./components/Header";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Batch_browser from "./pages/tools/Batch_browser";
 import Product_browser from "./pages/tools/Product_browser";
+import Product_detail from "./pages/tools/Product_detail";
 import Report_builder from "./pages/tools/Report_builder";
 import Category_report from "./pages/reports/Category_report";
 import Nutrient_report from "./pages/reports/Nutrient_report";
@@ -34,6 +35,9 @@ function App() {
           <Route path="data/visualizations" element={<Visualizations />} />
 
           <Route path="about" element={<About />} />
+
+          {/* Product Detail Page */}
+          <Route path="tools/product-browser/:productId" element={<Product_detail />} />
         </Routes>
 
         

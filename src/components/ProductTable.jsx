@@ -15,7 +15,7 @@ import axios from 'axios';
 import TextField from '@mui/material/TextField';
 import { OpenInNew, PageviewOutlined } from '@mui/icons-material';
 import { styled } from '@mui/material/styles';
-import './Table.css';
+// import './Table.css';
 
 const StyledHeader = styled(TableCell)(({ theme }) => ({
   typography: 'subtitle',
@@ -40,8 +40,10 @@ const ProductTable = () => {
     const getData = async () => {
       let page_n = controller.page + 1
       // Currently set up for the django API, will need to be changed.
+      // let url = `http://127.0.0.1:8000/api/recent_products_react/?page=${page_n}&size=${controller.rowsPerPage}`
       let url = `http://127.0.0.1:8000/api/recent_products_react/?page=${page_n}&size=${controller.rowsPerPage}`
       console.log(controller.search);
+      //https://172.17.10.69:7251/api/StoreProductService/GetStoreProductsAsync?storeid=13&scrapebatchid=-1&mostrecentonly=true&pageNumber=${page_n}&pageSize=${controller.rowsPerPage}
       if (controller.search != null) {
         url = url + `&search=${controller.search}`
       }
