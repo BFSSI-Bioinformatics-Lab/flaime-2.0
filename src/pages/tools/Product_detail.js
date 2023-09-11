@@ -4,7 +4,7 @@ import {useParams} from "react-router-dom"
 import { Container } from '@mui/system';
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
-import { Typography } from '@mui/material';
+import { Divider } from '@mui/material';
 import { styled } from '@mui/material/styles';
 
 import Grid from '@mui/material/Grid';
@@ -17,13 +17,21 @@ const Item = styled(Paper)(({ theme }) => ({
     color: theme.palette.text.secondary,
   }));
 
-  const ItemTitle = styled(Paper)(({ theme }) => ({
+const ItemTitle = styled(Paper)(({ theme }) => ({
     backgroundColor:  '#D9965B',
     ...theme.typography.h5,
     padding: theme.spacing(1),
     textAlign: 'center',
     color: '#f5f5f5',
-  }));
+}));
+
+const DetailItem = styled(Paper)(({ theme }) => ({
+    backgroundColor:  '#fff',
+    ...theme.typography.body2,
+    padding: theme.spacing(1),
+    textAlign: 'start',
+    color: '#191919',
+}));
 
 const Product_detail = () => {
     
@@ -98,15 +106,18 @@ const Product_detail = () => {
 
                     <Grid container item xs={6} spacing={3} direction="row"
                 justifyContent="space-around" alignItems="center">
-                        <Grid item xs={4}>
+                        <Grid item xs={3}>
                             <Item >item1</Item>
                         </Grid>
-                        <Grid item xs={4}>
+                        <Grid item xs={3}>
                             <Item >item1</Item>
                         </Grid>
-                        <Grid item xs={4}>
+                        <Grid item xs={3}>
                             <Item >item1</Item>
                         </Grid> 
+                        <Grid item xs={1}>
+                            
+                        </Grid>
                     </Grid>
                 </Grid>
                 {/* <Paper elevation={0} width='50%' sx={{
@@ -128,21 +139,28 @@ const Product_detail = () => {
         
         {/* Middle section with all info */}
         <div>
-        <Grid container spacing={2} direction="row"
-                justifyContent="flex-start" alignItems="center">
-                <Grid item xs={12} md={7}>
-                    <ItemTitle>{product.storeEntity.name}</ItemTitle>
-                </Grid>
+            <Container>
+                <Grid container spacing={2} direction="row"
+                    justifyContent="flex-start" alignItems="center">
+                    <Grid item xs={12} md={7} >
+                        <DetailItem elevation={0}>Store:{product.storeEntity.name}</DetailItem>
+                        <Divider></Divider>
+                        <DetailItem elevation={0}>Price:{product.price} {product.priceUnitEntity.name}</DetailItem>
+                        <Divider/>
+                        <DetailItem elevation={0}>Description: {product.siteDescription}</DetailItem>
+                        <Divider/>
+                    </Grid>
 
-        </Grid>
+                </Grid>
+            </Container>
             <Container>
                 
                 <div>
-                    {/* {/* <p>Product name: {product.id}</p> */}
-                    {/* <p>Store: {product.storeEntity.name}</p>
-                    <p>Price:{product.price} {products.products.priceUnitEntity.name}</p>
+                    <p>Product name: {product.id}</p>
+                    <p>Store: {product.storeEntity.name}</p>
+                    <p>Price:{product.price} {product.priceUnitEntity.name}</p>
                     <p>Description: {product.siteDescription}</p>
-                    <p>Serving Size: {product.servingSize} {product.servingSizeUnitEntity.name}</p>  */}
+                    <p>Serving Size: {product.servingSize} {product.servingSizeUnitEntity.name}</p> 
                 </div>
             </Container>
             

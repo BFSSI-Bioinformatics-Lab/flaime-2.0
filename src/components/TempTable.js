@@ -1,9 +1,9 @@
 import React, {useEffect, useState} from 'react'
 import axios from 'axios';
-import { DataGrid, GridToolbar, GridRowParams } from '@mui/x-data-grid'
+import { DataGrid } from '@mui/x-data-grid'
 import TextField from '@mui/material/TextField';
-import {useParams, Link} from "react-router-dom"
-import Product_detail from '../pages/tools/Product_detail';
+import {Link} from "react-router-dom"
+// import Product_detail from '../pages/tools/Product_detail';
 import { Container } from '@mui/system';
 
 
@@ -27,8 +27,8 @@ const columns = [
     { field: 'rawBrand', headerName: 'Brand' },
     { field: 'rawServingSize', headerName: 'Serving Size' },
     { field: 'readingPrice', headerName: 'Price' },
-    { field: 'storeProductCode', headerName: 'Code' }
-    // { field: 'productEntity.id', headerName: 'name' }
+    { field: 'storeProductCode', headerName: 'Code' },
+    { field: 'storeEntityId', headerName: 'store' }
 ];
 
 const TempTable = () => {
