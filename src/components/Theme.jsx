@@ -15,7 +15,8 @@ const theme = createTheme({
     typography: {
         fontFamily: [
             "K2D"
-        ]
+        ],
+        fontSize: 14
     }
 })
 

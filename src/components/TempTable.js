@@ -1,11 +1,11 @@
 import React, {useEffect, useState} from 'react'
 import axios from 'axios';
-import { DataGrid } from '@mui/x-data-grid'
+import { DataGrid, gridClasses } from '@mui/x-data-grid'
 import TextField from '@mui/material/TextField';
 import {Link} from "react-router-dom"
 // import Product_detail from '../pages/tools/Product_detail';
 import { Container } from '@mui/system';
-
+import { styled } from '@mui/material';
 
 const columns = [
     // { field: 'id', headerName: 'ID' },
@@ -24,12 +24,39 @@ const columns = [
         <Link to={`${params.row.id}`}>{params.row.id}</Link>,
             //`https://172.17.10.69:7251/api/StoreProductService/SelectStoreProductsAsync?id=${params.row.id}` 
     },
-    { field: 'rawBrand', headerName: 'Brand' },
-    { field: 'rawServingSize', headerName: 'Serving Size' },
-    { field: 'readingPrice', headerName: 'Price' },
-    { field: 'storeProductCode', headerName: 'Code' },
-    { field: 'storeEntityId', headerName: 'store' }
+    { field: 'rawBrand', headerName: 'Brand', width: 150 },
+    { field: 'rawServingSize', headerName: 'Serving Size', width: 200 },
+    { field: 'readingPrice', headerName: 'Price', width: 100 },
+    { field: 'storeProductCode', headerName: 'Code', width: 200 },
+    {
+        field: "categoryPredictionEntityId",
+        headerName: "Category"
+    },
+    { 
+        field: 'siteUrl', 
+        headerName: "Store",
+        renderCell: (params) => <a href={`${params.row.siteUrl}`}>{params.row.storeEntity.name}</a>
+    }
 ];
+
+const StripedDataGrid = styled(DataGrid)(({ theme }) => ({
+    [`& .${gridClasses.row}.odd`]: {
+        backgroundColor: "white",
+        "&:hover, &.Mui-hovered": {
+            backgroundColor: theme.palette.grey[400]
+        }
+    },
+    [`& .${gridClasses.row}.even`]: {
+        backgroundColor: theme.palette.grey[100],
+        "&:hover, &.Mui-hovered": {
+            backgroundColor: theme.palette.grey[400]
+        }
+    },
+    [`.${gridClasses.columnHeaderTitle}`]: {
+        fontWeight: "bold",
+        fontSize: theme.typography.fontSize * 1.2
+    }
+}));
 
 const TempTable = () => {
     // const [products, setProducts] = useState([]);
@@ -79,7 +106,7 @@ const TempTable = () => {
     };
 
   return (
-    <div style={{ height: 500, width: '70%' }}>
+    <div >
         <Container>
             <h2>Table of all Products</h2>
             {/* <p>{products.productName}</p>
@@ -97,7 +124,7 @@ const TempTable = () => {
             sx={{pb: "15px"}}
             // onCancelSearch={() => cancelSearch()}
             />
-            <DataGrid
+            <StripedDataGrid
                 autoHeight
                 rows={pageState.products}
                 rowCount={pageState.total}
@@ -110,6 +137,10 @@ const TempTable = () => {
                 onPageChange={(newPage) => setPageState(old =>({...old, page:newPage + 1}))}
                 onPageSizeChange={(newPageSize) => setPageState(old=>({...old, pageSize: newPageSize}))}
                 columns={columns}
+                getRowClassName={(params) => 
+                    params.indexRelativeToCurrentPage % 2 === 0 ? "even" : "odd"
+                }   
+                disableSelectionOnClick 
                 // components={{
                 //     Toolbar: GridToolbar,
                 // }}
