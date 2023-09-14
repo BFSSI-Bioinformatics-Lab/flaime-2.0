@@ -16,8 +16,8 @@ const Item = styled(Paper)(({ theme }) => ({
   padding: `${theme.spacing(1)} ${theme.spacing(3)}`,
   textAlign: 'center',
   color: theme.palette.primary.dark,
-  height:'187px',
-  width: '410px',
+  height:'177px',
+  width: '360px',
   display: "flex",
   flexDirection: "row",
   justifyContent: "space-between",
@@ -33,7 +33,7 @@ const ArrowButtonLink = styled(Link)(({ theme }) => ({
 
 const ArrowButton = styled(IconButton)(({ theme }) => ({
   position: "absolute",
-  transform: "translate(350px, 60px)",
+  transform: "translate(310px, 60px)",
 }));
 
 const Home = () => {
