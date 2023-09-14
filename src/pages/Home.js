@@ -43,27 +43,27 @@ const Home = () => {
     {
       title: "Get reports by Stores",
       icon: <ShoppingCardIcon sx={{ fontSize: 77 }} />,
-      link: ""
+      link: "reports/store"
     },
     {
       title: "Explore all products",
       icon: <ShoppingCardIcon sx={{ fontSize: 77 }} />,
-      link: ""
+      link: "tools/product-browser"
     },
     {
       title: "Get reports by Category",
       icon: <ShoppingCardIcon sx={{ fontSize: 77 }} />,
-      link: ""
+      link: "reports/category"
     },
     {
       title: "Explore all data and data history",
       icon: <ShoppingCardIcon sx={{ fontSize: 77 }} />,
-      link: ""
+      link: "data/quality"
     },
     {
       title: "Get reports by Nutrient",
       icon: <ShoppingCardIcon sx={{ fontSize: 77 }} />,
-      link: ""
+      link: "reports/nutrient"
     },
   ]
 
@@ -107,7 +107,7 @@ const Home = () => {
                       {item.icon}
                       <Typography variant="subtitle" align="left" sx={{ margin: "0 42px" }}>{item.title}</Typography>
                       <ArrowButton>
-                        <ArrowButtonLink>
+                        <ArrowButtonLink to={item.link}>
                           <ArrowCircleRight sx={{ fontSize: 44 }}/>
                         </ArrowButtonLink>
                       </ArrowButton>
