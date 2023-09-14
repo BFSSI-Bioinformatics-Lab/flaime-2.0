@@ -4,9 +4,12 @@ import { Link } from "react-router-dom";
 import { Image } from 'mui-image'
 import landing from "../static/images/landing.jpg"
 import quicklinks from "../static/images/quickLinks.jpg"
+import quickSearch from "../static/images/singin.jpg"
 import { Typography, Box, Paper, IconButton } from '@mui/material'
 import Grid from '@mui/material/Grid';
-import { styled, useTheme } from '@mui/material/styles';
+import { useTheme } from '@mui/material/styles';
+import { styled } from "@mui/system";
+import SearchBar from "../components/SearchBar";
 import ShoppingCardIcon from "@mui/icons-material/ShoppingCart";
 import ArrowCircleRight from "@mui/icons-material/ArrowCircleRight";
 
@@ -76,8 +79,13 @@ const Home = () => {
         <Typography  style={{position: "absolute", color: "#732C02",top: '50%',left: "45%",transform: "translateX(-58%)",}}>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Nibh nisl condimentum id venenatis a condimentum vitae. Non pulvinar neque laoreet suspendisse interdum.
         </Typography>
       </div>
-      
-      <Container maxWidth="sm" sx={{ padding: "30px"}}>
+      <Box sx={
+        { height: "335px", backgroundImage:`url(${quickSearch})`, backgroundRepeat: "no-repeat", backgroundSize: 
+          "cover", backgroundPosition: "80% 50%", display: "flex", alignItems: "center", justifyContent: "center" }
+      }>
+        <SearchBar placeholder="Quick Search" />
+      </Box>
+      <Container maxWidth="sm" sx={{ padding: "50px"}}>
         <Typography variant="h2" color="primary" align="center">Explore the FLAIME Database</Typography>
       </Container>
       <div style={{backgroundImage:`url(${quicklinks})`, backgroundRepeat: "no-repeat", backgroundSize: "cover"}}>
