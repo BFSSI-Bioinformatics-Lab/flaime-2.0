@@ -83,7 +83,7 @@ const Home = () => {
         { height: "335px", backgroundImage:`url(${quickSearch})`, backgroundRepeat: "no-repeat", backgroundSize: 
           "cover", backgroundPosition: "80% 50%", display: "flex", alignItems: "center", justifyContent: "center" }
       }>
-        <SearchBar placeholder="Quick Search" />
+        <SearchBar placeholder="Quick Search" width="452px" height="75px" />
       </Box>
       <Container maxWidth="sm" sx={{ padding: "50px"}}>
         <Typography variant="h2" color="primary" align="center">Explore the FLAIME Database</Typography>

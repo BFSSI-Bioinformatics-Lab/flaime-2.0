@@ -2,11 +2,11 @@ import { TextField, InputAdornment } from "@mui/material";
 import SearchIcon from '@mui/icons-material/Search';
 import { styled } from "@mui/system";
 
-const SearchBar = ({placeholder}) => {
+const SearchBar = ({placeholder, width, height}) => {
     
     const SearchBarTextField = styled(TextField)(({theme}) => ({
-        width: "452px",
-        height: "75px",
+        width: width,
+        height: height,
         justifyContent: "center",
         color: theme.palette.primary.dark,
         backgroundColor: theme.palette.grey[100],
@@ -16,15 +16,15 @@ const SearchBar = ({placeholder}) => {
           textAlign: "center",
           "::placeholder": {
             color: theme.palette.primary.dark,
-            opacity: 1
+            opacity: 0.8
           },
           "::-ms-input-placeholder": {
             color: theme.palette.primary.dark,
-            opacity: 1
+            opacity: 0.8
           },
           ":-ms-input-placeholder": {
             color: theme.palette.primary.dark,
-            opacity: 1
+            opacity: 0.8
           }
         },
         "& fieldset": {
@@ -37,7 +37,7 @@ const SearchBar = ({placeholder}) => {
             placeholder={placeholder}
             variant="outlined"
             InputProps={{
-                endAdornment: <InputAdornment><SearchIcon fontSize="large" color="primary" /></InputAdornment>
+                endAdornment: <InputAdornment position="end"><SearchIcon fontSize="large" color="primary" /></InputAdornment>
             }}
         />
     )
