@@ -4,33 +4,62 @@ import {useParams} from "react-router-dom"
 import { Container } from '@mui/system';
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
-import { Divider } from '@mui/material';
 import { styled } from '@mui/material/styles';
-
+import { Image } from 'mui-image'
 import Grid from '@mui/material/Grid';
+
+const Band = styled(Box)(({theme}) => ({
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: "center",
+    flexGrow: 1,
+    width: "100%",
+    height: 134,
+    backgroundColor: "#D9965B",
+    '& > :not(style)': {
+        m: 0,
+        width: '100%',
+        backgroundColor: "#D9965B",
+    }
+}));
+
 
 const Item = styled(Paper)(({ theme }) => ({
     backgroundColor:  '#fff',
-    ...theme.typography.body2,
+    ...theme.typography.body1,
     padding: theme.spacing(1),
     textAlign: 'center',
     color: theme.palette.text.secondary,
+    boxShadow: "none"
   }));
+
+const ItemIcon = styled(Box)(({ theme }) => ({
+    backgroundColor: theme.palette.landing.main,
+    padding: theme.spacing(1),
+    width: 60,
+    height: 60,
+    borderRadius: "50%",
+    border: 0,
+    marginLeft: theme.spacing(4),
+    marginRight: theme.spacing(2)
+}));
 
 const ItemTitle = styled(Paper)(({ theme }) => ({
     backgroundColor:  '#D9965B',
-    ...theme.typography.h5,
+    ...theme.typography.h4,
     padding: theme.spacing(1),
     textAlign: 'center',
     color: '#f5f5f5',
+    boxShadow: "none"
 }));
 
 const DetailItem = styled(Paper)(({ theme }) => ({
     backgroundColor:  '#fff',
-    ...theme.typography.body2,
-    padding: theme.spacing(1),
+    ...theme.typography.body1,
+    paddingBottom: theme.spacing(2),
+    marginBottom: theme.spacing(2),
     textAlign: 'start',
-    color: '#191919',
+    color: '#191919'
 }));
 
 const Product_detail = () => {
@@ -41,11 +70,22 @@ const Product_detail = () => {
     console.log(productId)
     const [products, setProducts] = useState([])
     const [isLoading, setLoading] = useState(true);
+    const [productDescItems, setProductDescItems] = useState([]);
     // const [products, setProducts] = useState({
     //     isLoading: true,
     //     products:[]
     // });
-    
+
+    const [product, setProduct] = useState()
+
+    const imagePathToUrl = (imagePath) => {
+        return `http://172.17.10.134/media/${imagePath}`;
+    }
+
+    const breadcrumbComponent = (crumbs) => {
+        return crumbs.join(" > ")
+    }
+
     useEffect( () =>{
         
         setProducts(old=>({...old, isLoading: true}))
@@ -59,16 +99,70 @@ const Product_detail = () => {
                 
                 const dataProduct = res.data.responseObjects[0]
                 if (dataProduct === undefined) return;
-                setProducts(dataProduct)
-                
+                setProducts(dataProduct);
+                setProduct(dataProduct);
                 // setProducts(old=>({...old, isLoading: false, products: dataProduct}));
                 setLoading(false)
             }      
         );
     },[productId]);
 
+    useEffect(() => {
+        if (!product) return;
+        const items = [
+            {
+                name: "Product name",
+                value: product.productEntity.nameOfProduct
+            },
+            {
+                name: "Brand",
+                value: product.productEntity.brandEntity.hasName ?
+                    product.productEntity.brandEntity.name : null 
+            },
+            {
+                name: "Category", // does the category need to be verified in order to be displayed?
+                value: product.subcategoryPredictionEntity.verified ? 
+                    product.subcategoryPredictionEntity.predictedCategoryName : null
+            },
+            {
+                name: "Subcategory", // does the category need to be verified in order to be displayed?
+                value: product.categoryPredictionEntity.verified ? 
+                    product.categoryPredictionEntity.predictedSubcategoryName : null
+            },
+            {
+                name: "Store",
+                value: products.storeEntity.name
+            },
+            {
+                name: "Product Code",
+                value: product.storeProductCode
+            },
+            {
+                name: "Price",
+                value: product.price ? `${product.price} ${product.priceUnitEntity.name ?? ""}` : null
+            },
+            {
+                name: "Description",
+                value: products.siteDescription
+            },
+            {
+                name: "Serving size",
+                value: product.servingSize ? `${product.servingSize} ${product.servingSizeUnitEntity.name ?? ""}` : null
+            },
+            {
+                name: "Breadcrumbs",
+                value: breadcrumbComponent(product.breadcrumbEntity.breadcrumbArray)
+            },
+            {
+                name: "URL",
+                value: product.siteUrl ? <a href={product.siteUrl}>{product.siteName}</a> : null
+            }
+        ];
+        setProductDescItems(items);
+    }, [product]);
+    
+
     // console.log(products.id)
-    const product = products
     if (isLoading) {
         return <div className="App">Loading...</div>;
       }
@@ -78,42 +172,31 @@ const Product_detail = () => {
     <div>
         {/* Top band */}
         
-            <Box
-                sx={{
-                    display: 'flex',
-                    // flexWrap: 'wrap',
-                    alignItems: 'center',
-                    flexGrow: 1,
-                    width: 1,
-                    height: 128,
-                    backgroundColor: '#D9965B',
-                    '& > :not(style)': {
-                    m: 0,
-                    width: '100%',
-                    // height: 128,
-                    backgroundColor: '#D9965B',
-                    },
-                }}
+            <Band
             >
-                <Grid container spacing={1} direction="row"
-                justifyContent="center" alignItems="center">
-                    
-                    <Grid container item xs={6} spacing={3}>
-                        <Grid item xs={12} container={true}>
-                            <ItemTitle elevation={0}>{product.siteName}</ItemTitle>
+                <Grid container columnSpacing={1} direction="row"
+                justifyContent="space-between" alignItems="center" >
+                    <Grid xs={12} md={6} item>
+                        <Grid container alignItems="center" wrap="nowrap">
+                            <Grid item>
+                                <ItemIcon></ItemIcon>
+                            </Grid>
+                            <Grid item>
+                                <ItemTitle elevation={0}>{product.siteName}</ItemTitle>
+                            </Grid>
                         </Grid>
                     </Grid>
 
-                    <Grid container item xs={6} spacing={3} direction="row"
+                    <Grid container item xs={12} md={6} spacing={3} direction="row"
                 justifyContent="space-around" alignItems="center">
                         <Grid item xs={3}>
-                            <Item >item1</Item>
+                            <Item >High Sodium</Item>
                         </Grid>
                         <Grid item xs={3}>
-                            <Item >item1</Item>
+                            <Item >Low Fat</Item>
                         </Grid>
                         <Grid item xs={3}>
-                            <Item >item1</Item>
+                            <Item >No Sugar</Item>
                         </Grid> 
                         <Grid item xs={1}>
                             
@@ -132,28 +215,129 @@ const Product_detail = () => {
                 </Paper> */}
                 {/* <Paper></Paper> */}
                 
-            </Box>
+            </Band>
         
         
         
         
         {/* Middle section with all info */}
         <div>
-            <Container>
-                <Grid container spacing={2} direction="row"
-                    justifyContent="flex-start" alignItems="center">
-                    <Grid item xs={12} md={7} >
-                        <DetailItem elevation={0}>Store:{product.storeEntity.name}</DetailItem>
-                        <Divider></Divider>
-                        <DetailItem elevation={0}>Price:{product.price} {product.priceUnitEntity.name}</DetailItem>
-                        <Divider/>
-                        <DetailItem elevation={0}>Description: {product.siteDescription}</DetailItem>
-                        <Divider/>
+            <Container  sx={{ padding: "40px 0" }}>
+                {product &&
+                    <Grid container columnSpacing={6} direction="row"
+                        justifyContent="space-between" alignItems="flex-start">
+                        {/*<Grid item xs={12} md={7} >
+                            <DetailItem elevation={0}>Store:{product.storeEntity.name}</DetailItem>
+                            <Divider></Divider>
+                            <DetailItem elevation={0}>Price:{product.price} {product.priceUnitEntity.name}</DetailItem>
+                            <Divider/>
+                            <DetailItem elevation={0}>Description: {product.siteDescription}</DetailItem>
+                            <Divider/>
+                </Grid>*/}
+                        <Grid item xs={12} md={6}>
+                            <div>
+                                {productDescItems && productDescItems.map((item) => ( item.value && 
+                                    <>
+                                        <DetailItem key={item.name} elevation={0}>{item.name}: {item.value}</DetailItem>
+                                    </>
+                                ))}
+                            </div>
+                            <Grid container 
+                                direction="row"
+                            >
+                                {product.storeProductImageEntities.length > 1 && product.storeProductImageEntities.slice(1).map(imageEntity => (
+                                    <Grid key={imageEntity.id} item sm={12} md={6} 
+                                        lg={Math.max(Math.floor(12 / (product.storeProductImageEntities.length - 1)), 4)}
+                                    >
+                                        <Image key={imageEntity.imagePath} 
+                                            src={imagePathToUrl(imageEntity.imagePath)} 
+                                            alt={product.siteName}  
+                                        />
+                                    </Grid>
+                                ))}
+                            </Grid>
+                        </Grid>
+                        <Grid item xs={12} md={6}>
+                            <div>
+                                {product.storeProductImageEntities && product.storeProductImageEntities.length > 0 && (
+                                    <div style={{ margin: "50px 0" }}>
+                                        <Image key={product.storeProductImageEntities[0].imagePath} 
+                                            src={imagePathToUrl(product.storeProductImageEntities[0].imagePath)} 
+                                            alt={product.siteName} 
+                                            width="100%"
+                                        />
+                                    </div>
+                                )}
+                                <Grid container
+                                    direction="row-reverse"
+                                    columnSpacing={12}
+                                    justifyContent={"left"}
+                                >
+                                    {product.storeProductNutritionFactEntities && 
+                                        <>
+                                            <Grid item xs={4}><Grid container direction="column-reverse" rowSpacing={2}>
+                                            { product.storeProductNutritionFactEntities.slice(0, 
+                                                Math.floor(product.storeProductNutritionFactEntities.length / 2)).map(
+                                                    (nutritionFact) => ( nutritionFact.amount !== null &&
+                                                        <Grid xs={12} item >
+                                                            <Grid container 
+                                                                justifyContent={"space-between"} 
+                                                                alignItems={"flex-end"}
+                                                                columnSpacing={1}
+                                                            >
+                                                                <Grid item sm={6} textAlign={"left"}>
+                                                                    <div>
+                                                                        <b>{nutritionFact.nutrientEntity.symbol}</b>
+                                                                    </div>
+                                                                </Grid>
+                                                                <Grid item sm={6} textAlign={"right"}>
+                                                                    <div>{nutritionFact.amount}{nutritionFact.amountUnitEntity.name}</div>
+                                                                </Grid>
+                                                            </Grid>
+                                                        </Grid>
+                                            ))}
+                                            </Grid></Grid>
+                                            <Grid item xs={4}><Grid container direction="column-reverse" rowSpacing={2}>
+                                            { product.storeProductNutritionFactEntities.slice(
+                                                Math.floor(product.storeProductNutritionFactEntities.length / 2)).map(
+                                                    (nutritionFact) => ( nutritionFact.amount !== null &&
+                                                        <Grid xs={12} item >
+                                                            <Grid container 
+                                                                justifyContent={"space-between"} 
+                                                                alignItems={"flex-end"}
+                                                                columnSpacing={1}
+                                                            >
+                                                                <Grid item sm={6} textAlign={"left"}>
+                                                                    <div>
+                                                                        <b>{nutritionFact.nutrientEntity.symbol}</b>
+                                                                    </div>
+                                                                </Grid>
+                                                                <Grid item sm={6} textAlign={"right"}>
+                                                                    <div>{nutritionFact.amount}{nutritionFact.amountUnitEntity.name}</div>
+                                                                </Grid>
+                                                            </Grid>
+                                                        </Grid>
+                                            ))}
+                                            </Grid></Grid>
+                                        </>
+                                    }
+                                </Grid>
+                                { product.ingredientEn && 
+                                    <div>
+                                        <div style={{ marginTop: "40px", marginBottom: "10px"}}>
+                                            <b>INGREDIENTS</b>
+                                        </div>
+                                        <div>
+                                            {product.ingredientEn.toUpperCase()}
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </Grid>
                     </Grid>
-
-                </Grid>
+                }
             </Container>
-            <Container>
+            {/*<Container>
                 
                 <div>
                     <p>Product name: {product.id}</p>
@@ -162,7 +346,10 @@ const Product_detail = () => {
                     <p>Description: {product.siteDescription}</p>
                     <p>Serving Size: {product.servingSize} {product.servingSizeUnitEntity.name}</p> 
                 </div>
-            </Container>
+                        </Container>*/}
+            <Band>
+                <ItemTitle>Visualizations</ItemTitle>
+            </Band>
             
         </div>
     </div>

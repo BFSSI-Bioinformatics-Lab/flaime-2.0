@@ -9,13 +9,16 @@ const theme = createTheme({
         },
         // the landing page background colour
         landing: {
-            main: "#F1F1F1"
+            main: "#F2F2F2"
         }
     },
     typography: {
         fontFamily: [
             "K2D"
-        ]
+        ],
+        body1: {
+            fontSize: 20
+        }
     }
 })
 
