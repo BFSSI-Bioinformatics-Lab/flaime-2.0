@@ -86,7 +86,7 @@ const Home = () => {
         <SearchBar placeholder="Quick Search" width="452px" height="75px" />
       </Box>
       <Container maxWidth="sm" sx={{ padding: "50px"}}>
-        <Typography variant="h2" color="primary" align="center">Explore the FLAIME Database</Typography>
+        <Typography variant="h2" color="primary.dark" align="center">Explore the FLAIME Database</Typography>
       </Container>
       <div style={{backgroundImage:`url(${quicklinks})`, backgroundRepeat: "no-repeat", backgroundSize: "cover"}}>
         <Box
@@ -103,7 +103,7 @@ const Home = () => {
               alignItems="center"
               justifyContent="space-evenly"
             >
-              {exploreItems.map((item, index) => 
+              {exploreItems.map((item) => 
                   <Grid item key={item.title}
                     xs={12} 
                     sm={12} 
@@ -112,7 +112,7 @@ const Home = () => {
                     align="center"
                   >
                     <Item>
-                      {item.icon}
+                      <Typography color="primary">{item.icon}</Typography>
                       <Typography variant="subtitle" align="left" sx={{ margin: "0 42px" }}>{item.title}</Typography>
                       <ArrowButton>
                         <ArrowButtonLink to={item.link}>

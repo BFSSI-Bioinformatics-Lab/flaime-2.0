@@ -10,7 +10,7 @@ const FooterContainer = styled(Container)(({ theme }) => ({
 const Footer = () => {
     return  (
         <FooterContainer >
-            <Typography variant="h3" color="primary" align="center">
+            <Typography variant="h3" color="primary.dark" align="center">
                 © FLAIME 2022
             </Typography>
         </FooterContainer>

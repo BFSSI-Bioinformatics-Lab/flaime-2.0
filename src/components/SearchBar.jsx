@@ -30,6 +30,9 @@ const SearchBar = ({placeholder, width, height}) => {
         "& fieldset": {
           border: "none"
         },
+        ".MuiSvgIcon-root path": {
+          color: theme.palette.primary.dark
+        }
       }));
 
     return (
@@ -37,7 +40,7 @@ const SearchBar = ({placeholder, width, height}) => {
             placeholder={placeholder}
             variant="outlined"
             InputProps={{
-                endAdornment: <InputAdornment position="end"><SearchIcon fontSize="large" color="primary" /></InputAdornment>
+                endAdornment: <InputAdornment position="end"><SearchIcon fontSize="large" /></InputAdornment>
             }}
         />
     )
