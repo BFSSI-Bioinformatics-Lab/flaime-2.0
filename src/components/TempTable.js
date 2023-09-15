@@ -14,32 +14,59 @@ const columns = [
     // { field: 'productPrice', headerName: 'Price' },
     // { field: 'productUpc', headerName: 'UPC', width: 100 },
     // { field: 'productCategory', headerName: 'Category', width: 100 }
-    { field: 'siteName', headerName: 'Store Name', width: 250 },
     { 
         field: 'id', 
         headerName: 'Id', 
-        width: 100, 
+        flex: 1,
+        minWidth: 100,
         renderCell: (params) => 
         // <a href={`https://172.17.10.69:7251/api/StoreProductService/SelectStoreProductsAsync?id=${params.row.id}`}>{params.row.id}</a>,
         <Link to={`${params.row.id}`}>{params.row.id}</Link>,
             //`https://172.17.10.69:7251/api/StoreProductService/SelectStoreProductsAsync?id=${params.row.id}` 
     },
-    { field: 'rawBrand', headerName: 'Brand', width: 150 },
-    { field: 'rawServingSize', headerName: 'Serving Size', width: 200 },
-    { field: 'readingPrice', headerName: 'Price', width: 100 },
-    { field: 'storeProductCode', headerName: 'Code', width: 200 },
+    { 
+        field: 'siteName', 
+        headerName: 'Store Name', 
+        minWidth: 200,
+        flex: 5 
+    },
+    { 
+        field: 'rawBrand', 
+        headerName: 'Brand', 
+        minWidth: 150,
+        flex: 2 
+    },
+    { 
+        field: 'store', 
+        headerName: "Store",
+        minWidth: 150,
+        flex: 2,
+        renderCell: (params) => params.row.storeEntity.name
+    },
     {
         field: "categoryPredictionEntityId",
-        headerName: "Category"
+        headerName: "Category",
+        minWidth: 200,
+        flex: 3,
+        renderCell: (params) => params.row.productEntity.categoryEntity ? params.row.productEntity.categoryEntity.name : null
+    },
+    { 
+        field: 'storeProductCode', 
+        headerName: 'Code', 
+        minWidth: 50,
+        flex: 2 
     },
     { 
         field: 'siteUrl', 
-        headerName: "Store",
+        headerName: 'External Url', 
+        minWidth: 150,
+        flex: 2,
         renderCell: (params) => <a href={`${params.row.siteUrl}`}>{params.row.storeEntity.name}</a>
     }
 ];
 
 const StripedDataGrid = styled(DataGrid)(({ theme }) => ({
+    fontSize: theme.typography.fontSize * 1.5,
     [`& .${gridClasses.row}.odd`]: {
         backgroundColor: "white",
         "&:hover, &.Mui-hovered": {
@@ -54,7 +81,11 @@ const StripedDataGrid = styled(DataGrid)(({ theme }) => ({
     },
     [`.${gridClasses.columnHeaderTitle}`]: {
         fontWeight: "bold",
-        fontSize: theme.typography.fontSize * 1.2
+        fontSize: theme.typography.fontSize * 1.8,
+        padding: theme.spacing(3)
+    },
+    [`& .${gridClasses.cell}`]: {
+        padding: theme.spacing(4)
     }
 }));
 
@@ -107,8 +138,8 @@ const TempTable = () => {
 
   return (
     <div >
-        <Container>
-            <h2>Table of all Products</h2>
+        <Container maxWidth="false">
+            <h1>Table of all Products</h1>
             {/* <p>{products.productName}</p>
             <p>{products.productUpc}</p> */}
             {/* <DataGrid 
