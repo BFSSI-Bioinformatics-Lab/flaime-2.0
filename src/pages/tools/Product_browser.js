@@ -2,7 +2,8 @@ import React, { useState } from 'react'
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import TempTable from "../../components/table/TempTable";
-import { Container } from '@mui/material';
+import PageContainer from '../../components/page/PageContainer';
+import ApiInstance from '../../api/Api';
 const Product_browser = () => {
 
   const [products, setProducts] = useState([]);
@@ -18,7 +19,7 @@ const Product_browser = () => {
         field: 'id', 
         headerName: 'Id', 
         flex: 1,
-        minWidth: 100,
+        minWidth: 130,
         renderCell: (params) => 
         <Link to={`${params.row.id}`}>{params.row.id}</Link>,
     },
@@ -44,7 +45,7 @@ const Product_browser = () => {
     {
         field: "categoryPredictionEntityId",
         headerName: "Category",
-        minWidth: 200,
+        minWidth: 350,
         flex: 3,
         renderCell: (params) => params.row.productEntity.categoryEntity ? params.row.productEntity.categoryEntity.name : null
     },
@@ -57,22 +58,22 @@ const Product_browser = () => {
     { 
         field: 'siteUrl', 
         headerName: 'External Url', 
-        minWidth: 150,
+        minWidth: 230,
         flex: 2,
         renderCell: (params) => <a href={`${params.row.siteUrl}`}>{params.row.storeEntity.name}</a>
     }
   ];
 
   const getAllProducts = async (pageSize, pageNumber) => {
-    const urlProducts =  `https://172.17.10.69:7251/api/StoreProductService/GetStoreProductsAsync?storeid=-1&pageSize=${pageSize}&scrapebatchid=-1&mostrecentonly=true&pageNumber=${pageNumber}`;
-    const res = await axios.get(urlProducts);
+    const urlProducts =  `StoreProductService/GetStoreProductsAsync?storeid=-1&pageSize=${pageSize}&scrapebatchid=-1&mostrecentonly=true&pageNumber=${pageNumber}`;
+    const res = await ApiInstance.get(urlProducts);
     setProducts(res.data.responseObjects)
     return res.data.pagination.totalRowCount;
   }
 
   const getSearchProducts = async (search, pageSize, pageNumber) => {
-    const urlSearch = `https://172.17.10.69:7251/api/StoreProductService/SearchStoreProductsAsync?searchterm=${search}&storeid=-1&pageSize=${pageSize}&scrapebatchid=-1&mostrecentonly=true&pageNumber=${pageNumber}`
-    const res = await axios.get(urlSearch);
+    const urlSearch = `StoreProductService/SearchStoreProductsAsync?searchterm=${search}&storeid=-1&pageSize=${pageSize}&scrapebatchid=-1&mostrecentonly=true&pageNumber=${pageNumber}`
+    const res = await ApiInstance.get(urlSearch);
     setProducts(res.data.responseObjects)
     return res.data.pagination.totalRowCount;
   }
@@ -80,10 +81,10 @@ const Product_browser = () => {
   return (
     <div>
         {/* <h2>Product_browser Page</h2> */}
-        <Container maxWidth="false">
+        <PageContainer>
           <h1>Table of all Products</h1>
-          <TempTable columns={columns} rows={products} onPageChange={getAllProducts} onSearchChage={getSearchProducts}/>
-        </Container>
+          <TempTable columns={columns} rows={products} onPageChange={getAllProducts} onSearchChange={getSearchProducts}/>
+        </PageContainer>
     </div>
   )
 }

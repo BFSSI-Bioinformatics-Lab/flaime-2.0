@@ -1,6 +1,6 @@
 import React from 'react'
 // import ProductTable from '../../components/ProductTable'
-import TempTable from "../../components/TempTable";
+import TempTable from "../../components/table/TempTable";
 import { Container } from '@mui/material';
 
 const Batch_browser = () => {
