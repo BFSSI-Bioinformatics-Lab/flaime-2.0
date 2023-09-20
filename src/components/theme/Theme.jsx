@@ -16,6 +16,11 @@ const Theme = createTheme({
         fontFamily: [
             "K2D"
         ]
+    },
+    page: {
+        content: {
+            max: 1800
+        }
     }
 })
 
