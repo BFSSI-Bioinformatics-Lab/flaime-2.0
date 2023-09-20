@@ -1,7 +1,6 @@
 import React, {useEffect, useState} from 'react'
-import axios from 'axios';
 import {useParams} from "react-router-dom"
-import { Container } from '@mui/system';
+import ApiInstance from '../../api/Api';
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
 import { styled } from '@mui/material/styles';
@@ -64,6 +63,7 @@ const Product_detail = () => {
     const [product, setProduct] = useState()
 
     const imagePathToUrl = (imagePath) => {
+        // TODO: use the real location of the image
         return `http://172.17.10.134/media/${imagePath}`;
     }
 
@@ -75,13 +75,10 @@ const Product_detail = () => {
         
         setProducts(old=>({...old, isLoading: true}))
         
-        let urlBase = `https://172.17.10.69:7251/api/StoreProductService/SelectStoreProductsAsync?id=${productId}`
+        let urlBase = `StoreProductService/SelectStoreProductsAsync?id=${productId}`
 
-        axios.get(urlBase).then(
+        ApiInstance.get(urlBase).then(
             (res) => {
-                console.log(res.data);
-                console.log(res.data.responseObjects[0]);
-                
                 const dataProduct = res.data.responseObjects[0]
                 if (dataProduct === undefined) return;
                 setProducts(dataProduct);
