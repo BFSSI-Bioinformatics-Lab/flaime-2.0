@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import axios from 'axios';
 import { Link } from 'react-router-dom';
-import TempTable from "../../components/TempTable";
+import TempTable from "../../components/table/TempTable";
 import { Container } from '@mui/material';
 const Product_browser = () => {
 
