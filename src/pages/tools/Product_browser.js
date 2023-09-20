@@ -1,5 +1,5 @@
 import React from 'react'
-import TempTable from "../../components/TempTable";
+import TempTable from "../../components/table/TempTable";
 
 const Product_browser = () => {
   return (
