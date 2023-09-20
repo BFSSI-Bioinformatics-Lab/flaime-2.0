@@ -16,6 +16,7 @@ import Download from "./pages/data/Download";
 import Quality from "./pages/data/Quality";
 import Visualizations from "./pages/data/Visualizations";
 import About from "./pages/About";
+import Advanced_search from "./pages/tools/Advanced_search";
 
 function App() {
   return (
@@ -25,6 +26,9 @@ function App() {
           <Header />
           <Routes>
             <Route path="/" element={<Home/>} />
+            {/* TODO: delete this */}
+            <Route path="search" element={<Advanced_search />} />
+
             {/* Tools Dropdown */}
             <Route path="tools/product-browser" element={<Product_browser />} />
             <Route path="tools/batch-browser" element={<Batch_browser />} />
