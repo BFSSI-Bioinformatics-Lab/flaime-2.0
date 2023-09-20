@@ -93,13 +93,33 @@ const Product_detail = () => {
         if (!product) return;
         const items = [
             {
-                name: "Product name",
+                name: "Product Name",
                 value: product.productEntity.nameOfProduct
             },
             {
                 name: "Brand",
                 value: product.productEntity.brandEntity.hasName ?
                     product.productEntity.brandEntity.name : null 
+            },
+            {
+                name: "Store",
+                value: products.storeEntity.name
+            },
+            {
+                name: "Product Code",
+                value: product.storeProductCode
+            },
+            {
+                name: "UPC",
+                value: product.rawUpc || "None"
+            },
+            {
+                name: "Price",
+                value: product.price ? `${product.price} ${product.priceUnitEntity.name ?? ""}` : null
+            },
+            {
+                name: "Description",
+                value: products.siteDescription
             },
             {
                 name: "Category", // does the category need to be verified in order to be displayed?
@@ -112,23 +132,19 @@ const Product_detail = () => {
                     product.categoryPredictionEntity.predictedSubcategoryName : null
             },
             {
-                name: "Store",
-                value: products.storeEntity.name
+                name: "Variety Pack",
+                value: product.productEntity.varietyPackFlag ? "True" : "False"
             },
             {
-                name: "Product Code",
-                value: product.storeProductCode
+                name: "Atwater Result",
+                value: product.productEntity.atWaterResult ?? "Missing information"
             },
             {
-                name: "Price",
-                value: product.price ? `${product.price} ${product.priceUnitEntity.name ?? ""}` : null
+                name: "Total Size",
+                value: product.totalSize
             },
             {
-                name: "Description",
-                value: products.siteDescription
-            },
-            {
-                name: "Serving size",
+                name: "Serving Size",
                 value: product.servingSize ? `${product.servingSize} ${product.servingSizeUnitEntity.name ?? ""}` : null
             },
             {
@@ -156,8 +172,8 @@ const Product_detail = () => {
         
             <Band
             >
-                <Grid container columnSpacing={1} direction="row"
-                justifyContent="space-between" alignItems="center" >
+                <Grid container spacing={1} direction="row"
+                justifyContent="space-between" alignItems="center">
                     <Grid xs={12} md={6} item>
                         <Grid container alignItems="center" wrap="nowrap">
                             <Grid item>
