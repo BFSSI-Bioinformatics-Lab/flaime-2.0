@@ -1,7 +1,9 @@
-import { Container } from "@mui/material";
+import { Container, useTheme } from "@mui/material";
+
 
 const PageContainer = ({children}) => {
-    return <Container maxWidth={1800}>{children}</Container>
-} 
+    const theme = useTheme();
+    return <Container sx={{maxWidth: theme.page.content.max}} maxWidth={false}>{children}</Container>
+}
 
 export default PageContainer;
