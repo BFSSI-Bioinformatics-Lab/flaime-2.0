@@ -1,19 +1,17 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import ApiInstance from "../../api/Api";
 import AdvancedSearchFilter from "../../components/SearchFilter";
-import { Container } from "@mui/material";
+import PageContainer from "../../components/page/PageContainer";
 
 const Advanced_search = () => {
-
-    const apiUrl = "https://172.17.10.69:7251/api";
 
     const [searchCategories, setSearchCategories] = useState([]);
     const [searchInputs, setSearchInputs] = useState([]);
 
     const getProductNames = async () => {
         return ["Apples", "Oranges", "Dumplings"];
-        const request = `${apiUrl}/StoreProductService/GetStoreProductsAsync?storeid=-1&scrapebatchid=-1&mostrecentonly=true`
-        const products = await axios.get(request);
+        const request = `StoreProductService/GetStoreProductsAsync?storeid=-1&scrapebatchid=-1&mostrecentonly=true`
+        const products = await ApiInstance.get(request);
         console.log(products);
         return products;
     }
@@ -85,7 +83,7 @@ const Advanced_search = () => {
     }, []);
 
     return (
-        <Container>
+        <PageContainer>
             <AdvancedSearchFilter categories={searchCategories} onInputChange={onSearchChange}/>
             <div>
                 Name={searchInputs.Name}
@@ -95,7 +93,7 @@ const Advanced_search = () => {
                 Ingredients={searchInputs["Contains Ingredient(s)"]}
 
             </div>
-        </Container>
+        </PageContainer>
     )
 }
 
