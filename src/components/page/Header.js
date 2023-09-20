@@ -42,7 +42,7 @@ const Header = () => {
         <Box sx={{ flexGrow: 1, background: '#732C02' }}>
             <AppBar position="static">
                 <PageContainer>
-                    <Toolbar >
+                    <Toolbar sx={{ paddingLeft: 0, paddingRight: 0 }} disableGutters>
                         <Typography variant="h6" component="div" 
                         sx={{ flexGrow: 1, cursor:'pointer' }} onClick={routeHome}>
                             FLAIME
