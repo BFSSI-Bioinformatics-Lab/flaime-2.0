@@ -7,22 +7,8 @@ import Paper from '@mui/material/Paper';
 import { styled } from '@mui/material/styles';
 import { Image } from 'mui-image'
 import Grid from '@mui/material/Grid';
-
-const Band = styled(Box)(({theme}) => ({
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: "center",
-    flexGrow: 1,
-    width: "100%",
-    height: 134,
-    backgroundColor: "#D9965B",
-    '& > :not(style)': {
-        m: 0,
-        width: '100%',
-        backgroundColor: "#D9965B",
-    }
-}));
-
+import PageContainer from '../../components/page/PageContainer';
+import Band from '../../components/page/Band';
 
 const Item = styled(Paper)(({ theme }) => ({
     backgroundColor:  '#fff',
@@ -40,7 +26,6 @@ const ItemIcon = styled(Box)(({ theme }) => ({
     height: 60,
     borderRadius: "50%",
     border: 0,
-    marginLeft: theme.spacing(4),
     marginRight: theme.spacing(2)
 }));
 
@@ -222,121 +207,123 @@ const Product_detail = () => {
         
         {/* Middle section with all info */}
         <div>
-            <Container  sx={{ padding: "40px 0" }}>
-                {product &&
-                    <Grid container columnSpacing={6} direction="row"
-                        justifyContent="space-between" alignItems="flex-start">
-                        {/*<Grid item xs={12} md={7} >
-                            <DetailItem elevation={0}>Store:{product.storeEntity.name}</DetailItem>
-                            <Divider></Divider>
-                            <DetailItem elevation={0}>Price:{product.price} {product.priceUnitEntity.name}</DetailItem>
-                            <Divider/>
-                            <DetailItem elevation={0}>Description: {product.siteDescription}</DetailItem>
-                            <Divider/>
-                </Grid>*/}
-                        <Grid item xs={12} md={6}>
-                            <div>
-                                {productDescItems && productDescItems.map((item) => ( item.value && 
-                                    <>
-                                        <DetailItem key={item.name} elevation={0}>{item.name}: {item.value}</DetailItem>
-                                    </>
-                                ))}
-                            </div>
-                            <Grid container 
-                                direction="row"
-                            >
-                                {product.storeProductImageEntities.length > 1 && product.storeProductImageEntities.slice(1).map(imageEntity => (
-                                    <Grid key={imageEntity.id} item sm={12} md={6} 
-                                        lg={Math.max(Math.floor(12 / (product.storeProductImageEntities.length - 1)), 4)}
+            <PageContainer >
+                <Box sx={{ padding: "40px 0" }}>
+                    {product &&
+                        <Grid container columnSpacing={6} direction="row"
+                            justifyContent="space-between" alignItems="flex-start">
+                            {/*<Grid item xs={12} md={7} >
+                                <DetailItem elevation={0}>Store:{product.storeEntity.name}</DetailItem>
+                                <Divider></Divider>
+                                <DetailItem elevation={0}>Price:{product.price} {product.priceUnitEntity.name}</DetailItem>
+                                <Divider/>
+                                <DetailItem elevation={0}>Description: {product.siteDescription}</DetailItem>
+                                <Divider/>
+                    </Grid>*/}
+                            <Grid item xs={12} md={6}>
+                                <div>
+                                    {productDescItems && productDescItems.map((item) => ( item.value && 
+                                        <>
+                                            <DetailItem key={item.name} elevation={0}>{item.name}: {item.value}</DetailItem>
+                                        </>
+                                    ))}
+                                </div>
+                                <Grid container 
+                                    direction="row"
+                                >
+                                    {product.storeProductImageEntities.length > 1 && product.storeProductImageEntities.slice(1).map(imageEntity => (
+                                        <Grid key={imageEntity.id} item sm={12} md={6} 
+                                            lg={Math.max(Math.floor(12 / (product.storeProductImageEntities.length - 1)), 4)}
+                                        >
+                                            <Image key={imageEntity.imagePath} 
+                                                src={imagePathToUrl(imageEntity.imagePath)} 
+                                                alt={product.siteName}  
+                                            />
+                                        </Grid>
+                                    ))}
+                                </Grid>
+                            </Grid>
+                            <Grid item xs={12} md={6}>
+                                <div>
+                                    {product.storeProductImageEntities && product.storeProductImageEntities.length > 0 && (
+                                        <div style={{ margin: "50px 0" }}>
+                                            <Image key={product.storeProductImageEntities[0].imagePath} 
+                                                src={imagePathToUrl(product.storeProductImageEntities[0].imagePath)} 
+                                                alt={product.siteName} 
+                                                width="100%"
+                                            />
+                                        </div>
+                                    )}
+                                    <Grid container
+                                        direction="row-reverse"
+                                        columnSpacing={12}
+                                        justifyContent={"center"}
                                     >
-                                        <Image key={imageEntity.imagePath} 
-                                            src={imagePathToUrl(imageEntity.imagePath)} 
-                                            alt={product.siteName}  
-                                        />
+                                        {product.storeProductNutritionFactEntities && 
+                                            <>
+                                                <Grid item xs={4}><Grid container direction="column-reverse" rowSpacing={2}>
+                                                { product.storeProductNutritionFactEntities.slice(0, 
+                                                    Math.floor(product.storeProductNutritionFactEntities.length / 2)).map(
+                                                        (nutritionFact) => ( nutritionFact.amount !== null &&
+                                                            <Grid xs={12} item >
+                                                                <Grid container 
+                                                                    justifyContent={"space-between"} 
+                                                                    alignItems={"flex-end"}
+                                                                    columnSpacing={1}
+                                                                >
+                                                                    <Grid item sm={6} textAlign={"left"}>
+                                                                        <div>
+                                                                            <b>{nutritionFact.nutrientEntity.symbol}</b>
+                                                                        </div>
+                                                                    </Grid>
+                                                                    <Grid item sm={6} textAlign={"right"}>
+                                                                        <div>{nutritionFact.amount}{nutritionFact.amountUnitEntity.name}</div>
+                                                                    </Grid>
+                                                                </Grid>
+                                                            </Grid>
+                                                ))}
+                                                </Grid></Grid>
+                                                <Grid item xs={4}><Grid container direction="column-reverse" rowSpacing={2}>
+                                                { product.storeProductNutritionFactEntities.slice(
+                                                    Math.floor(product.storeProductNutritionFactEntities.length / 2)).map(
+                                                        (nutritionFact) => ( nutritionFact.amount !== null &&
+                                                            <Grid xs={12} item >
+                                                                <Grid container 
+                                                                    justifyContent={"space-between"} 
+                                                                    alignItems={"flex-end"}
+                                                                    columnSpacing={1}
+                                                                >
+                                                                    <Grid item sm={6} textAlign={"left"}>
+                                                                        <div>
+                                                                            <b>{nutritionFact.nutrientEntity.symbol}</b>
+                                                                        </div>
+                                                                    </Grid>
+                                                                    <Grid item sm={6} textAlign={"right"}>
+                                                                        <div>{nutritionFact.amount}{nutritionFact.amountUnitEntity.name}</div>
+                                                                    </Grid>
+                                                                </Grid>
+                                                            </Grid>
+                                                ))}
+                                                </Grid></Grid>
+                                            </>
+                                        }
                                     </Grid>
-                                ))}
+                                    { product.ingredientEn && 
+                                        <div>
+                                            <div style={{ marginTop: "40px", marginBottom: "10px"}}>
+                                                <b>INGREDIENTS</b>
+                                            </div>
+                                            <div>
+                                                {product.ingredientEn.toUpperCase()}
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
                             </Grid>
                         </Grid>
-                        <Grid item xs={12} md={6}>
-                            <div>
-                                {product.storeProductImageEntities && product.storeProductImageEntities.length > 0 && (
-                                    <div style={{ margin: "50px 0" }}>
-                                        <Image key={product.storeProductImageEntities[0].imagePath} 
-                                            src={imagePathToUrl(product.storeProductImageEntities[0].imagePath)} 
-                                            alt={product.siteName} 
-                                            width="100%"
-                                        />
-                                    </div>
-                                )}
-                                <Grid container
-                                    direction="row-reverse"
-                                    columnSpacing={12}
-                                    justifyContent={"left"}
-                                >
-                                    {product.storeProductNutritionFactEntities && 
-                                        <>
-                                            <Grid item xs={4}><Grid container direction="column-reverse" rowSpacing={2}>
-                                            { product.storeProductNutritionFactEntities.slice(0, 
-                                                Math.floor(product.storeProductNutritionFactEntities.length / 2)).map(
-                                                    (nutritionFact) => ( nutritionFact.amount !== null &&
-                                                        <Grid xs={12} item >
-                                                            <Grid container 
-                                                                justifyContent={"space-between"} 
-                                                                alignItems={"flex-end"}
-                                                                columnSpacing={1}
-                                                            >
-                                                                <Grid item sm={6} textAlign={"left"}>
-                                                                    <div>
-                                                                        <b>{nutritionFact.nutrientEntity.symbol}</b>
-                                                                    </div>
-                                                                </Grid>
-                                                                <Grid item sm={6} textAlign={"right"}>
-                                                                    <div>{nutritionFact.amount}{nutritionFact.amountUnitEntity.name}</div>
-                                                                </Grid>
-                                                            </Grid>
-                                                        </Grid>
-                                            ))}
-                                            </Grid></Grid>
-                                            <Grid item xs={4}><Grid container direction="column-reverse" rowSpacing={2}>
-                                            { product.storeProductNutritionFactEntities.slice(
-                                                Math.floor(product.storeProductNutritionFactEntities.length / 2)).map(
-                                                    (nutritionFact) => ( nutritionFact.amount !== null &&
-                                                        <Grid xs={12} item >
-                                                            <Grid container 
-                                                                justifyContent={"space-between"} 
-                                                                alignItems={"flex-end"}
-                                                                columnSpacing={1}
-                                                            >
-                                                                <Grid item sm={6} textAlign={"left"}>
-                                                                    <div>
-                                                                        <b>{nutritionFact.nutrientEntity.symbol}</b>
-                                                                    </div>
-                                                                </Grid>
-                                                                <Grid item sm={6} textAlign={"right"}>
-                                                                    <div>{nutritionFact.amount}{nutritionFact.amountUnitEntity.name}</div>
-                                                                </Grid>
-                                                            </Grid>
-                                                        </Grid>
-                                            ))}
-                                            </Grid></Grid>
-                                        </>
-                                    }
-                                </Grid>
-                                { product.ingredientEn && 
-                                    <div>
-                                        <div style={{ marginTop: "40px", marginBottom: "10px"}}>
-                                            <b>INGREDIENTS</b>
-                                        </div>
-                                        <div>
-                                            {product.ingredientEn.toUpperCase()}
-                                        </div>
-                                    </div>
-                                }
-                            </div>
-                        </Grid>
-                    </Grid>
-                }
-            </Container>
+                    }
+                </Box>
+            </PageContainer>
             {/*<Container>
                 
                 <div>
