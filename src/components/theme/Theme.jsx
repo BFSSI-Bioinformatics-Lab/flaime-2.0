@@ -1,6 +1,6 @@
 import { createTheme } from "@mui/material";
 
-const theme = createTheme({
+const Theme = createTheme({
     palette: {
         primary: {
             main: "rgb(115, 44, 2)",
@@ -19,4 +19,4 @@ const theme = createTheme({
     }
 })
 
-export default theme;
+export default Theme;
