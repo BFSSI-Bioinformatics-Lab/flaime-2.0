@@ -16,6 +16,7 @@ import Download from "./pages/data/Download";
 import Quality from "./pages/data/Quality";
 import Visualizations from "./pages/data/Visualizations";
 import About from "./pages/About";
+import Advanced_search from "./pages/tools/Advanced_search";
 
 function App() {
   return (
@@ -23,26 +24,29 @@ function App() {
       <ThemeProvider theme={Theme}>
         <div className="App">
           <Header />
-            <Routes>
-              <Route path="/" element={<Home/>} />
-              {/* Tools Dropdown */}
-              <Route path="tools/product-browser" element={<Product_browser />} />
-              <Route path="tools/batch-browser" element={<Batch_browser />} />
-              <Route path="tools/report-builder" element={<Report_builder />} />
-              {/* Reports Dropdown */}
-              <Route path="reports/store" element={<Store_report />} />
-              <Route path="reports/category" element={<Category_report />} />
-              <Route path="reports/nutrient" element={<Nutrient_report />} />
-              {/* Data Dropdown */}
-              <Route path="data/quality" element={<Quality />} />
-              <Route path="data/download" element={<Download />} />
-              <Route path="data/visualizations" element={<Visualizations />} />
+          <Routes>
+            <Route path="/" element={<Home/>} />
 
-              <Route path="about" element={<About />} />
+            {/* Tools Dropdown */}
+            <Route path="tools/product-browser" element={<Product_browser />} />
+            <Route path="tools/batch-browser" element={<Batch_browser />} />
+            <Route path="tools/report-builder" element={<Report_builder />} />
+            <Route path="tools/advanced-search" element={<Advanced_search />} />
+            {/* Reports Dropdown */}
+            <Route path="reports/store" element={<Store_report />} />
+            <Route path="reports/category" element={<Category_report />} />
+            <Route path="reports/nutrient" element={<Nutrient_report />} />
+            {/* Data Dropdown */}
+            <Route path="data/quality" element={<Quality />} />
+            <Route path="data/download" element={<Download />} />
+            <Route path="data/visualizations" element={<Visualizations />} />
 
-              {/* Product Detail Page */}
-              <Route path="tools/product-browser/:productId" element={<Product_detail />} />
-            </Routes>
+            <Route path="about" element={<About />} />
+
+            {/* Product Detail Page */}
+            <Route path="tools/product-browser/:productId" element={<Product_detail />} />
+          </Routes>
+
           <Footer />
         </div>
       </ThemeProvider>
