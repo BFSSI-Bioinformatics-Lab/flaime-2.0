@@ -82,6 +82,8 @@ const Header = () => {
                             onClick={handleClose}>Batch Browser</MenuItem>
                             <MenuItem component={Link} to='/tools/report-builder'
                             onClick={handleClose}>Report Builder</MenuItem>
+                            <MenuItem component={Link} to='/tools/advanced-search'
+                            onClick={handleClose}>Advanced Search</MenuItem>
                         </Menu>
 
                         <Button

@@ -26,13 +26,12 @@ function App() {
           <Header />
           <Routes>
             <Route path="/" element={<Home/>} />
-            {/* TODO: delete this */}
-            <Route path="search" element={<Advanced_search />} />
 
             {/* Tools Dropdown */}
             <Route path="tools/product-browser" element={<Product_browser />} />
             <Route path="tools/batch-browser" element={<Batch_browser />} />
             <Route path="tools/report-builder" element={<Report_builder />} />
+            <Route path="tools/advanced-search" element={<Advanced_search />} />
             {/* Reports Dropdown */}
             <Route path="reports/store" element={<Store_report />} />
             <Route path="reports/category" element={<Category_report />} />

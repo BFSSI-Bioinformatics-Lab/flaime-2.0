@@ -5,18 +5,20 @@ const SearchFilter = ({categories, onInputChange}) => {
     return (
         <>
             <Grid container spacing={3}>
-                {categories.map(category => (
-                    <Grid item xs={category.multiple ? 7 : 6} md={category.multiple ? 4 : 3}>
+                {categories.map((category, i) => (
+                    <Grid key={`${category.title}${i}`} item xs={category.multiple ? 7 : 6} md={category.multiple ? 4 : 3}>
                         <div>
-                            <Typography variant="subtitle1">{category.title}</Typography>
+                            <Typography variant="h5">{category.title}</Typography>
                             <Autocomplete 
                                 freeSolo
-                                id={category.title}
+                                id={`${category.title}${i}`}
                                 options={category.options}
                                 size={category.multiple ? "medium" : "small"}
                                 multiple={category.multiple}
-                                onInputChange={(e, val) => onInputChange(category.title, e, val)}
+                                onChange={category.multiple ? (e, val) => onInputChange(category.title, e, val) : () => {}}
+                                onInputChange={category.multiple ? () => {} : (e, val) => onInputChange(category.title, e, val)}
                                 renderInput={(params => <TextField {...params} />)}
+                                loading={category.loading}
                             />
                         </div>
                     </Grid>
