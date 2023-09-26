@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import axios from 'axios';
+import { SearchStoreProducts, GetAllStoreProductsByPagination } from '../../api/StoreProductService';
 import { Link } from 'react-router-dom';
 import TempTable from "../../components/table/TempTable";
 import PageContainer from '../../components/page/PageContainer';
@@ -65,17 +65,15 @@ const Product_browser = () => {
   ];
 
   const getAllProducts = async (pageSize, pageNumber) => {
-    const urlProducts =  `StoreProductService/GetStoreProductsAsync?storeid=-1&pageSize=${pageSize}&scrapebatchid=-1&mostrecentonly=true&pageNumber=${pageNumber}`;
-    const res = await ApiInstance.get(urlProducts);
-    setProducts(res.data.responseObjects)
-    return res.data.pagination.totalRowCount;
+    const data = await GetAllStoreProductsByPagination({ pageSize, pageNumber });
+    setProducts(data.error ? [] : data.products)
+    return data.pagination.totalRowCount;
   }
 
-  const getSearchProducts = async (search, pageSize, pageNumber) => {
-    const urlSearch = `StoreProductService/SearchStoreProductsAsync?searchterm=${search}&storeid=-1&pageSize=${pageSize}&scrapebatchid=-1&mostrecentonly=true&pageNumber=${pageNumber}`
-    const res = await ApiInstance.get(urlSearch);
-    setProducts(res.data.responseObjects)
-    return res.data.pagination.totalRowCount;
+  const getSearchProducts = async (searchTerm, pageSize, pageNumber) => {
+    const data = await SearchStoreProducts({ searchTerm, pageSize, pageNumber });
+    setProducts(data.error ? [] : data.products)
+    return data.pagination.totalRowCount;
   }
 
   return (

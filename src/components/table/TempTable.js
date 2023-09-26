@@ -168,6 +168,7 @@ const TempTable = ({
                         { ...obj, [col.field]: col.visible }
                     ), {})
                 }
+                disableColumnMenu
                 // components={{
                 //     Toolbar: GridToolbar,
                 // }}
