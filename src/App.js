@@ -4,7 +4,7 @@ import Header from "./components/page/Header";
 import Footer from "./components/page/Footer";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from '@mui/material/styles';
-import Theme from "./components/theme/Theme";
+import Theme from "./components/Theme/Theme";
 import Batch_browser from "./pages/tools/Batch_browser";
 import Product_browser from "./pages/tools/Product_browser";
 import Product_detail from "./pages/tools/Product_detail";
@@ -16,6 +16,7 @@ import Download from "./pages/data/Download";
 import Quality from "./pages/data/Quality";
 import Visualizations from "./pages/data/Visualizations";
 import About from "./pages/About";
+import SignIn from "./pages/SignIn";
 
 function App() {
   return (
@@ -25,6 +26,8 @@ function App() {
           <Header />
             <Routes>
               <Route path="/" element={<Home/>} />
+              <Route path="signin" element={<SignIn />} />
+
               {/* Tools Dropdown */}
               <Route path="tools/product-browser" element={<Product_browser />} />
               <Route path="tools/batch-browser" element={<Batch_browser />} />

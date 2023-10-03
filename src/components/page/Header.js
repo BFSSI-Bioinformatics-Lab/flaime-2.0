@@ -37,6 +37,11 @@ const Header = () => {
         navigate(path);
     }
 
+    const routeSignIn = () =>{ 
+        let path = '/signin'; 
+        navigate(path);
+    }
+
     return (
         // <div>Header</div>
         <Box sx={{ flexGrow: 1, background: '#732C02' }}>
@@ -173,6 +178,7 @@ const Header = () => {
                                 edge="start"
                                 color="inherit"
                                 aria-label="login"
+                                onClick={routeSignIn}
                             >
                                 <AccountCircleIcon />
                             </IconButton>
