@@ -3,7 +3,6 @@ import { SearchStoreProducts, GetAllStoreProductsByPagination } from '../../api/
 import { Link } from 'react-router-dom';
 import TempTable from "../../components/table/TempTable";
 import PageContainer from '../../components/page/PageContainer';
-import ApiInstance from '../../api/Api';
 const Product_browser = () => {
 
   const [products, setProducts] = useState([]);
@@ -45,7 +44,7 @@ const Product_browser = () => {
     {
         field: "categoryPredictionEntityId",
         headerName: "Category",
-        minWidth: 350,
+        minWidth: 100,
         flex: 3,
         renderCell: (params) => params.row.productEntity.categoryEntity ? params.row.productEntity.categoryEntity.name : null
     },
