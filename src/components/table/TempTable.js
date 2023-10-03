@@ -6,7 +6,7 @@ import { styled } from '@mui/material';
 import TableActionButtons from './TableActionButtons';
 
 const StripedDataGrid = styled(DataGrid)(({ theme }) => ({
-    fontSize: theme.typography.fontSize * 1.5,
+    fontSize: theme.typography.fontSize * 1.2,
     [`& .${gridClasses.row}.odd`]: {
         backgroundColor: "white",
         "&:hover, &.Mui-hovered": {
@@ -21,11 +21,11 @@ const StripedDataGrid = styled(DataGrid)(({ theme }) => ({
     },
     [`.${gridClasses.columnHeaderTitle}`]: {
         fontWeight: "bold",
-        fontSize: theme.typography.fontSize * 1.8,
-        padding: theme.spacing(3)
+        fontSize: theme.typography.fontSize * 1.5,
+        padding: theme.spacing(1)
     },
     [`& .${gridClasses.cell}`]: {
-        padding: theme.spacing(4),
+        padding: theme.spacing(2),
         alignItems: "start",
         wordWrap: "break-word",
         whiteSpace: "normal"
