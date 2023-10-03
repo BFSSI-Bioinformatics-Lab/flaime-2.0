@@ -13,7 +13,7 @@ const SearchFilter = ({categories, onInputChange}) => {
                                 freeSolo
                                 id={`${category.title}${i}`}
                                 options={category.options}
-                                size={category.multiple ? "medium" : "small"}
+                                size={"small"}
                                 multiple={category.multiple}
                                 onChange={category.multiple ? (e, val) => onInputChange(category.title, e, val) : () => {}}
                                 onInputChange={category.multiple ? () => {} : (e, val) => onInputChange(category.title, e, val)}

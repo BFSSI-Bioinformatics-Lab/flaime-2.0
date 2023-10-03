@@ -77,7 +77,7 @@ const Advanced_search = () => {
         { 
             field: 'storeProductCode', 
             headerName: 'Code', 
-            minWidth: 200,
+            minWidth: 120,
             flex: 2 
         },
         { 
@@ -95,21 +95,21 @@ const Advanced_search = () => {
         {
             field: "categoryPredictionEntityId",
             headerName: "Category",
-            minWidth: 200,
+            minWidth: 150,
             flex: 3,
             renderCell: (params) => params.row.productEntity.categoryEntity ? params.row.productEntity.categoryEntity.name : null
         },
         {
             field: "subcategoryPredictionEntityId",
             headerName: "Subcategory",
-            minWidth: 220,
+            minWidth: 160,
             flex: 3,
             renderCell: (params) => params.row.productEntity.subCategoryEntity ? params.row.productEntity.subCategoryEntity.name : null
         },
         { 
             field: 'ingredientEn', 
             headerName: 'Ingredients', 
-            minWidth: 430,
+            minWidth: 350,
             flex: 5,
             renderCell: (params) => params.row.ingredientEn ? formatIngredients(params.row.ingredientEn) : null
         }
@@ -284,31 +284,32 @@ const Advanced_search = () => {
     return (
         <PageContainer>
             <AdvancedSearchSection>
-                <Typography variant="h3">Metadata</Typography>
+                <Typography variant="h4">Metadata</Typography>
                 <AdvancedSearchSection>
                     <AdvancedSearchFilter categories={searchCategories} onInputChange={onSearchFilterChange}/>
                 </AdvancedSearchSection>
             </AdvancedSearchSection>
             <Divider/>
             <AdvancedSearchSection>
-                <Typography variant="h3">Nutrient Daily Value (DV) Filtering</Typography>
+                <Typography variant="h4">Nutrient Daily Value (DV) Filtering</Typography>
                 <AdvancedSearchSection>
                     <Button 
                         color="success" 
                         variant="contained" 
                         size="large" 
-                        sx={{ fontSize: 20, marginBottom: 2 }} 
+                        sx={{ fontSize: 16, marginBottom: 2 }} 
                         onClick={addNewNutrientDailyValueFilter}
                     >
                         Add Nutrient (+)
                     </Button>
                     {nutrientValueFilters.map((nutrientValue, i) => 
-                        (<Grid key={`nutrientDV${i}`} container spacing={3} alignItems={"center"} sx={{ paddingBottom: 5}}
+                        (<Grid key={`nutrientDV${i}`} container spacing={3} alignItems={"center"} sx={{ paddingBottom: 2}}
                         >
                             <Grid item xs={12} md={3}>
                                 <FormLabel>Nutrient</FormLabel>
                                 <Autocomplete
                                     id={nutrientValue.title}
+                                    size="small"
                                     options={nutrientNames}
                                     onInputChange={(e, val) => onNutrientNameChange(i, val)}
                                     value={nutrientValue.nutrient}
@@ -318,12 +319,12 @@ const Advanced_search = () => {
                             </Grid>
                             <Grid item xs={12} md={2} >
                                 <FormLabel color="primary">Minimum value (%)</FormLabel>
-                                <RangeField disabled fullWidth variant="filled" color="primary.dark" value={`${nutrientValue.min}%` ?? "0%"}
+                                <RangeField disabled fullWidth variant="filled" color="primary.dark" size="small" value={`${nutrientValue.min}%` ?? "0%"}
                                 />
                             </Grid>
                             <Grid item xs={12} md={2}>
                                 <FormLabel color="primary">Maximum value (%)</FormLabel>
-                                <RangeField disabled fullWidth variant="filled" color="primary.dark" value={`${nutrientValue.max}%` ?? "100%"}/>
+                                <RangeField disabled fullWidth variant="filled" color="primary.dark" size="small" value={`${nutrientValue.max}%` ?? "100%"}/>
                             </Grid>
                             <Grid item xs={12} md={3} alignSelf={"flex-end"}>
                                 <InputRange 
@@ -350,7 +351,7 @@ const Advanced_search = () => {
             </AdvancedSearchSection>
             <Divider/>
             <AdvancedSearchSection>
-                <Button variant="contained" color="info" size="large" sx={{ fontSize: 18 }} onClick={onSearchButtonClick}>
+                <Button variant="contained" color="info" size="large" sx={{ fontSize: 16 }} onClick={onSearchButtonClick}>
                     Search
                 </Button>
             </AdvancedSearchSection>
