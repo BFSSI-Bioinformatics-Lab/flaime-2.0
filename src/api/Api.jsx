@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const ApiInstance = axios.create({
-    baseURL: "https://172.17.10.69:7251/api/"
+    baseURL: "https://localhost:7166/api/"//"https://172.17.10.69:7251/api/"
 });
 
 const ApiQueryGet = async (url) => {

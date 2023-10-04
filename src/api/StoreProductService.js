@@ -25,13 +25,13 @@ const AdvanceSearchStoreProducts = encodeQuery(async (
     { 
         storeid = -1, scrapebatchid = -1, mostrecentonly = true, includeDetails = false, pageNumber = 1, pageSize = 25,
         productSiteName = "", storeName = "", brandName = "", categoryName = "", subcategoryName = "", ingredientEn = "",
-        nutrientName = ""
+        nutrientName = []
      }
 ) => {
     const url = `StoreProductService/AdvanceSearchStoreProductsAsync?storeid=${storeid}&scrapebatchid=${scrapebatchid}`
     + `&mostrecentonly=${mostrecentonly}&includeDetails=${includeDetails}&pageNumber=${pageNumber}&pageSize=${pageSize}`
     + `&productSiteName=${productSiteName}&storeName=${storeName}&brandName=${brandName}&categoryName=${categoryName}`
-    + `&subcategoryName=${subcategoryName}&ingredientEn=${ingredientEn}&nutrientName=${nutrientName}`;
+    + `&subcategoryName=${subcategoryName}&ingredientEn=${ingredientEn}&` + nutrientName.map(ntr => `nutrientName=${ntr}`).join("&");
     const data = await ApiQueryGet(url);
     return { error: data.statusCode !== 200, products: data.responseObjects, pagination: data.pagination };
 

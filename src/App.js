@@ -4,7 +4,7 @@ import Header from "./components/page/Header";
 import Footer from "./components/page/Footer";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from '@mui/material/styles';
-import Theme from "./components/theme/Theme";
+import Theme from "./components/Theme/Theme";
 import Batch_browser from "./pages/tools/Batch_browser";
 import Product_browser from "./pages/tools/Product_browser";
 import Product_detail from "./pages/tools/Product_detail";

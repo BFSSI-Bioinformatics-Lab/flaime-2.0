@@ -111,7 +111,7 @@ const Advanced_search = () => {
             headerName: 'Ingredients', 
             minWidth: 350,
             flex: 5,
-            renderCell: (params) => params.row.ingredientEn ? formatIngredients(params.row.ingredientEn) : null
+            renderCell: (params) => params.row.productEntity && params.row.productEntity.ingredientEn ? formatIngredients(params.row.productEntity.ingredientEn) : null
         }
       ];
       
@@ -226,12 +226,13 @@ const Advanced_search = () => {
     const onSearchButtonClick = useCallback(async () => {
 
         setSearchResultsIsLoading(true);
+        const currentSearchInputs = { ...searchInputs };
         getSearchResultsPage(searchInputs, 10, 1, nutrientValueFilters)
             .then((rows) => {
                 setAppliedSearchFilters(searchInputs);
                 setAppliedNutrientValueFilters(nutrientValueFilters);
-
-                setTotalTableRows(rows)
+                if (searchInputs === currentSearchInputs)
+                    setTotalTableRows(rows)
             })
             .catch((e) => {
                 setTotalTableRows(0)
@@ -249,18 +250,19 @@ const Advanced_search = () => {
             ["pageNumber", pageNumber],
             ["pageSize", pageSize],
             ["includeDetails", true],
+            ["nutrientName", nutrients.map(ntr => ntr.nutrient)],
                 ...Object.values(searchFilters).map(filter => 
             ([filter.id, filter.value])
         )]);
-        if (nutrients.length > 0) {
+        /*if (nutrients.length > 0) {
             params["nutrientName"] = nutrients[0].nutrient;
-        }       
+        }  */     
         const results = await AdvanceSearchStoreProducts(params);
         if (results.error) {
             setSearchResults([]);
             return 0;
         } else {
-            if (nutrients.length > 0) {
+           /* if (nutrients.length > 0) {
                 results.products = results.products.filter(product => {
                     const productNutrientNames = product.storeProductNutritionFactEntities.map(
                         n => n.nutrientEntity.name
@@ -269,7 +271,7 @@ const Advanced_search = () => {
                         nutrient => productNutrientNames.includes(nutrient.nutrient)
                     )
                 })
-            }
+            }*/
             setSearchResults(results.products);
             return results.pagination.totalRowCount;
         }
