@@ -4,38 +4,13 @@ import TextField from '@mui/material/TextField';
 // import Product_detail from '../pages/tools/Product_detail';
 import { styled } from '@mui/material';
 import TableActionButtons from './TableActionButtons';
-
-const StripedDataGrid = styled(DataGrid)(({ theme }) => ({
-    fontSize: theme.typography.fontSize * 1.2,
-    [`& .${gridClasses.row}.odd`]: {
-        backgroundColor: "white",
-        "&:hover, &.Mui-hovered": {
-            backgroundColor: theme.palette.grey[400]
-        }
-    },
-    [`& .${gridClasses.row}.even`]: {
-        backgroundColor: theme.palette.grey[100],
-        "&:hover, &.Mui-hovered": {
-            backgroundColor: theme.palette.grey[400]
-        }
-    },
-    [`.${gridClasses.columnHeaderTitle}`]: {
-        fontWeight: "bold",
-        fontSize: theme.typography.fontSize * 1.5,
-        padding: theme.spacing(1)
-    },
-    [`& .${gridClasses.cell}`]: {
-        padding: theme.spacing(2),
-        alignItems: "start",
-        wordWrap: "break-word",
-        whiteSpace: "normal"
-    }
-}));
+import StripedTable from './StripedTable';
 
 const TempTable = ({
     columns, 
     rows, 
     loading, 
+    setLoading = () => {},
     getRowHeight, 
     onPageChange, 
     onSearchChange, 
@@ -66,6 +41,8 @@ const TempTable = ({
     }
 
     useEffect( () =>{
+        const oldLoading = loading;
+        setLoading(true);
         setPageState(old=>({...old, isLoading: true}))
         // let urlBase = `https://172.17.10.69:7251/api/StoreProductService/`
         
@@ -92,12 +69,13 @@ const TempTable = ({
             }*/
             (res) => setPageState(old=>({...old, isLoading: false, total: res}))
         )
-        .catch(() => setPageState(old=>({...old, isLoading: false, total: 0})));
+        .catch(() => setPageState(old=>({...old, isLoading: false, total: 0})))
+        .finally(() => setLoading(oldLoading));
         
     },[pageState.page, pageState.pageSize, pageState.search]);
 
     useEffect(() => {
-        setPageState(old => ({...old, total: totalRows ?? old.total}))
+        setPageState(old => ({...old, page: 1, total: totalRows ?? old.total}))
     }, [totalRows])
 
     useEffect(() => {
@@ -145,9 +123,7 @@ const TempTable = ({
                 // onCancelSearch={() => cancelSearch()}
                 />
             }
-            <StripedDataGrid
-                autoHeight
-                getRowHeight={getRowHeight ?? (() => "auto")}
+            <StripedTable
                 rows={rows}
                 rowCount={pageState.total}
                 loading={pageState.isLoading || loading}
@@ -155,7 +131,6 @@ const TempTable = ({
                 pagination
                 page={pageState.page - 1}   //page currently visable
                 pageSize={pageState.pageSize}   //# of rows visible in page
-                paginationMode="server"
                 onPageChange={(newPage) => setPageState(old =>({...old, page:newPage + 1}))}
                 onPageSizeChange={(newPageSize) => setPageState(old=>({...old, pageSize: newPageSize}))}
                 columns={columns}
@@ -163,6 +138,7 @@ const TempTable = ({
                     params.indexRelativeToCurrentPage % 2 === 0 ? "even" : "odd"
                 }   
                 disableSelectionOnClick 
+                controlledColumns={true}
                 columnVisibilityModel={
                     columnVisibilities.reduce((obj, col) => (
                         { ...obj, [col.field]: col.visible }

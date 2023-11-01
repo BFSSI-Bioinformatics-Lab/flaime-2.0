@@ -1,10 +1,11 @@
 import { useEffect, useState, useCallback } from "react";
 import { Link } from "react-router-dom";
 import ApiInstance from "../../api/Api";
-import AdvancedSearchFilter from "../../components/inputs/SearchFilter";
+import AdvancedSearchFilter from "../../components/inputs/SearchFilter/SearchFilter";
 import PageContainer from "../../components/page/PageContainer";
 import TempTable from "../../components/table/TempTable";
-import InputRange from "../../components/inputs/InputRange";
+import InputPercentRange from "../../components/inputs/InputPercentRange";
+import InputRangeField from "../../components/inputs/InputRangeField";
 import { nutrientsList } from "../../components/constants/data/nutrients";
 import { Autocomplete, TextField, Typography, Grid, FormLabel, Button, Divider, Box } from "@mui/material";
 import { styled } from "@mui/material/styles";
@@ -15,17 +16,11 @@ import {
     AdvanceSearchStoreProducts
 } from "../../api/StoreProductService";
 import { GetAllCategories } from "../../api/CategoryService";
+import { GetAllSubcategories } from "../../api/SubcategoryService";
 
 const AdvancedSearchSection = styled(Box)(({theme}) => ({
     paddingTop: theme.spacing(3),
     paddingBottom: theme.spacing(3)
-}));
-
-const RangeField = styled(TextField)(({theme}) => ({
-    "& .MuiInputBase-input.Mui-disabled": {
-        color: theme.palette.primary.dark,
-        "-webkit-text-fill-color": theme.palette.primary.dark
-    }
 }));
 
 const nutrientNames = nutrientsList.map(nutrient => nutrient.name);
@@ -132,12 +127,8 @@ const Advanced_search = () => {
     }
 
     const getSubcategories = async () => {
-        const request = 'SubcategoryService/GetAllSubcategoriesAsync'
-        let categories;
-        await ApiInstance.get(request)
-            .then(res => categories = res.data.responseObjects.map(category => category.name))
-            .catch(() => categories = []);
-        return categories;
+        const categories = await GetAllSubcategories();
+        return categories.error ? [] : categories.subcategories.map(category => category.name);
     }
 
     const getIngredients = async () => {
@@ -168,7 +159,7 @@ const Advanced_search = () => {
                 },            
                 {
                     title: "Subcategory",
-                    options: []
+                    options: subcategories
                 },            
                 {
                     title: "Contains Ingredient(s)",
@@ -224,15 +215,14 @@ const Advanced_search = () => {
     }
 
     const onSearchButtonClick = useCallback(async () => {
+        if (appliedSearchFilters === searchInputs) return;
 
         setSearchResultsIsLoading(true);
-        const currentSearchInputs = { ...searchInputs };
         getSearchResultsPage(searchInputs, 10, 1, nutrientValueFilters)
             .then((rows) => {
                 setAppliedSearchFilters(searchInputs);
                 setAppliedNutrientValueFilters(nutrientValueFilters);
-                if (searchInputs === currentSearchInputs)
-                    setTotalTableRows(rows)
+                setTotalTableRows(rows)
             })
             .catch((e) => {
                 setTotalTableRows(0)
@@ -251,13 +241,16 @@ const Advanced_search = () => {
             ["pageSize", pageSize],
             ["includeDetails", true],
             ["nutrientName", nutrients.map(ntr => ntr.nutrient)],
+            ["nutrientRange", nutrients.map(ntr => [ntr.min / 100,ntr.max])],
                 ...Object.values(searchFilters).map(filter => 
             ([filter.id, filter.value])
         )]);
         /*if (nutrients.length > 0) {
             params["nutrientName"] = nutrients[0].nutrient;
         }  */     
+        console.log(params);
         const results = await AdvanceSearchStoreProducts(params);
+        console.log(results);
         if (results.error) {
             setSearchResults([]);
             return 0;
@@ -281,6 +274,7 @@ const Advanced_search = () => {
         const searchCategoryNames = ["Name", "Brand", "Category", "Subcategory", "Contains Ingredient(s)"];
         setSearchCategories(searchCategoryNames.map(cat => ({title: cat, options: [], multiple: cat === "Contains Ingredient(s)", loading: true})))
         getCategoryOptions();
+        onSearchButtonClick();
     }, []);
 
     return (
@@ -320,16 +314,13 @@ const Advanced_search = () => {
                                 />
                             </Grid>
                             <Grid item xs={12} md={2} >
-                                <FormLabel color="primary">Minimum value (%)</FormLabel>
-                                <RangeField disabled fullWidth variant="filled" color="primary.dark" size="small" value={`${nutrientValue.min}%` ?? "0%"}
-                                />
+                                <InputRangeField label={"Minimum value (%)"} value={`${nutrientValue.min}%` ?? "0%"}/>
                             </Grid>
                             <Grid item xs={12} md={2}>
-                                <FormLabel color="primary">Maximum value (%)</FormLabel>
-                                <RangeField disabled fullWidth variant="filled" color="primary.dark" size="small" value={`${nutrientValue.max}%` ?? "100%"}/>
+                                <InputRangeField label={"Maximum value (%)"} value={`${nutrientValue.max}%` ?? "100%"}/>
                             </Grid>
                             <Grid item xs={12} md={3} alignSelf={"flex-end"}>
-                                <InputRange 
+                                <InputPercentRange 
                                     min={nutrientValue.min} 
                                     max={nutrientValue.max} 
                                     onChange={(e, value) => onDailyValuePercentageChange(i, value)}
@@ -353,7 +344,7 @@ const Advanced_search = () => {
             </AdvancedSearchSection>
             <Divider/>
             <AdvancedSearchSection>
-                <Button variant="contained" color="info" size="large" sx={{ fontSize: 16 }} onClick={onSearchButtonClick}>
+                <Button variant="contained" color="info" size="large" sx={{ fontSize: 16 }} onClick={onSearchButtonClick} disabled={searchResultsIsLoading}>
                     Search
                 </Button>
             </AdvancedSearchSection>
@@ -367,6 +358,7 @@ const Advanced_search = () => {
                         } 
                         getRowHeight={searchResultsGetRowHeight}
                         loading={searchResultsIsLoading}
+                        setLoading={setSearchResultsIsLoading}
                         pageSize={10}
                         totalRows={totalTableRows}
                         searchBar={false}
