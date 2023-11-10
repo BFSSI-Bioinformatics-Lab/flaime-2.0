@@ -1,12 +1,12 @@
-import { TextField, FormLabel } from "@mui/material"
-import Styled from "./styles"
+import { FormLabel } from "@mui/material"
+import { RangeTextField } from "./styles"
 
 const InputRangeField = ({label, value}) => {
     return (
-        <Styled>
+        <div>
             <FormLabel color="primary">{label}</FormLabel>
-             <TextField disabled fullWidth variant="filled" color="primary.dark" size="small" value={value} />
-        </Styled>
+             <RangeTextField disabled fullWidth variant="filled" color="primary.dark" size="small" value={value} />
+        </div>
     )
 }
 

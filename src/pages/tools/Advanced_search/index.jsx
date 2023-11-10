@@ -1,27 +1,26 @@
 import { useEffect, useState, useCallback } from "react";
 import { Link } from "react-router-dom";
-import ApiInstance from "../../api/Api";
-import AdvancedSearchFilter from "../../components/inputs/SearchFilter/SearchFilter";
-import PageContainer from "../../components/page/PageContainer";
-import TempTable from "../../components/table/TempTable";
-import InputPercentRange from "../../components/inputs/InputPercentRange";
-import InputRangeField from "../../components/inputs/InputRangeField";
-import { nutrientsList } from "../../components/constants/data/nutrients";
-import { Autocomplete, TextField, Typography, Grid, FormLabel, Button, Divider, Box } from "@mui/material";
-import { styled } from "@mui/material/styles";
-import { formatIngredients } from "../../components/tools/formatting";
-import { GetBrandsByPagination } from "../../api/BrandService";
+import AdvancedSearchFilter from "../../../components/inputs/SearchFilter/SearchFilter";
+import PageContainer from "../../../components/page/PageContainer";
+import TempTable from "../../../components/table/TempTable/index.js";
+import InputPercentRange from "../../../components/inputs/InputPercentRange";
+import InputRangeField from "../../../components/inputs/InputRangeField";
+import { nutrientsList } from "../../../components/constants/data/nutrients";
+import { Autocomplete, TextField, Typography, Grid, FormLabel, Button, Divider } from "@mui/material";
+import { formatIngredients } from "../../../components/tools/formatting";
+import { GetBrandsByPagination } from "../../../api/BrandService";
 import { 
     GetAllStoreProductsByPagination, 
     AdvanceSearchStoreProducts
-} from "../../api/StoreProductService";
-import { GetAllCategories } from "../../api/CategoryService";
-import { GetAllSubcategories } from "../../api/SubcategoryService";
-
-const AdvancedSearchSection = styled(Box)(({theme}) => ({
-    paddingTop: theme.spacing(3),
-    paddingBottom: theme.spacing(3)
-}));
+} from "../../../api/StoreProductService";
+import { GetAllCategories } from "../../../api/CategoryService";
+import { GetAllSubcategories } from "../../../api/SubcategoryService";
+import {
+    AdvancedSearchSection,
+    AddNutrientButton,
+    NutrientFiltersGrid,
+    SearchButton
+} from "./styles.js"
 
 const nutrientNames = nutrientsList.map(nutrient => nutrient.name);
 
@@ -245,26 +244,11 @@ const Advanced_search = () => {
                 ...Object.values(searchFilters).map(filter => 
             ([filter.id, filter.value])
         )]);
-        /*if (nutrients.length > 0) {
-            params["nutrientName"] = nutrients[0].nutrient;
-        }  */     
-        console.log(params);
         const results = await AdvanceSearchStoreProducts(params);
-        console.log(results);
         if (results.error) {
             setSearchResults([]);
             return 0;
         } else {
-           /* if (nutrients.length > 0) {
-                results.products = results.products.filter(product => {
-                    const productNutrientNames = product.storeProductNutritionFactEntities.map(
-                        n => n.nutrientEntity.name
-                    );
-                    return nutrientValueFilters.every(
-                        nutrient => productNutrientNames.includes(nutrient.nutrient)
-                    )
-                })
-            }*/
             setSearchResults(results.products);
             return results.pagination.totalRowCount;
         }
@@ -289,17 +273,16 @@ const Advanced_search = () => {
             <AdvancedSearchSection>
                 <Typography variant="h4">Nutrient Daily Value (DV) Filtering</Typography>
                 <AdvancedSearchSection>
-                    <Button 
+                    <AddNutrientButton 
                         color="success" 
                         variant="contained" 
                         size="large" 
-                        sx={{ fontSize: 16, marginBottom: 2 }} 
                         onClick={addNewNutrientDailyValueFilter}
                     >
                         Add Nutrient (+)
-                    </Button>
+                    </AddNutrientButton>
                     {nutrientValueFilters.map((nutrientValue, i) => 
-                        (<Grid key={`nutrientDV${i}`} container spacing={3} alignItems={"center"} sx={{ paddingBottom: 2}}
+                        (<NutrientFiltersGrid key={`nutrientDV${i}`} container spacing={3} alignItems={"center"}
                         >
                             <Grid item xs={12} md={3}>
                                 <FormLabel>Nutrient</FormLabel>
@@ -338,15 +321,15 @@ const Advanced_search = () => {
                                     </Button>
                                 </Grid>
                             </Grid>
-                        </Grid>)
+                        </NutrientFiltersGrid>)
                     )}
                 </AdvancedSearchSection>
             </AdvancedSearchSection>
             <Divider/>
             <AdvancedSearchSection>
-                <Button variant="contained" color="info" size="large" sx={{ fontSize: 16 }} onClick={onSearchButtonClick} disabled={searchResultsIsLoading}>
+                <SearchButton variant="contained" color="info" size="large" onClick={onSearchButtonClick} disabled={searchResultsIsLoading}>
                     Search
-                </Button>
+                </SearchButton>
             </AdvancedSearchSection>
             <AdvancedSearchSection>
                 <div>

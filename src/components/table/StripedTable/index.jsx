@@ -1,5 +1,4 @@
-import { DataGrid } from '@mui/x-data-grid'
-import Styled from "./styles"
+import { StripedDataGrid } from "./styles"
 
 const StripedTable = ({
     getRowHeight,
@@ -19,30 +18,28 @@ const StripedTable = ({
 }) => {
 
     return (
-        <Styled>
-            <DataGrid                
-                autoHeight
-                getRowHeight={getRowHeight ?? (() => "auto")}
-                rows={rows}
-                rowCount={rowCount}
-                loading={loading}
-                rowsPerPageOptions={rowsPerPageOptions}
-                pagination={pagination}
-                page={page}   //page currently visable
-                pageSize={pageSize}   //# of rows visible in page
-                paginationMode={paginationMode}
-                onPageChange={onPageChange}
-                onPageSizeChange={onPageSizeChange}
-                columns={columns}
-                getRowClassName={(params) => 
-                    params.indexRelativeToCurrentPage % 2 === 0 ? "even" : "odd"
-                }   
-                disableSelectionOnClick 
-                disableColumnFilter={controlledColumns}
-                disableColumnSelector={controlledColumns}
-                columnVisibilityModel={columnVisibilityModel}            
-            />
-        </Styled>
+        <StripedDataGrid                
+            autoHeight
+            getRowHeight={getRowHeight ?? (() => "auto")}
+            rows={rows}
+            rowCount={rowCount}
+            loading={loading}
+            rowsPerPageOptions={rowsPerPageOptions}
+            pagination={pagination}
+            page={page}   //page currently visable
+            pageSize={pageSize}   //# of rows visible in page
+            paginationMode={paginationMode}
+            onPageChange={onPageChange}
+            onPageSizeChange={onPageSizeChange}
+            columns={columns}
+            getRowClassName={(params) => 
+                params.indexRelativeToCurrentPage % 2 === 0 ? "even" : "odd"
+            }   
+            disableSelectionOnClick 
+            disableColumnFilter={controlledColumns}
+            disableColumnSelector={controlledColumns}
+            columnVisibilityModel={columnVisibilityModel}            
+        />
     )
 }
 

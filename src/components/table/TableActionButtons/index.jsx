@@ -1,5 +1,12 @@
 import { useState, useRef } from 'react';
-import { ButtonGroup, Button, Paper, MenuList, MenuItem, Popper, ClickAwayListener } from '@mui/material';
+import { ButtonGroup, Button, MenuList, ClickAwayListener } from '@mui/material';
+import {
+    ColumnVisiblityButton,
+    ColumnMenuPopper,
+    ColumnMenuPaper,
+    VisibleColumnMenuItem,
+    HiddenColumnMenuItem
+} from "./styles";
 
 const TableActionButtons = ({columns, onColumnClick}) => {
 
@@ -7,30 +14,36 @@ const TableActionButtons = ({columns, onColumnClick}) => {
     const columnsMenuRef = useRef();
     const handleMenuClose = () => setColumnsMenuAnchorEl(null);
     const columnsMenuOpen = Boolean(columnsMenuAnchorEl);
-    const onColumnsMenuButtonClick = (e) => setColumnsMenuAnchorEl(columnsMenuRef.current)
+    const onColumnsMenuButtonClick = () => setColumnsMenuAnchorEl(columnsMenuRef.current)
     return (
         <ButtonGroup>
-            <Button sx={{ width: 200 }} ref={columnsMenuRef} variant="contained" size="large" onClick={onColumnsMenuButtonClick}>Column Visibility</Button>
-            <Popper sx={{ zIndex: 1000 }}anchorEl={columnsMenuAnchorEl} open={columnsMenuOpen} onClose={handleMenuClose}>
+            <ColumnVisiblityButton ref={columnsMenuRef} 
+                variant="contained" 
+                size="large" 
+                onClick={onColumnsMenuButtonClick}
+            >
+                Column Visibility
+            </ColumnVisiblityButton>
+            <ColumnMenuPopper anchorEl={columnsMenuAnchorEl} open={columnsMenuOpen} onClose={handleMenuClose}>
                 <ClickAwayListener onClickAway={handleMenuClose}>
-                    <Paper sx={{ width: 200, backgroundColor: "primary.dark" }}>
+                    <ColumnMenuPaper>
                         <MenuList>
                             { columns && 
                                 columns.map((column, i) => 
-                                    <MenuItem onClick={() => onColumnClick(i)}
-                                        sx={{ "&, &:hover": { color: column.visible ? "white" : "primary.dark" , 
-                                                backgroundColor: column.visible ? "primary.dark" : "white",
-                                            }   
-                                        }}
-                                    >
+                                    column.visible ?
+                                    <VisibleColumnMenuItem onClick={() => onColumnClick(i)}>
                                         {column.headerName}
-                                    </MenuItem>
+                                    </VisibleColumnMenuItem>
+                                    :
+                                    <HiddenColumnMenuItem onClick={() => onColumnClick(i)}>
+                                        {column.headerName}
+                                    </HiddenColumnMenuItem>
                                 )
                             }
                         </MenuList>
-                    </Paper>
+                    </ColumnMenuPaper>
                 </ClickAwayListener>
-            </Popper>
+            </ColumnMenuPopper>
             <Button variant="contained" size="large">Excel</Button>
             <Button variant="contained" size="large">CSV</Button>
             <Button variant="contained" size="large">PDF</Button>

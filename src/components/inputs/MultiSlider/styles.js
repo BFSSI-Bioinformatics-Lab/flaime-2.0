@@ -1,6 +1,7 @@
+import { Slider } from "@mui/material";
 import { styled } from "@mui/system";
 
-export default styled('div')(() => ({
+export const ListItemSlider = styled(Slider)(() => ({
     ".MuiSlider-thumb": {
         transition: "none"
     },

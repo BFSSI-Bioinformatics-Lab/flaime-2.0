@@ -1,8 +1,8 @@
 import { styled } from "@mui/system"
-import { gridClasses } from '@mui/x-data-grid'
+import { DataGrid, gridClasses } from '@mui/x-data-grid'
 
 
-export default styled("div")(({ theme }) => ({
+export const StripedDataGrid = styled(DataGrid)(({ theme }) => ({
     fontSize: theme.typography.fontSize * 1.2,
     [`& .${gridClasses.row}.odd`]: {
         backgroundColor: "white",
