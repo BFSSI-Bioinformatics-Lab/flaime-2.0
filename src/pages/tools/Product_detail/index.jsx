@@ -1,50 +1,19 @@
 import React, {useEffect, useState} from 'react'
 import {useParams} from "react-router-dom"
-import ApiInstance from '../../api/Api';
-import Box from '@mui/material/Box';
-import Paper from '@mui/material/Paper';
-import { styled } from '@mui/material/styles';
+import ApiInstance from '../../../api/Api';
 import { Image } from 'mui-image'
 import Grid from '@mui/material/Grid';
-import PageContainer from '../../components/page/PageContainer';
-import Band from '../../components/page/Band';
-
-const Item = styled(Paper)(({ theme }) => ({
-    backgroundColor:  '#fff',
-    ...theme.typography.body1,
-    padding: theme.spacing(1),
-    textAlign: 'center',
-    color: theme.palette.text.secondary,
-    boxShadow: "none"
-  }));
-
-const ItemIcon = styled(Box)(({ theme }) => ({
-    backgroundColor: theme.palette.landing.main,
-    padding: theme.spacing(1),
-    width: 60,
-    height: 60,
-    borderRadius: "50%",
-    border: 0,
-    marginRight: theme.spacing(2)
-}));
-
-const ItemTitle = styled(Paper)(({ theme }) => ({
-    backgroundColor:  '#D9965B',
-    ...theme.typography.h4,
-    padding: theme.spacing(1),
-    textAlign: 'center',
-    color: '#f5f5f5',
-    boxShadow: "none"
-}));
-
-const DetailItem = styled(Paper)(({ theme }) => ({
-    backgroundColor:  '#fff',
-    ...theme.typography.body1,
-    paddingBottom: theme.spacing(2),
-    marginBottom: theme.spacing(2),
-    textAlign: 'start',
-    color: '#191919'
-}));
+import PageContainer from '../../../components/page/PageContainer';
+import Band from '../../../components/page/Band';
+import {
+    ProductInfoBox,
+    ProductStatItem,
+    PageIcon,
+    PageTitle,
+    DetailItem,
+    ProductImageContainer,
+    ProductIngredientsHeadingContainer
+} from "./styles";
 
 const Product_detail = () => {
     
@@ -177,10 +146,10 @@ const Product_detail = () => {
                     <Grid xs={12} md={6} item>
                         <Grid container alignItems="center" wrap="nowrap">
                             <Grid item>
-                                <ItemIcon></ItemIcon>
+                                <PageIcon></PageIcon>
                             </Grid>
                             <Grid item>
-                                <ItemTitle elevation={0}>{product.siteName}</ItemTitle>
+                                <PageTitle elevation={0}>{product.siteName}</PageTitle>
                             </Grid>
                         </Grid>
                     </Grid>
@@ -188,13 +157,13 @@ const Product_detail = () => {
                     <Grid container item xs={12} md={6} spacing={3} direction="row"
                 justifyContent="space-around" alignItems="center">
                         <Grid item xs={3}>
-                            <Item >High Sodium</Item>
+                            <ProductStatItem >High Sodium</ProductStatItem>
                         </Grid>
                         <Grid item xs={3}>
-                            <Item >Low Fat</Item>
+                            <ProductStatItem >Low Fat</ProductStatItem>
                         </Grid>
                         <Grid item xs={3}>
-                            <Item >No Sugar</Item>
+                            <ProductStatItem >No Sugar</ProductStatItem>
                         </Grid> 
                         <Grid item xs={1}>
                             
@@ -221,18 +190,10 @@ const Product_detail = () => {
         {/* Middle section with all info */}
         <div>
             <PageContainer >
-                <Box sx={{ padding: "40px 0" }}>
+                <ProductInfoBox>
                     {product &&
                         <Grid container columnSpacing={6} direction="row"
                             justifyContent="space-between" alignItems="flex-start">
-                            {/*<Grid item xs={12} md={7} >
-                                <DetailItem elevation={0}>Store:{product.storeEntity.name}</DetailItem>
-                                <Divider></Divider>
-                                <DetailItem elevation={0}>Price:{product.price} {product.priceUnitEntity.name}</DetailItem>
-                                <Divider/>
-                                <DetailItem elevation={0}>Description: {product.siteDescription}</DetailItem>
-                                <Divider/>
-                    </Grid>*/}
                             <Grid item xs={12} md={6}>
                                 <div>
                                     {productDescItems && productDescItems.map((item) => ( item.value && 
@@ -259,13 +220,13 @@ const Product_detail = () => {
                             <Grid item xs={12} md={6}>
                                 <div>
                                     {product.storeProductImageEntities && product.storeProductImageEntities.length > 0 && (
-                                        <div style={{ margin: "50px 0" }}>
+                                        <ProductImageContainer>
                                             <Image key={product.storeProductImageEntities[0].imagePath} 
                                                 src={imagePathToUrl(product.storeProductImageEntities[0].imagePath)} 
                                                 alt={product.siteName} 
                                                 width="100%"
                                             />
-                                        </div>
+                                        </ProductImageContainer>
                                     )}
                                     <Grid container
                                         direction="row-reverse"
@@ -323,9 +284,9 @@ const Product_detail = () => {
                                     </Grid>
                                     { product.ingredientEn && 
                                         <div>
-                                            <div style={{ marginTop: "40px", marginBottom: "10px"}}>
+                                            <ProductIngredientsHeadingContainer>
                                                 <b>INGREDIENTS</b>
-                                            </div>
+                                            </ProductIngredientsHeadingContainer>
                                             <div>
                                                 {product.ingredientEn.toUpperCase()}
                                             </div>
@@ -335,20 +296,10 @@ const Product_detail = () => {
                             </Grid>
                         </Grid>
                     }
-                </Box>
+                </ProductInfoBox>
             </PageContainer>
-            {/*<Container>
-                
-                <div>
-                    <p>Product name: {product.id}</p>
-                    <p>Store: {product.storeEntity.name}</p>
-                    <p>Price:{product.price} {product.priceUnitEntity.name}</p>
-                    <p>Description: {product.siteDescription}</p>
-                    <p>Serving Size: {product.servingSize} {product.servingSizeUnitEntity.name}</p> 
-                </div>
-                        </Container>*/}
             <Band>
-                <ItemTitle>Visualizations</ItemTitle>
+                <PageTitle>Visualizations</PageTitle>
             </Band>
             
         </div>

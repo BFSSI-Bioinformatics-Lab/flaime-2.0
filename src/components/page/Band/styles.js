@@ -1,8 +1,7 @@
-import PageContainer from "./PageContainer";
 import { Box } from "@mui/material";
 import { styled } from '@mui/material/styles';
     
-const StyledBox = styled(Box)(({theme}) => ({
+export const BannerBox = styled(Box)(() => ({
     display: 'flex',
     alignItems: 'center',
     justifyContent: "center",
@@ -16,15 +15,3 @@ const StyledBox = styled(Box)(({theme}) => ({
         backgroundColor: "#D9965B",
     }
 }));
-
-const Band = ({children}) => {
-    return (
-        <StyledBox>
-            <PageContainer>
-                {children}
-            </PageContainer>
-        </StyledBox>
-    )
-}
-
-export default Band;
