@@ -19,7 +19,7 @@ const Theme = createTheme({
     },
     page: {
         content: {
-            max: 1800
+            max: 1300
         }
     }
 })
