@@ -7,6 +7,13 @@ const encodeParams = (params) => {
     return params;
 }
 
-export const encodeQuery = (func) => {
-    return (params) => func(encodeParams(params));
+export function encodeQuery(func) {
+    return async (params, ...args) => await func(encodeParams(params), ...args);
+}
+
+export function addSignalController(req) {
+    return () => {
+        const abortController = new AbortController();
+        return [async (args) => await req(args, abortController), () => abortController.abort()]
+    }
 }

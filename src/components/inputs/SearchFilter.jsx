@@ -1,6 +1,6 @@
 import { Autocomplete, TextField, Typography, Grid } from "@mui/material";
 
-const SearchFilter = ({categories, onInputChange}) => {
+const SearchFilter = ({categories, onInputChange, free = true}) => {
 
     return (
         <>
@@ -10,7 +10,7 @@ const SearchFilter = ({categories, onInputChange}) => {
                         <div>
                             <Typography variant="h5">{category.title}</Typography>
                             <Autocomplete 
-                                freeSolo
+                                freeSolo={free}
                                 id={`${category.title}${i}`}
                                 options={category.options ?? []}
                                 size={"small"}
