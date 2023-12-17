@@ -12,7 +12,7 @@ const SearchFilter = ({categories, onInputChange}) => {
                             <Autocomplete 
                                 freeSolo
                                 id={`${category.title}${i}`}
-                                options={category.options}
+                                options={category.options ?? []}
                                 size={"small"}
                                 multiple={category.multiple}
                                 onChange={category.multiple ? (e, val) => onInputChange(category.title, e, val) : () => {}}

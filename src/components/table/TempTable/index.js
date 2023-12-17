@@ -1,41 +1,17 @@
-import React, {useEffect, useState} from 'react'
-import { DataGrid, gridClasses } from '@mui/x-data-grid'
-import TextField from '@mui/material/TextField';
+import React, { useEffect, useState } from 'react'
 // import Product_detail from '../pages/tools/Product_detail';
-import { styled } from '@mui/material';
-import TableActionButtons from './TableActionButtons';
-
-const StripedDataGrid = styled(DataGrid)(({ theme }) => ({
-    fontSize: theme.typography.fontSize * 1.2,
-    [`& .${gridClasses.row}.odd`]: {
-        backgroundColor: "white",
-        "&:hover, &.Mui-hovered": {
-            backgroundColor: theme.palette.grey[400]
-        }
-    },
-    [`& .${gridClasses.row}.even`]: {
-        backgroundColor: theme.palette.grey[100],
-        "&:hover, &.Mui-hovered": {
-            backgroundColor: theme.palette.grey[400]
-        }
-    },
-    [`.${gridClasses.columnHeaderTitle}`]: {
-        fontWeight: "bold",
-        fontSize: theme.typography.fontSize * 1.5,
-        padding: theme.spacing(1)
-    },
-    [`& .${gridClasses.cell}`]: {
-        padding: theme.spacing(2),
-        alignItems: "start",
-        wordWrap: "break-word",
-        whiteSpace: "normal"
-    }
-}));
+import TableActionButtons from '../TableActionButtons';
+import StripedTable from '../StripedTable';
+import { 
+    TableSearchBar,
+    TableActionButtonsContainer 
+} from './styles';
 
 const TempTable = ({
     columns, 
     rows, 
     loading, 
+    setLoading = () => {},
     getRowHeight, 
     onPageChange, 
     onSearchChange, 
@@ -66,8 +42,9 @@ const TempTable = ({
     }
 
     useEffect( () =>{
+        const oldLoading = loading;
+        setLoading(true);
         setPageState(old=>({...old, isLoading: true}))
-
         const action = pageState.search === "" ? 
             () => onPageChange(pageState.pageSize, pageState.page) : 
             () => onSearchChange(pageState.search, pageState.pageSize, pageState.page);
@@ -75,12 +52,13 @@ const TempTable = ({
         action().then(
             (res) => setPageState(old=>({...old, isLoading: false, total: res}))
         )
-        .catch(() => setPageState(old=>({...old, isLoading: false, total: 0})));
+        .catch(() => setPageState(old=>({...old, isLoading: false, total: 0})))
+        .finally(() => setLoading(oldLoading));
         
     },[pageState.page, pageState.pageSize, pageState.search]);
 
     useEffect(() => {
-        setPageState(old => ({...old, total: totalRows ?? old.total}))
+        setPageState(old => ({...old, page: 1, total: totalRows ?? old.total}))
     }, [totalRows])
 
     useEffect(() => {
@@ -104,41 +82,32 @@ const TempTable = ({
 
   return (
     <div >
-            {/* <p>{products.productName}</p>
-            <p>{products.productUpc}</p> */}
-            {/* <DataGrid 
-                rows={products}
-                columns={columns}
-            /> */}
             {
                 downloadMenu && 
-                <div style={{ marginBottom: 20 }}>
+                <TableActionButtonsContainer>
                     <TableActionButtons columns={columnVisibilities} onColumnClick={toggleColumnVisibility}/>
-                </div>
+                </TableActionButtonsContainer>
             }
             { 
                 searchBar && 
-                <TextField
+                <TableSearchBar
                 name="search"
                 value={pageState.search}
                 onChange={(searchVal) => requestSearch(searchVal)}
                 variant="outlined"
                 label="Search"
-                sx={{pb: "15px"}}
                 // onCancelSearch={() => cancelSearch()}
                 />
             }
-            <StripedDataGrid
-                autoHeight
-                getRowHeight={getRowHeight ?? (() => "auto")}
+            <StripedTable
                 rows={rows}
                 rowCount={pageState.total}
+                getRowHeight={getRowHeight}
                 loading={pageState.isLoading || loading}
                 rowsPerPageOptions={[25,50,100]}
                 pagination
                 page={pageState.page - 1}   //page currently visable
                 pageSize={pageState.pageSize}   //# of rows visible in page
-                paginationMode="server"
                 onPageChange={(newPage) => setPageState(old =>({...old, page:newPage + 1}))}
                 onPageSizeChange={(newPageSize) => setPageState(old=>({...old, pageSize: newPageSize}))}
                 columns={columns}
@@ -146,12 +115,12 @@ const TempTable = ({
                     params.indexRelativeToCurrentPage % 2 === 0 ? "even" : "odd"
                 }   
                 disableSelectionOnClick 
+                controlledColumns={true}
                 columnVisibilityModel={
                     columnVisibilities.reduce((obj, col) => (
                         { ...obj, [col.field]: col.visible }
                     ), {})
                 }
-                disableColumnMenu
                 // components={{
                 //     Toolbar: GridToolbar,
                 // }}

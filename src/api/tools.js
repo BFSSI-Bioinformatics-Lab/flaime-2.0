@@ -1,6 +1,8 @@
 const encodeParams = (params) => {
     Object.keys(params).forEach(
-        key => params[key] = encodeURIComponent(params[key])
+        key => params[key] = params[key] instanceof Array ? 
+            params[key].map(item => encodeURIComponent(item)) : 
+            encodeURIComponent(params[key])
     );
     return params;
 }
