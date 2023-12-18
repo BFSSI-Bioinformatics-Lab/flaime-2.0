@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { Link } from "react-router-dom";
-import AdvancedSearchFilter from "../../../components/inputs/SearchFilter/SearchFilter";
+import AdvancedSearchFilter from "../../../components/inputs/SearchFilter";
 import PageContainer from "../../../components/page/PageContainer";
 import TempTable from "../../../components/table/TempTable/index.js";
 import InputPercentRange from "../../../components/inputs/InputPercentRange";
@@ -11,7 +11,7 @@ import { formatIngredients } from "../../../components/tools/formatting";
 import { GetBrandsByPagination } from "../../../api/BrandService";
 import { 
     GetAllStoreProductsByPagination, 
-    AdvanceSearchStoreProducts
+    AdvanceSearchStoreProductsControlled
 } from "../../../api/StoreProductService";
 import { GetAllCategories } from "../../../api/CategoryService";
 import { GetAllSubcategories } from "../../../api/SubcategoryService";
@@ -58,6 +58,8 @@ const Advanced_search = () => {
     const [searchResults, setSearchResults] = useState([]);
     const [searchResultsIsLoading, setSearchResultsIsLoading] = useState(false);
     const [totalTableRows, setTotalTableRows] = useState(0);
+    
+    const [advancedSearchCancel, setAdvancedSearchCancel] = useState({ fn: () => {} });
 
     const searchTableColumns = [
         { 
@@ -213,22 +215,19 @@ const Advanced_search = () => {
         setNutrientValueFilters(nutrientValueFilters.filter((n, i) => i !== index));
     }
 
-    const onSearchButtonClick = useCallback(async () => {
+    const onSearchButtonClick = async () => {
         if (appliedSearchFilters === searchInputs) return;
-
-        setSearchResultsIsLoading(true);
         getSearchResultsPage(searchInputs, 10, 1, nutrientValueFilters)
             .then((rows) => {
                 setAppliedSearchFilters(searchInputs);
                 setAppliedNutrientValueFilters(nutrientValueFilters);
-                setTotalTableRows(rows)
+                if (rows != null) setTotalTableRows(rows)
             })
             .catch((e) => {
                 setTotalTableRows(0)
-            })
-            .finally(() => setSearchResultsIsLoading(false));
+            });
             
-    }, [nutrientValueFilters, searchInputs]);
+    };
 
     const searchResultsGetRowHeight = () => {
         return "auto";
@@ -244,13 +243,29 @@ const Advanced_search = () => {
                 ...Object.values(searchFilters).map(filter => 
             ([filter.id, filter.value])
         )]);
-        const results = await AdvanceSearchStoreProducts(params);
-        if (results.error) {
-            setSearchResults([]);
-            return 0;
-        } else {
-            setSearchResults(results.products);
-            return results.pagination.totalRowCount;
+        advancedSearchCancel.fn();
+
+        const [advanceSearchProductsCall, advanceSearchProductsCancel] = AdvanceSearchStoreProductsControlled();
+        setAdvancedSearchCancel({ fn: advanceSearchProductsCancel });
+        setSearchResultsIsLoading(true);
+
+        try {
+            const results = await advanceSearchProductsCall(params);
+            setSearchResultsIsLoading(false);
+            console.log(results);
+            if (results.error) {
+                setSearchResults([]);
+                return 0;
+            } else {
+                setSearchResults(results.products);
+                return results.pagination.totalRowCount;
+            }
+        } catch (e) {
+            if (e.code !== "ERR_CANCELED") {
+                setSearchResultsIsLoading(false);
+                return 0;
+            }
+            return null;
         }
     }
     
@@ -258,7 +273,7 @@ const Advanced_search = () => {
         const searchCategoryNames = ["Name", "Brand", "Category", "Subcategory", "Contains Ingredient(s)"];
         setSearchCategories(searchCategoryNames.map(cat => ({title: cat, options: [], multiple: cat === "Contains Ingredient(s)", loading: true})))
         getCategoryOptions();
-        onSearchButtonClick();
+
     }, []);
 
     return (
@@ -327,7 +342,7 @@ const Advanced_search = () => {
             </AdvancedSearchSection>
             <Divider/>
             <AdvancedSearchSection>
-                <SearchButton variant="contained" color="info" size="large" onClick={onSearchButtonClick} disabled={searchResultsIsLoading}>
+                <SearchButton variant="contained" color="info" size="large" onClick={onSearchButtonClick}>
                     Search
                 </SearchButton>
             </AdvancedSearchSection>

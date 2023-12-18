@@ -42,18 +42,19 @@ const TempTable = ({
     }
 
     useEffect( () =>{
-        const oldLoading = loading;
-        setLoading(true);
         setPageState(old=>({...old, isLoading: true}))
         const action = pageState.search === "" ? 
             () => onPageChange(pageState.pageSize, pageState.page) : 
             () => onSearchChange(pageState.search, pageState.pageSize, pageState.page);
        
         action().then(
-            (res) => setPageState(old=>({...old, isLoading: false, total: res}))
+            (res) => {
+                if (res != null) {
+                    setPageState(old=>({...old, isLoading: false, total: res}));
+                }
+            }
         )
-        .catch(() => setPageState(old=>({...old, isLoading: false, total: 0})))
-        .finally(() => setLoading(oldLoading));
+        .catch(() => setPageState(old=>({...old, isLoading: false, total: 0})));
         
     },[pageState.page, pageState.pageSize, pageState.search]);
 
