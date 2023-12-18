@@ -1,3 +1,5 @@
+/* Nutrient list used in Advanced Search */
+
 const flaime1nutrients = [
     'Calories',
     'Sodium',
@@ -51,7 +53,6 @@ const flaime1nutrients = [
     'Manganese',
     'Molybdenum',
 ];
-
 
 export const nutrientsList = [{
     id: 203,

@@ -1,3 +1,4 @@
+/* Nutrients to pass into the reports API call */
 export const categoryReportNutrients = [
     {
         nutrient: "sodium",

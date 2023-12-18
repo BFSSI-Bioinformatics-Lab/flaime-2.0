@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { SearchStoreProducts, GetAllStoreProductsByPagination } from '../../api/StoreProductService';
 import { Link } from 'react-router-dom';
-import TempTable from "../../components/table/TempTable";
+import MainTable from "../../components/table/MainTable";
 import PageContainer from '../../components/page/PageContainer';
 const Product_browser = () => {
 
@@ -80,7 +80,7 @@ const Product_browser = () => {
         {/* <h2>Product_browser Page</h2> */}
         <PageContainer>
           <h1>Table of all Products</h1>
-          <TempTable columns={columns} rows={products} onPageChange={getAllProducts} onSearchChange={getSearchProducts}/>
+          <MainTable columns={columns} rows={products} onPageChange={getAllProducts} onSearchChange={getSearchProducts}/>
         </PageContainer>
     </div>
   )

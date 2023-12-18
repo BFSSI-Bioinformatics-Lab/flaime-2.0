@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { Link } from "react-router-dom";
 import AdvancedSearchFilter from "../../../components/inputs/SearchFilter";
 import PageContainer from "../../../components/page/PageContainer";
-import TempTable from "../../../components/table/TempTable/index.js";
+import MainTable from "../../../components/table/MainTable";
 import InputPercentRange from "../../../components/inputs/InputPercentRange";
 import InputRangeField from "../../../components/inputs/InputRangeField";
 import { nutrientsList } from "../../../components/constants/data/nutrients";
@@ -348,7 +348,7 @@ const Advanced_search = () => {
             </AdvancedSearchSection>
             <AdvancedSearchSection>
                 <div>
-                    <TempTable 
+                    <MainTable 
                         rows={searchResults} 
                         columns={searchTableColumns} 
                         onPageChange={(pageNumber, pageSize) => 

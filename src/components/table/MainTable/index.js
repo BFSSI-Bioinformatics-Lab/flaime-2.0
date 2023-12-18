@@ -7,7 +7,7 @@ import {
     TableActionButtonsContainer 
 } from './styles';
 
-const TempTable = ({
+const MainTable = ({
     columns, 
     rows, 
     loading, 
@@ -130,4 +130,4 @@ const TempTable = ({
   )
 }
 
-export default TempTable
+export default MainTable
