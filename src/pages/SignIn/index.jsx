@@ -1,44 +1,5 @@
-import quickSearch from "../static/images/singin.jpg"
-import { Card, Typography, TextField, Grid, Button, Box } from "@mui/material";
-import { styled } from "@mui/system";
-
-const SignInPageContainer = styled(Box)(({theme}) => ({
-    backgroundImage: `url(${quickSearch})`,
-    width: "100%", 
-    minHeight: "calc(100vh - 140px)", 
-    paddingBottom: 50,
-    display: "flex",
-    alignItems: "center"
-}));
-
-const SignInContainer = styled(Card)(({theme}) => ({
-    margin: "auto",
-    padding: theme.spacing(3),
-    maxWidth: 400,
-    borderRadius: theme.spacing(3)
-}));
-
-const SignInInputField = styled(TextField)(({theme}) => ({
-    backgroundColor: theme.palette.primary.transparent.light,
-    borderRadius: theme.spacing(2),
-    maxWidth: "100%",
-    width: 293,
-    padding: theme.spacing(0.5),
-    outline: "none",
-    "& fieldset": {
-        border: "none"
-    },
-    "& input": {
-        textAlign: "center",
-        color: theme.palette.primary.main,
-        fontSize: 23,
-        "::placeholder, ::-ms-input-placeholder, :-ms-input-placeholder": {
-          opacity: 0.8
-        }
-      },
-}));
-
-
+import { Typography,Grid, Button, } from "@mui/material";
+import { SignInContainer, SignInInputField, SignInPageContainer } from "./styles";
 const SignIn = () => {
 
     return (

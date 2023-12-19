@@ -3,7 +3,7 @@ import { Image } from 'mui-image'
 import landing from "../../static/images/landing.jpg"
 import { Typography } from '@mui/material'
 import Grid from '@mui/material/Grid';
-import SearchBar from "../../components/SearchBar";
+import SearchBar from "../../components/inputs/SearchBar";
 import {
   ExploreItem,
   ArrowButtonLink,

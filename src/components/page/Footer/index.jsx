@@ -1,11 +1,6 @@
 import { Container, Typography } from "@mui/material";
 
-import { styled } from '@mui/material/styles';
-
-const FooterContainer = styled(Container)(({ theme }) => ({
-    padding: "20px",
-    backgroundColor: theme.palette.landing
-}));
+import { FooterContainer } from './styles';
 
 const Footer = () => {
     return  (

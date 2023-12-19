@@ -1,8 +1,8 @@
 import React, { useState } from 'react'
-import { SearchStoreProducts, GetAllStoreProductsByPagination } from '../../api/StoreProductService';
+import { SearchStoreProducts, GetAllStoreProductsByPagination } from '../../../api/StoreProductService';
 import { Link } from 'react-router-dom';
-import MainTable from "../../components/table/MainTable";
-import PageContainer from '../../components/page/PageContainer';
+import MainTable from "../../../components/table/MainTable";
+import PageContainer from '../../../components/page/PageContainer';
 const Product_browser = () => {
 
   const [products, setProducts] = useState([]);

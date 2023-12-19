@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { Link } from "react-router-dom";
 import AdvancedSearchFilter from "../../../components/inputs/SearchFilter";
-import PageContainer from "../../../components/page/PageContainer";
+import PageContainer from "../../../components/page/PageContainer/index.jsx";
 import MainTable from "../../../components/table/MainTable";
 import InputPercentRange from "../../../components/inputs/InputPercentRange";
 import InputRangeField from "../../../components/inputs/InputRangeField";
