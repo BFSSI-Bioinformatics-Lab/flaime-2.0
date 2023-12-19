@@ -252,7 +252,6 @@ const Advanced_search = () => {
         try {
             const results = await advanceSearchProductsCall(params);
             setSearchResultsIsLoading(false);
-            console.log(results);
             if (results.error) {
                 setSearchResults([]);
                 return 0;

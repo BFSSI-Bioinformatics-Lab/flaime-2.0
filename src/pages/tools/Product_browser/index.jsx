@@ -1,11 +1,12 @@
 import React, { useState } from 'react'
-import { SearchStoreProducts, GetAllStoreProductsByPagination } from '../../../api/StoreProductService';
+import { SearchStoreProductsControlled, GetAllStoreProductsByPagination } from '../../../api/StoreProductService';
 import { Link } from 'react-router-dom';
 import MainTable from "../../../components/table/MainTable";
 import PageContainer from '../../../components/page/PageContainer';
 const Product_browser = () => {
 
   const [products, setProducts] = useState([]);
+  const [cancelSearch, setCancelSearch] = useState(() => () => {});
 
   const columns = [
     // { field: 'id', headerName: 'ID' },
@@ -70,9 +71,19 @@ const Product_browser = () => {
   }
 
   const getSearchProducts = async (searchTerm, pageSize, pageNumber) => {
-    const data = await SearchStoreProducts({ searchTerm, pageSize, pageNumber });
-    setProducts(data.error ? [] : data.products)
-    return data.pagination.totalRowCount;
+    cancelSearch();
+    try {
+      const [SearchStoreProductsCall, SearchStoreProductsCancel] = SearchStoreProductsControlled();
+      setCancelSearch(() => SearchStoreProductsCancel);
+      const data = await SearchStoreProductsCall({ searchTerm, pageSize, pageNumber });
+      setProducts(data.error ? [] : data.products)
+      return data.pagination.totalRowCount;
+    } catch (e) {
+      if (e.code !== "ERR_CANCELED") {
+        return 0;
+      }
+      return null;    
+    }
   }
 
   return (

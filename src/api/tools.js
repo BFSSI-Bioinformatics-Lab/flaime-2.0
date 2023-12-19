@@ -11,6 +11,7 @@ export function encodeQuery(func) {
     return async (params, ...args) => await func(encodeParams(params), ...args);
 }
 
+/* Provides a function to cancel a request */
 export function addSignalController(req) {
     return () => {
         const abortController = new AbortController();

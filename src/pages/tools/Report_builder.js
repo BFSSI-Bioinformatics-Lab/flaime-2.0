@@ -15,7 +15,6 @@ const Report_builder = () => {
     const request = await GetAllCategories();
     const obj = request.error ? {} : 
         Object.assign({}, ...request.categories.map(category => ({[category.name]: category})));
-    console.log(obj);
     setCategories(obj);
     
   }
@@ -24,7 +23,6 @@ const Report_builder = () => {
     const request = await GetAllStores();
     const obj = request.error ? {} : 
         Object.assign({}, ...request.stores.map(store => ({[store.name]: store})));
-    console.log(obj);
     setStores(obj);
     
   }
@@ -34,8 +32,6 @@ const Report_builder = () => {
   }
 
   const onBuildReportButtonClick = async () => {
-    console.log(reportSubject)
-    console.log(stores)
     const request = await GetStoreReports(
       {
         storeId: stores[reportSubject].id, 
@@ -43,7 +39,6 @@ const Report_builder = () => {
         dailyValues: [2300, 50, 50]
       });
     !request.error && setReport(request.reports[0]);
-    console.log(request.reports)
   }
 
   useEffect(() => {
