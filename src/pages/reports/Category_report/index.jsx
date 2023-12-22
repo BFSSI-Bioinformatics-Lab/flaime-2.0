@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react'
 import PageContainer from '../../../components/page/PageContainer'
 import SearchFilter from '../../../components/inputs/SearchFilter'
 import GroceryLayout from '../../../components/diagrams/GroceryLayout'
-import { GetAllCategories } from '../../../api/CategoryService'
-import { GetCategoryReportsControlled } from '../../../api/ReportService'
+import { GetAllCategories } from '../../../api/services/CategoryService'
+import { GetCategoryReportsControlled } from '../../../api/services/ReportService'
 import { categoryReportNutrients } from '../constants'
 const Category_report = () => {
   

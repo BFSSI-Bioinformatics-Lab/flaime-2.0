@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { SearchStoreProductsControlled, GetAllStoreProductsByPagination } from '../../../api/StoreProductService';
+import { SearchStoreProductsControlled, GetAllStoreProductsByPaginationControlled } from '../../../api/services/StoreProductService';
 import { Link } from 'react-router-dom';
 import MainTable from "../../../components/table/MainTable";
 import PageContainer from '../../../components/page/PageContainer';
@@ -65,16 +65,26 @@ const Product_browser = () => {
   ];
 
   const getAllProducts = async (pageSize, pageNumber) => {
-    const data = await GetAllStoreProductsByPagination({ pageSize, pageNumber });
-    setProducts(data.error ? [] : data.products)
-    return data.pagination.totalRowCount;
+    cancelSearch();
+    try {
+      const [GetAllStoreProductsByPagination, GetAllStoreProductsByPaginationCancel] = GetAllStoreProductsByPaginationControlled();
+      setCancelSearch(() => () => GetAllStoreProductsByPaginationCancel());
+      const data = await GetAllStoreProductsByPagination({ pageSize, pageNumber });
+      setProducts(data.error ? [] : data.products)
+      return data.pagination.totalRowCount;
+    } catch (e) {
+      if (e.code !== "ERR_CANCELED") {
+        return 0;
+      }
+      return null;    
+    }
   }
 
   const getSearchProducts = async (searchTerm, pageSize, pageNumber) => {
     cancelSearch();
     try {
       const [SearchStoreProductsCall, SearchStoreProductsCancel] = SearchStoreProductsControlled();
-      setCancelSearch(() => SearchStoreProductsCancel);
+      setCancelSearch(() => () => SearchStoreProductsCancel());
       const data = await SearchStoreProductsCall({ searchTerm, pageSize, pageNumber });
       setProducts(data.error ? [] : data.products)
       return data.pagination.totalRowCount;

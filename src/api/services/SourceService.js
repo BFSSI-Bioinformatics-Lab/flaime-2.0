@@ -1,4 +1,4 @@
-import { ApiQueryGet } from "./Api";
+import { ApiQueryGet } from "../Api";
 
 const GetAllSources = async () => {
     const data = await ApiQueryGet("SourceService/GetAllSourcesAsync")

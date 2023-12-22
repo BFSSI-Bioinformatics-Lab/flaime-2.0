@@ -1,7 +1,8 @@
 import axios from "axios";
+import config from "./config.json";
 
 const ApiInstance = axios.create({
-    baseURL: "https://localhost:7166/api/"
+    baseURL: config.BASE_URL
 });
 
 const ApiQueryGet = async (url, controller) => {

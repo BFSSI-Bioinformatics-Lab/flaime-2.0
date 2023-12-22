@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import AdvancedSearchFilter from "../../../components/inputs/SearchFilter";
 import PageContainer from "../../../components/page/PageContainer/index.jsx";
@@ -8,13 +8,13 @@ import InputRangeField from "../../../components/inputs/InputRangeField";
 import { nutrientsList } from "../../../components/constants/data/nutrients";
 import { Autocomplete, TextField, Typography, Grid, FormLabel, Button, Divider } from "@mui/material";
 import { formatIngredients } from "../../../components/tools/formatting";
-import { GetBrandsByPagination } from "../../../api/BrandService";
+import { GetBrandsByPagination } from "../../../api/services/BrandService";
 import { 
     GetAllStoreProductsByPagination, 
     AdvanceSearchStoreProductsControlled
-} from "../../../api/StoreProductService";
-import { GetAllCategories } from "../../../api/CategoryService";
-import { GetAllSubcategories } from "../../../api/SubcategoryService";
+} from "../../../api/services/StoreProductService";
+import { GetAllCategories } from "../../../api/services/CategoryService";
+import { GetAllSubcategories } from "../../../api/services/SubcategoryService";
 import {
     AdvancedSearchSection,
     AddNutrientButton,

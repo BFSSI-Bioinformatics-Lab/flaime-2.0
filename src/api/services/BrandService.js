@@ -1,4 +1,4 @@
-import { ApiQueryGet } from "./Api";
+import { ApiQueryGet } from "../Api";
 
 const GetBrandsByPagination = async ({ pageNumber, pageSize }) => {
     const data = await ApiQueryGet(`BrandService/GetBrandsByPaginationAsync?pageNumber=${pageNumber}&pageSize=${pageSize}`)

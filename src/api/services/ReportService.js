@@ -1,5 +1,5 @@
-import { ApiQueryGet } from "./Api";
-import { encodeQuery, addSignalController } from "./tools";
+import { ApiQueryGet } from "../Api";
+import { encodeQuery, addSignalController } from "../tools";
 
 const GetStoreReports = encodeQuery(async ({storeId, nutrients = [], dailyValues = [] }, abortController) => {
     const data = await ApiQueryGet(`ReportService/GetStoreReportAsync?storeId=${storeId}` +

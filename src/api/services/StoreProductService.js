@@ -1,5 +1,5 @@
-import { ApiQueryGet } from "./Api";
-import { encodeQuery, addSignalController } from "./tools";
+import { ApiQueryGet } from "../Api";
+import { encodeQuery, addSignalController } from "../tools";
 
 const GetAllStoreProducts = encodeQuery(async (
     { storeid = -1, scrapebatchid = -1, mostrecentonly = true, includedetails = false }
@@ -12,14 +12,18 @@ const GetAllStoreProducts = encodeQuery(async (
 });
 
 const GetAllStoreProductsByPagination = encodeQuery(async (
-    { storeid = -1, scrapebatchid = -1, mostrecentonly = true, includedetails = false, pageNumber = 1, pageSize = 25 }
+    { storeid = -1, scrapebatchid = -1, mostrecentonly = true, includedetails = false, pageNumber = 1, pageSize = 25 },
+    abortController
 ) => {
     const data = await ApiQueryGet(
         `StoreProductService/GetStoreProductsAsync?storeid=${storeid}&scrapebatchid=${scrapebatchid}`
-        + `&mostrecentonly=${mostrecentonly}&includeDetails=${includedetails}&pageNumber=${pageNumber}&pageSize=${pageSize}`
+        + `&mostrecentonly=${mostrecentonly}&includeDetails=${includedetails}&pageNumber=${pageNumber}&pageSize=${pageSize}`,
+        abortController
     )
     return { error: data.statusCode !== 200, products: data.responseObjects, pagination: data.pagination };
 });
+
+const GetAllStoreProductsByPaginationControlled = addSignalController(GetAllStoreProductsByPagination);
 
 const AdvanceSearchStoreProducts = encodeQuery(async (
     { 
@@ -57,6 +61,7 @@ const SearchStoreProductsControlled = addSignalController(SearchStoreProducts);
 export {
     GetAllStoreProducts,
     GetAllStoreProductsByPagination,
+    GetAllStoreProductsByPaginationControlled,
     AdvanceSearchStoreProducts,
     AdvanceSearchStoreProductsControlled,
     SearchStoreProducts,

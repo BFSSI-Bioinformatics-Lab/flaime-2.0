@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react"
 import { FormControl, Select, MenuItem, Typography, Button } from "@mui/material"
-import { GetAllCategories } from "../../api/CategoryService";
-import { GetAllStores } from "../../api/StoreService";
-import { GetStoreReports } from "../../api/ReportService";
+import { GetAllCategories } from "../../api/services/CategoryService";
+import { GetAllStores } from "../../api/services/StoreService";
+import { GetStoreReports } from "../../api/services/ReportService";
 const Report_builder = () => {
 
   const [report, setReport] = useState(null);

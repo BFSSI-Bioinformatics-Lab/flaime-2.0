@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import PageContainer from '../../../components/page/PageContainer'
 import SearchFilter from '../../../components/inputs/SearchFilter'
-import { GetAllStores } from '../../../api/StoreService'
-import { GetStoreReportsControlled, GetStoreReportsNutritionFactsControlled } from '../../../api/ReportService'
+import { GetAllStores } from '../../../api/services/StoreService'
+import { GetStoreReportsControlled, GetStoreReportsNutritionFactsControlled } from '../../../api/services/ReportService'
 import { storeReportNutrients } from '../constants'
 const Store_report = () => {
   

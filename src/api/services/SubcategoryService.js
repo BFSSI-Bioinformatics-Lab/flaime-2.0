@@ -1,4 +1,4 @@
-import { ApiQueryGet } from "./Api";
+import { ApiQueryGet } from "../Api";
 
 const GetAllSubcategories = async () => {
     const data = await ApiQueryGet("SubcategoryService/GetAllSubcategoriesAsync")
