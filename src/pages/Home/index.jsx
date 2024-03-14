@@ -63,6 +63,7 @@ const Home = () => {
       <SearchBarContainer>
         <SearchBar placeholder="Quick Search" width="452px" height="75px" />
       </SearchBarContainer>
+      
       <ExploreHeadingContainer maxWidth="sm">
         <Typography variant="h2" color="primary.dark" align="center">Explore the FLAIME Database</Typography>
       </ExploreHeadingContainer>

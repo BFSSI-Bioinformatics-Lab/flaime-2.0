@@ -113,7 +113,7 @@ const Advanced_search = () => {
       
     const getProductNames = async () => {
         const products = await GetAllStoreProductsByPagination({ pageNumber: 1, pageSize: 25 });
-
+                console.log("--- products --- = " + products);
         return products.error ? [] : products.products.map((product) => product.siteName);
     }
 

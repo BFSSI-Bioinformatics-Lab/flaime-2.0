@@ -17,7 +17,8 @@ import Quality from "./pages/data/Quality";
 import Visualizations from "./pages/data/Visualizations";
 import About from "./pages/About";
 import Advanced_search from "./pages/tools/Advanced_search";
-import SignIn from "./pages/SignIn";
+// import SignIn from "./pages/SignIn";
+import SignupLogin from "./pages/SignupLogin";
 
 function App() {
   return (
@@ -26,9 +27,9 @@ function App() {
         <div className="App">
           <Header />
           <Routes>
-            <Route path="/" element={<Home/>} />
+          <Route path="signupLogin" element={<SignupLogin />} />
 
-              <Route path="signin" element={<SignIn />} />
+            <Route path="/" element={<Home/>} />
 
             {/* Tools Dropdown */}
             <Route path="tools/product-browser" element={<Product_browser />} />
