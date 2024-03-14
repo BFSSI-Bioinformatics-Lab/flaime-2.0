@@ -1,9 +1,10 @@
-import React from 'react'
+import React, {useState} from "react"
 import { Image } from 'mui-image'
 import landing from "../../static/images/landing.jpg"
 import { Typography } from '@mui/material'
 import Grid from '@mui/material/Grid';
 import SearchBar from "../../components/inputs/SearchBar";
+import {Context} from "../../App"
 import {
   ExploreItem,
   ArrowButtonLink,
@@ -21,6 +22,8 @@ import {
 } from "./styles";
 
 const Home = () => {
+
+  // const [headerMenuDisplay, setHeaderMenuDisplay] = useContext(Context)
 
   const exploreItems = [
     {
@@ -49,6 +52,8 @@ const Home = () => {
       link: "reports/nutrient"
     },
   ]
+
+  // setHeaderMenuDisplay("")
 
   return (
     <HomePageContainer>

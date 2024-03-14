@@ -6,18 +6,16 @@ export const SignInPageContainer = styled(Box)(() => ({
     backgroundImage: `url(${quickSearch})`,
     width: "100%", 
     minHeight: "calc(100vh - 140px)", 
-    /* paddingBottom: 50, */
+    paddingBottom: 50,
     display: "flex",
     alignItems: "center"
 }));
 
 export const SignInContainer = styled(Card)(({theme}) => ({
     margin: "auto",
-    /* width: "100%", */
     padding: theme.spacing(3),
     maxWidth: 400,
-    borderRadius: theme.spacing(3),
-    alignItems: "center"
+    borderRadius: theme.spacing(3)
 }));
 
 export const SignInInputField = styled(TextField)(({theme}) => ({

@@ -1,3 +1,4 @@
+import React, {useState, createContext, useContext} from "react"
 // import Table from "./components/Table";
 import Home from "./pages/Home";
 import Header from "./components/page/Header";
@@ -17,20 +18,43 @@ import Quality from "./pages/data/Quality";
 import Visualizations from "./pages/data/Visualizations";
 import About from "./pages/About";
 import Advanced_search from "./pages/tools/Advanced_search";
-// import SignIn from "./pages/SignIn";
-import SignupLogin from "./pages/SignupLogin";
+import SignIn from "./pages/SignIn";
+import SignUp from "./pages/SignUp";
+import ForgotPassword from "./pages/ForgotPassword";
+import SetNewPassword from "./pages/SetNewPassword";
+import AdminUserMaintenance from "./pages/AdminUserMaintenance";
+import UpdateUser from "./pages/UpdateUser";
+
+import ReactDOM from "react-dom/client";
+
+export const Context = React.createContext();
+export const UserContext = React.createContext();
 
 function App() {
+
+  const [user, setUser] = useState("user");
+  // const [headerMenuDisplay, setHeaderMenuDisplay] = useState("none") 
+  const [navigation, setNavigation] = useState("SignIn");
+
   return (
     <BrowserRouter>
+      <Context.Provider value={{navigation: "SignIn" }} >
+      </Context.Provider>
+ 
       <ThemeProvider theme={Theme}>
         <div className="App">
-          <Header />
+          
           <Routes>
-          <Route path="signupLogin" element={<SignupLogin />} />
+            <Route path="/" element={<SignIn />} />
+            <Route path="/SignUp" element={<SignUp />} />
+            <Route path="/ForgotPassword" element={<ForgotPassword />} />
+            <Route path="/SetNewPassword" element={<SetNewPassword />} />
+            <Route path="/AdminUserMaintenance" element={<AdminUserMaintenance />} />
+            <Route path="/UpdateUser" element={<UpdateUser />} />
 
-            <Route path="/" element={<Home/>} />
-
+            <Route path="/home" element={<Home />} />
+            <Route path="/Home" element={<Home />} />
+         
             {/* Tools Dropdown */}
             <Route path="tools/product-browser" element={<Product_browser />} />
             <Route path="tools/batch-browser" element={<Batch_browser />} />

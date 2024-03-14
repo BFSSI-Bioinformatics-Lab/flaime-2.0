@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {useState, createContext, useContext} from 'react'
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
@@ -12,19 +12,23 @@ import Tooltip from '@mui/material/Tooltip';
 
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
+
 import PageContainer from '../PageContainer';
-
-
+import {Context} from '../../../App.js';
 
 const Header = () => {
+
+    // const [headerMenuDisplay, setHeaderMenuDisplay] = React.useContext(Context);
 
     const [anchorEl, setAnchorEl] = React.useState(null);
     const [anchorEl2, setAnchorEl2] = React.useState(null);
     const [anchorEl3, setAnchorEl3] = React.useState(null);
+
     // const open = Boolean(anchorEl);
     // const handleClick = (event) => {
     //   setAnchorEl(event.currentTarget);
     // };
+
     const handleClose = () => {
         setAnchorEl(null);
         setAnchorEl2(null);
@@ -32,6 +36,7 @@ const Header = () => {
     };
 
     let navigate = useNavigate(); 
+
     const routeHome = () =>{ 
         let path = '/'; 
         navigate(path);
@@ -42,6 +47,8 @@ const Header = () => {
         navigate(path);
     }
 
+    const navigation = useContext(Context);
+    
     return (
         // <div>Header</div>
         <Box sx={{ flexGrow: 1, background: '#732C02' }}>
@@ -50,7 +57,7 @@ const Header = () => {
                     <Toolbar sx={{ paddingLeft: 0, paddingRight: 0 }} disableGutters>
                         <Typography variant="h6" component="div" 
                         sx={{ flexGrow: 1, cursor:'pointer' }} onClick={routeHome}>
-                            FLAIME
+                            FLAIME   &nbsp;&nbsp;&nbsp; <h4> {`Hello ${navigation}`} </h4>
                         </Typography>
 
                         {/* Menu Buttons */}
@@ -60,8 +67,7 @@ const Header = () => {
                             aria-haspopup="true"
                             // aria-expanded={open ? "true" : undefined}
                             onClick={e=>setAnchorEl(e.currentTarget)}
-                            color="inherit"
-                            
+                            color="inherit"                            
                         >
                             tools
                         </Button>
