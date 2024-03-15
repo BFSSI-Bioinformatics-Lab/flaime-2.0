@@ -57,8 +57,17 @@ const Header = () => {
                     <Toolbar sx={{ paddingLeft: 0, paddingRight: 0 }} disableGutters>
                         <Typography variant="h6" component="div" 
                         sx={{ flexGrow: 1, cursor:'pointer' }} onClick={routeHome}>
-                            FLAIME   &nbsp;&nbsp;&nbsp; <h4> {`Hello ${navigation}`} </h4>
+                            FLAIME   
                         </Typography>
+
+                        <Button
+                            id="tests"
+                            aria-haspopup="true"
+                            onClick={e=>setAnchorEl(e.currentTarget)}
+                            color="inherit"                            
+                        >
+                            tests
+                        </Button>
 
                         {/* Menu Buttons */}
                         <Button

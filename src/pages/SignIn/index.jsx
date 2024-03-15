@@ -82,11 +82,13 @@ const SignIn = () => {
     };
 
     const forgotPassword = (event) => {
+        alert("in ForgotPassword");
+
         let url = pathBase + `ForgotPassword/?userid=${userid}`;    
 
-        const response = axios.get(url);
+        const response = axios.put(url);
   
-        navigate(`/End`);  // ReassignUserPassword          
+        navigate(`/Home`);  // Forgot Password          
     };
 
     const setNewPassword = (event) => {
@@ -112,11 +114,11 @@ const SignIn = () => {
                         </Typography>
                     </Grid>
                     <Grid item>
-                    <TextField id="password" label="Username" placeholder="Username" 
+                    <TextField id="userid" label="Username" placeholder="Username" 
                                    type="text"
                                    autoComplete="current-password" 
                                    className={localStyles.inputField} 
-                                   onChange={(e) => setPassword(e.target.value)} />
+                                   onChange={(e) => setUserid(e.target.value)} />
                     </Grid>
                     <Grid item>                        
                         <TextField id="password" label="Password" placeholder="Password" 
