@@ -9,7 +9,7 @@ import { useNavigate } from "react-router-dom";
 import { Table, TableHead, TableBody, TableRow, TableCell, TablePagination, 
          TableContainer } from '@mui/material';
   
-const AdminUserMaintenance = () => {
+const UserAdmin = () => {
 
     const [lang, setLang] = useState("en")
     const [header, setHeader] = useState("Sign In")
@@ -21,6 +21,11 @@ const AdminUserMaintenance = () => {
     const [user_userid, setUser_userid] = useState("")
     const [user_userPassword, setUser_userPassword] = useState("")
     const [admin_User, setAdmin_User] = useState("")
+
+    const [userFLName, setUserFLName] = useState("")
+    const [username, setUsername] = useState("")
+    const [userNewPassword, setNewPassword] = useState("")
+    const [userConfirmNewPassword, setConfirmNewPassword] = useState("")
 
     const [controller, setController] = useState({
         page: 0,
@@ -40,31 +45,32 @@ const AdminUserMaintenance = () => {
 
     let navigate = useNavigate(); 
     
-    const getUser = (event) => {
-        
-        alert("in GetUser: making API call: url = " + url);
-       
-        var url = pathBase + `GetUser/?userid=${user_userid}&userPassword=${user_userPassword}`;  
+    const reassignUserPassword = (event) => {
+               
+        var url = pathBase + `ReassignUserPassword/?userid=${user_userid}&userPassword=${user_userPassword}`;  
 
-        axios.get(url, {}, {})
-            .then(response => {
-               alert("response = " + JSON.stringify(response));
-            }, 
-            error => {
-            console.log(error);
-        }); 
+        axios.put(url, {}, {})
+             .then(response => { alert("response = " + JSON.stringify(response)); }, 
+                  error => { console.log(error); } ); 
 
         navigate(`/Home`);            
     };
 
-    const addUser = (event) => {};
+    const addUser = (event) => {
+
+        var url = pathBase + `AddUser/?userid=${user_userid}&userPassword=${user_userPassword}`;  
+
+        axios.put(url, {}, {})
+             .then(response => { alert("response = " + JSON.stringify(response)); }, 
+                  error => { console.log(error); } ); 
+
+        navigate(`/Home`);                
+    };
 
     const deleteUser = (event) => {
 
         var url = pathBase + `UpdateUserSetDeleted/?userid=${user_userid}&userPassword=${user_userPassword}`;  
 
-        alert("in DeleteUser: making API call: url = " + url);
-       
         axios.get(url, {}, {})
             .then(response => {
                alert("response = " + JSON.stringify(response));
@@ -81,18 +87,34 @@ const AdminUserMaintenance = () => {
             <SignInContainer>
                 <Grid container direction="column" justifyContent={"center"} alignItems={"left"} spacing={4}>
                     <Grid item pt={6}>
-                        <Typography variant="h4" color="primary"> Admin User Maintenance </Typography>
+                        <Typography variant="h4" color="primary"> User Admin </Typography>
                     </Grid>
                     <Grid item>
-                        <Typography > Username* </Typography>
-                        <SignInInputField placeholder="Username"/>
+                        <Typography > User's Firt & Last Name* </Typography>
+                        <SignInInputField placeholder="UserFLName"
+                            onChange={(e) => setUserFLName(e.target.value)}  />
                     </Grid>
                     <Grid item>
-                        <Button onClick={getUser}  variant="contained" color="action" size="large" 
+                        <Typography > User's Username* </Typography>
+                        <SignInInputField placeholder="Username" 
+                           onChange={(e) => setUsername(e.target.value)}  />
+                    </Grid>
+                    <Grid item>
+                        <Typography > New Password* </Typography>
+                        <SignInInputField placeholder="NewPassword" 
+                            onChange={(e) => setNewPassword(e.target.value)}  />
+                    </Grid>
+                    <Grid item>
+                        <Typography > Confirm Password* </Typography>
+                        <SignInInputField placeholder="ConfirmPassword" 
+                            onChange={(e) => setConfirmNewPassword(e.target.value)}  />
+                    </Grid>
+                    <Grid item>
+                        <Button onClick={reassignUserPassword}  variant="contained" color="action" size="large" 
                                 sx={{ width: 250, height: 62, borderRadius: 5, textTransform: "none"}} >
 
                             <Typography variant="h5" color="white">
-                                Get User 
+                                Reassign User Password 
                             </Typography>
                         </Button>
                       </Grid> 
@@ -122,4 +144,4 @@ const AdminUserMaintenance = () => {
     )
 }
 
-export default AdminUserMaintenance;
+export default UserAdmin;

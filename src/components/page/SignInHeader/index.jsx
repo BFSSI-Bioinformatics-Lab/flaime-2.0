@@ -24,10 +24,10 @@ const SignInHeader = () => {
     const [anchorEl2, setAnchorEl2] = React.useState(null);
     const [anchorEl3, setAnchorEl3] = React.useState(null);
 
-    // const open = Boolean(anchorEl);
-    // const handleClick = (event) => {
-    //   setAnchorEl(event.currentTarget);
-    // };
+    const open = Boolean(anchorEl);
+    const handleClick = (event) => {
+     setAnchorEl(event.currentTarget);
+    };
 
     const handleClose = () => {
         setAnchorEl(null);

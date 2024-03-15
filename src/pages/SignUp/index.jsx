@@ -17,24 +17,21 @@ const Signup = () => {
 
     const [lang, setLang] = useState("en")
     const [header, setHeader] = useState("Sign Up")
-    const [usernamePlaceholder, setUsernamePlaceholder ] = useState("Username")
+    const [namePlaceholder, setNamePlaceholder ] = useState("Username")
     const [passwordPlaceholder, setPasswordPlaceholder ] = useState("Password")
     const [buttonEnterName, setButtonEnterName] = useState("Sign Up")
     const [pathBase, setPathBase] = useState("https://localhost:7166/api/")  // 172.17.10.69:7251
 
-    const [userEmail, setUserEmail] = useState("")
-    const [userPhoneNumber, setUserPhoneNumber] = useState("")
+    const [name, setName] = useState("")
     const [userid, setUserid] = useState("")
-    const [userPassword, setUserPassword] = useState("")
-    const [confirmUserPassword, setConfirmUserPassword] = useState("")
+    const [password, setPassword] = useState("")
+    const [confirmPassword, setConfirmPassword] = useState("")
 
     const [controller, setController] = useState({
         page: 0,
         rowsPerPage: 10,
         search: null
     });
-
-    var url = pathBase + `AddUser/?email=${userEmail}&phoneNumber=${userPhoneNumber}&userid=${userid}&password=${userPassword}`;
 
     const StyledHeader = styled(TableCell)(({ theme }) => ({
       typography: 'subtitle',
@@ -48,16 +45,16 @@ const Signup = () => {
 
     let navigate = useNavigate(); 
 
-    console.log("In SignUp page");
-
     const signup = (event) => {
       
         const salt = bcrypt.genSaltSync(10);
-        const hashedUserPassword = bcrypt.hashSync(userPassword, salt); 
-          
-        alert("on Sign Up, in signup: making api call: userPassword = " + userPassword + 
-                    ", hashedUserPassword = " + hashedUserPassword);  
-        
+        const hashedPassword = bcrypt.hashSync(password, salt); 
+         
+        alert("salt = " + salt);
+        alert("password = " + password + ", hashedPassword = " + hashedPassword);
+
+        var url = pathBase + `AddUser/?userName=${name}&userid=${userid}&password=${password}`;
+
         axios.post(url, {}, {})
             .then(response => {
                alert("response =" + JSON.stringify(response));
@@ -77,14 +74,9 @@ const Signup = () => {
                         <Typography variant="h4" color="primary"> Sign Up </Typography>
                     </Grid>
                     <Grid item>
-                        <Typography > Email* </Typography>
-                        <SignupInputField placeholder="Email" 
-                          onChange={(e) => setUserEmail(e.target.value)} />
-                    </Grid>
-                    <Grid item>
-                        <Typography > Phone Number* </Typography>
-                        <SignupInputField placeholder="Phone Number" 
-                          onChange={(e) => setUserPhoneNumber(e.target.value)} />
+                        <Typography > First & Last Name* </Typography>
+                        <SignupInputField placeholder="First & Last Name" 
+                          onChange={(e) => setName(e.target.value)} />
                     </Grid>
                     <Grid item>
                         <Typography > Username* </Typography>
@@ -94,12 +86,12 @@ const Signup = () => {
                     <Grid item>
                         <Typography > Password* </Typography>
                         <SignupInputField placeholder="Password" 
-                          onChange={(e) => setUserPassword(e.target.value)} />
+                          onChange={(e) => setPassword(e.target.value)} />
                     </Grid>
                     <Grid item>
                         <Typography > Confirm Password* </Typography>
                         <SignupInputField placeholder="Confirm Password" 
-                          onChange={(e) => setConfirmUserPassword(e.target.value)} />
+                          onChange={(e) => setConfirmPassword(e.target.value)} />
                     </Grid>
                     <Grid item>
                         <Button onClick={signup}  variant="contained" color="action" size="large" 

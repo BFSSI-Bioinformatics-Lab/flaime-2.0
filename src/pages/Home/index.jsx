@@ -1,4 +1,4 @@
-import React, {useState} from "react"
+import React, {useState, useContext} from "react"
 import { Image } from 'mui-image'
 import landing from "../../static/images/landing.jpg"
 import { Typography } from '@mui/material'
@@ -21,9 +21,11 @@ import {
   ArrowCircleRightIcon
 } from "./styles";
 
+import { useNavigate } from "react-router-dom";
+
 const Home = () => {
 
-  // const [headerMenuDisplay, setHeaderMenuDisplay] = useContext(Context)
+  // const [headerMenuDisplay, setHeaderMenuDisplay] = useState("") 
 
   const exploreItems = [
     {
@@ -51,13 +53,21 @@ const Home = () => {
       icon: <ShoppingCartIcon />,
       link: "reports/nutrient"
     },
-  ]
+  ];
+
+  let navigate = useNavigate();
+
+  const userAdmin = (event) => {
+    navigate(`/UserAdmin`);            
+};
 
   // setHeaderMenuDisplay("")
 
   return (
     <HomePageContainer>
+
       <div className='landing-img' style={{ position: "relative" }}>
+
         <Image src={landing} height='550px' duration={0} easing='ease' opacity={0.5}></Image>
         
         <PageTitleTypography variant="h2">FLAIME</PageTitleTypography>
@@ -106,9 +116,7 @@ const Home = () => {
                   </Grid>
                 )
               }
-            </Grid> 
-          
-          
+            </Grid>
         </ExploreSectionBox>  
       </ExploreSectionContainer>
       

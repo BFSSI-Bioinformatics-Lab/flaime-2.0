@@ -20,6 +20,7 @@ const SetNewPassword = () => {
     const [buttonEnterName, setButtonEnterName] = useState("Sign Up")
     const [pathBase, setPathBase] = useState("https://localhost:7166/api/")  // 172.17.10.69:7251
 
+    const [currentPassword, setCurrentPassword] = useState("")
     const [newPassword, setNewPassword] = useState("")
     const [confirmNewPassword, setConfirmNewPassword] = useState("")
     const [errorMessage, setErrorMessage] = useState("")
@@ -78,7 +79,12 @@ const SetNewPassword = () => {
                     </Grid>
                     <Grid item>
                         <Typography > Username </Typography>
-                        <Typography > glibenson </Typography>
+                        <Typography > <b> greg </b> </Typography>
+                    </Grid>
+                    <Grid item>
+                        <Typography > Current Password* </Typography>
+                        <SignInInputField placeholder="Current Password" 
+                          onChange={(e) => setCurrentPassword(e.target.value)} />
                     </Grid>
                     <Grid item>
                         <Typography > New Password* </Typography>

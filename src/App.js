@@ -22,8 +22,7 @@ import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
 import ForgotPassword from "./pages/ForgotPassword";
 import SetNewPassword from "./pages/SetNewPassword";
-import AdminUserMaintenance from "./pages/AdminUserMaintenance";
-import UpdateUser from "./pages/UpdateUser";
+import UserAdmin from "./pages/UserAdmin";
 
 import ReactDOM from "react-dom/client";
 
@@ -42,16 +41,14 @@ function App() {
       </Context.Provider>
  
       <ThemeProvider theme={Theme}>
-        <div className="App">
-          
+        <div className="App">          
           <Routes>
             <Route path="/" element={<SignIn />} />
             <Route path="/SignUp" element={<SignUp />} />
             <Route path="/ForgotPassword" element={<ForgotPassword />} />
             <Route path="/SetNewPassword" element={<SetNewPassword />} />
-            <Route path="/AdminUserMaintenance" element={<AdminUserMaintenance />} />
-            <Route path="/UpdateUser" element={<UpdateUser />} />
-
+            <Route path="/UserAdmin" element={<UserAdmin />} />
+            
             <Route path="/home" element={<Home />} />
             <Route path="/Home" element={<Home />} />
          

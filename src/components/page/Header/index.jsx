@@ -18,16 +18,16 @@ import {Context} from '../../../App.js';
 
 const Header = () => {
 
-    // const [headerMenuDisplay, setHeaderMenuDisplay] = React.useContext(Context);
+    const [headerMenuDisplay, setHeaderMenuDisplay] = React.useContext(Context);
 
     const [anchorEl, setAnchorEl] = React.useState(null);
     const [anchorEl2, setAnchorEl2] = React.useState(null);
     const [anchorEl3, setAnchorEl3] = React.useState(null);
 
-    // const open = Boolean(anchorEl);
-    // const handleClick = (event) => {
-    //   setAnchorEl(event.currentTarget);
-    // };
+    const open = Boolean(anchorEl);
+    const handleClick = (event) => {
+      setAnchorEl(event.currentTarget);
+    };
 
     const handleClose = () => {
         setAnchorEl(null);
@@ -63,9 +63,9 @@ const Header = () => {
                         {/* Menu Buttons */}
                         <Button
                             id="tools"
-                            // aria-controls={open ? "tools-menu" : undefined}
+                            //aria-controls={open ? "tools-menu" : undefined}
                             aria-haspopup="true"
-                            // aria-expanded={open ? "true" : undefined}
+                            //aria-expanded={open ? "true" : undefined}
                             onClick={e=>setAnchorEl(e.currentTarget)}
                             color="inherit"                            
                         >
@@ -99,9 +99,9 @@ const Header = () => {
 
                         <Button
                             id="reports"
-                            // aria-controls={open ? "reports-menu" : undefined}
+                            //aria-controls={open ? "reports-menu" : undefined}
                             aria-haspopup="true"
-                            // aria-expanded={open ? "true" : undefined}
+                            //aria-expanded={open ? "true" : undefined}
                             onClick={e=>setAnchorEl2(e.currentTarget)}
                             color="inherit"
                             
@@ -169,9 +169,9 @@ const Header = () => {
 
                         <Button
                             id="about"
-                            // aria-controls={open ? "basic-menu" : undefined}
+                            //aria-controls={open ? "basic-menu" : undefined}
                             aria-haspopup="true"
-                            // aria-expanded={open ? "true" : undefined}
+                            //aria-expanded={open ? "true" : undefined}
                             // onClick={handleClick}
                             color="inherit"
                             sx={{ mr: 2 }}

@@ -1,16 +1,18 @@
 import React, { useState, useEffect } from "react";
-import { Typography,Grid, Button, } from "@mui/material";
+import { Typography, Grid, Button, TextField } from "@mui/material";
 import { SignInContainer, SignInPageContainer, SignInInputField } from "./styles";
-import axios from 'axios';
 import { styled } from '@mui/material/styles';
 import { CheckBox } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
+import axios from 'axios';
 import SignInHeader from "../../components/page/SignInHeader";
 
 import { Table, TableHead, TableBody, TableRow, TableCell, TablePagination, 
          TableContainer } from '@mui/material';
   
 import bcrypt from 'bcryptjs';
+
+import { Container, useTheme } from "@mui/material";
 
 const SignIn = () => {
 
@@ -28,7 +30,8 @@ const SignIn = () => {
     });
 
     const [userid, setUserid] = useState("");
-    const [userPassword, setUserPassword] = useState("");
+    const [password, setPassword] = useState("");
+    const [showPassword, setShowPassword] = useState("");
 
     const StyledHeader = styled(TableCell)(({ theme }) => ({
       typography: 'subtitle',
@@ -40,14 +43,34 @@ const SignIn = () => {
         fontSize: 14,
     }));
 
-    let navigate = useNavigate(); 
+    const theme = useTheme();
+    
+    const localStyles = {
+        inputField: { 
+          backgroundColor: 'green' // , // theme.palette.primary.transparent.light,
+        //  borderRadius: theme.spacing(2),
+        //  maxWidth: "100%",
+        //  width: 293,
+        //  padding: theme.spacing(0.5),
+        //  outline: "none",
+        //  "& fieldset": { border: "none" }, 
+        //  "& input": {
+        //    textAlign: "center",
+        //    color: theme.palette.primary.main,
+        //    fontSize: 23 // ,
+        //     "::placeholder, ::-ms-input-placeholder, :-ms-input-placeholder": { opacity: 0.8 }
+        //  }
+        }    
+    };
+
+    let navigate = useNavigate();
     
     const verifyUserBtn = (event) => {
         
         const salt = bcrypt.genSaltSync(10);
-        const hashedUserPassword = bcrypt.hashSync(userPassword, salt); 
+        const hashedPassword = bcrypt.hashSync(password, salt); 
 
-        let url = pathBase + `VerifyUser/?userid=${userid}&userPassword=${userPassword}`;  // TO-DO: will be "hashedUserPassword"  
+        let url = pathBase + `VerifyUser/?userid=${userid}&userPassword=${password}`;  // TO-DO: will be "hashedUserPassword"  
 
         const response = axios.get(url);
 
@@ -58,25 +81,21 @@ const SignIn = () => {
         navigate(`/SignUp`);            
     };
 
-    const forgotPassword = (event) => {          
-        navigate(`/ForgotPassword`);            
+    const forgotPassword = (event) => {
+        let url = pathBase + `ForgotPassword/?userid=${userid}`;    
+
+        const response = axios.get(url);
+  
+        navigate(`/End`);  // ReassignUserPassword          
     };
 
     const setNewPassword = (event) => {
         navigate(`/SetNewPassword`);            
     };
 
-    const adminUserMaintenance = (event) => {
-        navigate(`/AdminUserMaintenance`);            
-    };
-
-    const updateUser = (event) => {
-        navigate(`/UpdateUser`);            
-    };
-
     return (
         <div>
-          <div style={{ width: '100%', backgroundColor: 'blue' }} > <SignInHeader /> </div>
+          <div style={{ width: '100%', backgroundColor: 'green' }} > <SignInHeader /> </div>
           <div>      
           <SignInPageContainer>            
             <SignInContainer>
@@ -85,19 +104,31 @@ const SignIn = () => {
                         <Typography variant="h4" color="primary"> Sign In </Typography>
                     </Grid>
                     <Grid item>
-                        <Typography > If you have not created an account yet, <br/>
-                         then please <a href="#" onClick={signUp} style={{color: "blue"}} >sign up</a> first. </Typography>
+                        <Typography > 
+                            If you have not created an account yet, <br/>
+                            then please <a href="#" onClick={signUp} style={{color: "blue"}} >sign up</a> first. 
+                            If password was reassigned by admin, please <a href="#" onClick={setNewPassword} 
+                            style={{color: "blue"}} > set new password </a>.
+                        </Typography>
                     </Grid>
                     <Grid item>
-                        <Typography > Username* </Typography>
-                        <SignInInputField placeholder="Username" 
-                           onChange={(e) => setUserid(e.target.value)} />
+                    <TextField id="password" label="Username" placeholder="Username" 
+                                   type="text"
+                                   autoComplete="current-password" 
+                                   className={localStyles.inputField} 
+                                   onChange={(e) => setPassword(e.target.value)} />
                     </Grid>
-                    <Grid item>
-                        <Typography > Password* </Typography>
-                        <SignInInputField placeholder="Password"
-                          onChange={(e) => setUserPassword(e.target.value)} />
+                    <Grid item>                        
+                        <TextField id="password" label="Password" placeholder="Password" 
+                                   type={ showPassword ? "text" : "password" }
+                                   autoComplete="current-password" 
+                                   className={localStyles.inputField} 
+                                   onChange={(e) => setPassword(e.target.value)} /> <br/>
+                        <label for="check">Show Password</label>
+                        <input id="check" value={showPassword}
+                               type="checkbox" onChange={() => setShowPassword((prev) => !prev) } />
                     </Grid>
+                    
                     <Grid item> 
                         <div style={{textAlign:"left"}}>
                             <div style={{float:"left"}} > <CheckBox></CheckBox> </div>
@@ -105,7 +136,7 @@ const SignIn = () => {
                         </div>
                     </Grid>
                     <Grid item>
-                    <a href="#" onClick={forgotPassword} style={{color: "blue"}} > <Typography color="blue" > Forgot Password? </Typography> </a>
+                        <a href="#" onClick={forgotPassword} style={{color: "blue"}} > <Typography color="blue" > Forgot Password? </Typography> </a>
                         <Button onClick={verifyUserBtn}  variant="contained" color="action" size="large" 
                                 sx={{ width: 250, height: 62, borderRadius: 5, textTransform: "none"}} >
 
@@ -113,12 +144,7 @@ const SignIn = () => {
                                 Sign In 
                             </Typography>
                         </Button>
-                        <br /><br/>
-                        <a href="#" onClick={setNewPassword} style={{color: "blue"}} > [TEMP. SHOWN - via Email ] Set New Password </a> 
-                        <br/>
-                        <a href="#" onClick={adminUserMaintenance} style={{color: "blue"}} > [TEMP. SHOWN - for Home] Admin User Maintenance </a>
-                        <br/>
-                        <a href="#" onClick={updateUser} style={{color: "blue"}} > [TEMP. SHOWN - for Home] Update User </a>
+                        
                     </Grid>
                 </Grid>
             </SignInContainer>            
