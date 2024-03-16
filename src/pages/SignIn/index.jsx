@@ -95,13 +95,13 @@ const SignIn = () => {
         navigate(`/SetNewPassword`);            
     };
 
-    return (
-        <div>
-          <div style={{ width: '100%', backgroundColor: 'green' }} > <SignInHeader /> </div>
-          <div>      
-          <SignInPageContainer>            
-            <SignInContainer>
-                <Grid container direction="column" justifyContent={"center"} alignItems={"left"} spacing={4}>
+    return (            
+
+          <div style={{ backgroundColor: 'lightgray' }}>
+            <div style={{width: '100% !important' }} > <SignInHeader />  </div> <br/>            
+            <div style={{width: '100% !important'}} > 
+              <SignInContainer>
+                <Grid container direction="column" alignItems={"left"} spacing={4}>
                     <Grid item pt={6}>
                         <Typography variant="h4" color="primary"> Sign In </Typography>
                     </Grid>
@@ -149,10 +149,9 @@ const SignIn = () => {
                         
                     </Grid>
                 </Grid>
-            </SignInContainer>            
-        </SignInPageContainer>
-      </div>  
-      </div>
+              </SignInContainer>
+            </div> <br/>           
+        </div>
     )
 }
 

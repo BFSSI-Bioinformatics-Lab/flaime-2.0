@@ -18,7 +18,7 @@ import {Context} from '../../../App.js';
 
 const Header = () => {
 
-    const [headerMenuDisplay, setHeaderMenuDisplay] = React.useContext(Context);
+    // const [headerMenuDisplay, setHeaderMenuDisplay] = React.useContext(Context);
 
     const [anchorEl, setAnchorEl] = React.useState(null);
     const [anchorEl2, setAnchorEl2] = React.useState(null);
@@ -56,18 +56,9 @@ const Header = () => {
                 <PageContainer>
                     <Toolbar sx={{ paddingLeft: 0, paddingRight: 0 }} disableGutters>
                         <Typography variant="h6" component="div" 
-                        sx={{ flexGrow: 1, cursor:'pointer' }} onClick={routeHome}>
-                            FLAIME   
+                                    sx={{ flexGrow: 1, cursor:'pointer' }} onClick={routeHome} >
+                            FLAIME  
                         </Typography>
-
-                        <Button
-                            id="tests"
-                            aria-haspopup="true"
-                            onClick={e=>setAnchorEl(e.currentTarget)}
-                            color="inherit"                            
-                        >
-                            tests
-                        </Button>
 
                         {/* Menu Buttons */}
                         <Button
@@ -147,8 +138,7 @@ const Header = () => {
                             aria-haspopup="true"
                             // aria-expanded={open ? "true" : undefined}
                             onClick={e=>setAnchorEl3(e.currentTarget)}
-                            color="inherit"
-                            
+                            color="inherit"                            
                         >
                             Data
                         </Button>

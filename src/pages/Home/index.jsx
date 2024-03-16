@@ -21,6 +21,7 @@ import {
   ArrowCircleRightIcon
 } from "./styles";
 
+import Header from "../../components/page/Header";
 import { useNavigate } from "react-router-dom";
 
 const Home = () => {
@@ -65,7 +66,7 @@ const Home = () => {
 
   return (
     <HomePageContainer>
-
+      <Header />
       <div className='landing-img' style={{ position: "relative" }}>
 
         <Image src={landing} height='550px' duration={0} easing='ease' opacity={0.5}></Image>
