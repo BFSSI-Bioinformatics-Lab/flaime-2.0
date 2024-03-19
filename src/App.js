@@ -1,4 +1,4 @@
-import React, {useState, createContext, useContext} from "react"
+import React, {useState, createContext, useContext, Context} from "react"
 // import Table from "./components/Table";
 import Home from "./pages/Home";
 import Header from "./components/page/Header";
@@ -26,24 +26,34 @@ import UserAdmin from "./pages/UserAdmin";
 
 import ReactDOM from "react-dom/client";
 
-export const Context = React.createContext();
-export const UserContext = React.createContext();
+export const AppContext = React.createContext();
 
 function App() {
 
   const [user, setUser] = useState("user");
   // const [headerMenuDisplay, setHeaderMenuDisplay] = useState("none") 
-  const [navigation, setNavigation] = useState("SignIn");
+
+  let date = new Date();
+  let dateStr = date.getFullYear() + '.' + date.getMonth() + '.' + date.getDay() + '_' +
+                date.getHours() + '.' + date.getMinutes() + '.' + date.getSeconds() + '.' + date.getMilliseconds(); 
+  
+  const [uiSessionId, setUISessionId] = useState(dateStr);
+  const [adminUserid, setAdminUserid] = useState("kate");
+  const [currUserid, setCurrUserid]   = useState("greg");
+
+  alert("in App.js: uiSessionId " + uiSessionId);
+  alert("in App.js: adminUserid = " + adminUserid);
+  alert("in App.js: currUserid = " + currUserid);
 
   return (
     <BrowserRouter>
-      <Context.Provider value={{navigation: "SignIn" }} >
+      <Context.Provider value={{ uiSessionId: uiSessionId }} >
       </Context.Provider>
  
       <ThemeProvider theme={Theme}>
         <div className="App">          
           <Routes>
-            <Route path="/" element={<SignIn />} />
+          <Route path="/" element={<SignIn />} />            
             <Route path="/SignUp" element={<SignUp />} />
             <Route path="/ForgotPassword" element={<ForgotPassword />} />
             <Route path="/SetNewPassword" element={<SetNewPassword />} />

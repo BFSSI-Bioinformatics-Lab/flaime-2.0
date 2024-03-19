@@ -51,15 +51,17 @@ const SetNewPassword = () => {
         if (newPassword == confirmNewPassword)
         {
            alert("newPassword == confirmNewPassword: url = " + url);
-       
+        
            setErrorMessage("");    
 
-           axios.post(url, {}, {})
-             .then(response => {
-               alert("response =" + JSON.stringify(response));
-             });   
-        
-            navigate(`/Home`);
+           axios.put(url)
+            .then(response => {
+             alert("in SetNewPassword: response = " + JSON.stringify(response));
+           } );   
+
+           alert("before going to Home page");
+           
+           navigate(`/Home`);
         }
         else
         {

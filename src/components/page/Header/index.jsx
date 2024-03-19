@@ -14,7 +14,7 @@ import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 
 import PageContainer from '../PageContainer';
-import {Context} from '../../../App.js';
+import {AppContext} from '../../../App.js';
 
 const Header = () => {
 
@@ -42,13 +42,20 @@ const Header = () => {
         navigate(path);
     }
 
-    const routeSignIn = () =>{ 
-        let path = '/signin'; 
+    const accountLogin = () =>{ 
+        let path = '/SignIn'; 
         navigate(path);
     }
 
-    const navigation = useContext(Context);
+    const userAdmin = () =>{ 
+        let path = '/UserAdmin'; 
+        navigate(path);
+    }
+
+    const appContext = useContext(AppContext);
     
+    alert("in Header: appContext = " + JSON.stringify(appContext));
+
     return (
         // <div>Header</div>
         <Box sx={{ flexGrow: 1, background: '#732C02' }}>
@@ -185,11 +192,24 @@ const Header = () => {
                                 edge="start"
                                 color="inherit"
                                 aria-label="login"
-                                onClick={routeSignIn}
+                                onClick={ accountLogin }
                             >
                                 <AccountCircleIcon />
                             </IconButton>
                         </Tooltip>
+
+                        <Tooltip title="Admin">
+                            <IconButton
+                                size="large"
+                                edge="start"
+                                color="inherit"
+                                aria-label="login"
+                                onClick={ userAdmin }
+                            >
+                                ADMIN
+                            </IconButton>
+                        </Tooltip>
+
                     </Toolbar>
                 </PageContainer>
             </AppBar>

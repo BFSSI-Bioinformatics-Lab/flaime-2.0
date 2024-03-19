@@ -14,7 +14,7 @@ import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 
 import PageContainer from '../PageContainer';
-import {Context} from '../../../App.js';
+import { AppContext } from '../../../App.js';
 
 const SignInHeader = () => {
 
@@ -47,8 +47,10 @@ const SignInHeader = () => {
         navigate(path);
     }
 
-    const navigation = useContext(Context);
-    
+    const uiSessionId = useContext(uiSessionId);
+
+    alert("in SignInHeader: uiSessionId = " + JSON.stringify(uiSessionId));
+        
     return (
         // <div>Header</div>
         <Box sx={{ flexGrow: 1, background: '#732C02', width: '100%' }}>

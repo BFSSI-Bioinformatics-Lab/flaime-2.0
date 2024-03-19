@@ -16,16 +16,16 @@ const UserAdmin = () => {
     const [usernamePlaceholder, setUsernamePlaceholder ] = useState("Username")
     const [passwordPlaceholder, setPasswordPlaceholder ] = useState("Password")
     const [buttonEnterName, setButtonEnterName] = useState("Sign In")
-    const [pathBase, setPathBase] = useState("https://localhost:7166/")  // 172.17.10.69:7251
+    const [pathBase, setPathBase] = useState("https://localhost:7166/api/")  // 172.17.10.69:7251
 
-    const [user_userid, setUser_userid] = useState("")
-    const [user_userPassword, setUser_userPassword] = useState("")
+    const [user_userid, setUser_userid] = useState("greg")
+    const [user_userPassword, setUser_userPassword] = useState("suc")
     const [admin_User, setAdmin_User] = useState("")
 
-    const [userFLName, setUserFLName] = useState("")
-    const [username, setUsername] = useState("")
-    const [userNewPassword, setNewPassword] = useState("")
-    const [userConfirmNewPassword, setConfirmNewPassword] = useState("")
+    const [flName, setFLName] = useState("")
+    const [userid, setUserid] = useState("")
+    const [newPassword, setNewPassword] = useState("")
+    const [confirmNewPassword, setConfirmNewPassword] = useState("")
 
     const [controller, setController] = useState({
         page: 0,
@@ -47,12 +47,12 @@ const UserAdmin = () => {
     
     const reassignUserPassword = (event) => {
                
-        var url = pathBase + `ReassignUserPassword/?userid=${user_userid}&userPassword=${user_userPassword}`;  
-
-        axios.put(url, {}, {})
-             .then(response => { alert("response = " + JSON.stringify(response)); }, 
-                  error => { console.log(error); } ); 
-
+        var url = pathBase + `ReassignUserPassword/?userid=${userid}&userPassword=${newPassword}`;  
+        alert("url = " + url);        
+        var response = axios.put(url, {}, {}).then(response => {
+            alert("response =" + JSON.stringify(response));
+          }); 
+               
         navigate(`/Home`);            
     };
 
@@ -69,9 +69,9 @@ const UserAdmin = () => {
 
     const deleteUser = (event) => {
 
-        var url = pathBase + `UpdateUserSetDeleted/?userid=${user_userid}&userPassword=${user_userPassword}`;  
+        var url = pathBase + `DeleteUser/?userid=${user_userid}&userPassword=${user_userPassword}`;  
 
-        axios.get(url, {}, {})
+        axios.put(url, {}, {})
             .then(response => {
                alert("response = " + JSON.stringify(response));
             }, 
@@ -92,12 +92,12 @@ const UserAdmin = () => {
                     <Grid item>
                         <Typography > User's Firt & Last Name* </Typography>
                         <SignInInputField placeholder="UserFLName"
-                            onChange={(e) => setUserFLName(e.target.value)}  />
+                            onChange={(e) => setFLName(e.target.value)}  />
                     </Grid>
                     <Grid item>
                         <Typography > User's Username* </Typography>
                         <SignInInputField placeholder="Username" 
-                           onChange={(e) => setUsername(e.target.value)}  />
+                           onChange={(e) => setUserid(e.target.value)}  />
                     </Grid>
                     <Grid item>
                         <Typography > New Password* </Typography>

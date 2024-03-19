@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { createContext, useContext} from 'react'
 import { Typography, Grid, Button, TextField } from "@mui/material";
 import { SignInContainer, SignInPageContainer, SignInInputField } from "./styles";
 import { styled } from '@mui/material/styles';
@@ -13,6 +14,7 @@ import { Table, TableHead, TableBody, TableRow, TableCell, TablePagination,
 import bcrypt from 'bcryptjs';
 
 import { Container, useTheme } from "@mui/material";
+import {AppContext} from '../../App.js';
 
 const SignIn = () => {
 
@@ -63,18 +65,40 @@ const SignIn = () => {
         }    
     };
 
+    const [message, setMessage] = useState("");
+
     let navigate = useNavigate();
     
     const verifyUserBtn = (event) => {
         
-        const salt = bcrypt.genSaltSync(10);
-        const hashedPassword = bcrypt.hashSync(password, salt); 
+        if (userid.length == 0)
+        {
+            setMessage("Userid is required");
+        }
+        else {
 
-        let url = pathBase + `VerifyUser/?userid=${userid}&userPassword=${password}`;  // TO-DO: will be "hashedUserPassword"  
+            if (password.length == 0)
+            {
+                setMessage("Password is required");
+            }
+            else {
 
-        const response = axios.get(url);
+                const salt = bcrypt.genSaltSync(10);
+                const hashedPassword = bcrypt.hashSync(password, salt); 
 
-        navigate(`/Home`);
+                let url = pathBase + `VerifyUser/?userid=${userid}&userPassword=${password}`;  // TO-DO: will be "hashedUserPassword"  
+                let result = 0;
+
+                axios.get(url).then(response => {
+                    result = parseInt(response.data);            
+                }); 
+        
+                if (result == 1) {
+                    setMessage("");
+                    navigate(`/Home`);   
+                }
+            }            
+        }
     };
 
     const signUp = (event) => {
@@ -82,6 +106,7 @@ const SignIn = () => {
     };
 
     const forgotPassword = (event) => {
+        
         alert("in ForgotPassword");
 
         let url = pathBase + `ForgotPassword/?userid=${userid}`;    
@@ -95,12 +120,17 @@ const SignIn = () => {
         navigate(`/SetNewPassword`);            
     };
 
+    const appContext = useContext(appContext);
+
+    alert("in SignIn: appContext = " + JSON.stringify(appContext));
+
     return (            
 
           <div style={{ backgroundColor: 'lightgray' }}>
             <div style={{width: '100% !important' }} > <SignInHeader />  </div> <br/>            
             <div style={{width: '100% !important'}} > 
               <SignInContainer>
+              <Typography style={{ color: 'red', fontWeight:'bold' }} > {message} </Typography>
                 <Grid container direction="column" alignItems={"left"} spacing={4}>
                     <Grid item pt={6}>
                         <Typography variant="h4" color="primary"> Sign In </Typography>
@@ -126,6 +156,7 @@ const SignIn = () => {
                                    autoComplete="current-password" 
                                    className={localStyles.inputField} 
                                    onChange={(e) => setPassword(e.target.value)} /> <br/>
+
                         <label for="check">Show Password</label>
                         <input id="check" value={showPassword}
                                type="checkbox" onChange={() => setShowPassword((prev) => !prev) } />
@@ -139,6 +170,7 @@ const SignIn = () => {
                     </Grid>
                     <Grid item>
                         <a href="#" onClick={forgotPassword} style={{color: "blue"}} > <Typography color="blue" > Forgot Password? </Typography> </a>
+                        <br />
                         <Button onClick={verifyUserBtn}  variant="contained" color="action" size="large" 
                                 sx={{ width: 250, height: 62, borderRadius: 5, textTransform: "none"}} >
 
