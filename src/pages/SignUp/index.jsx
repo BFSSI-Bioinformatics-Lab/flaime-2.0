@@ -15,15 +15,7 @@ import { Table, TableHead, TableBody, TableRow, TableCell, TablePagination,
 
 const Signup = () => {
 
-    // const location = useLocation();
-
-    // let uiSessionId =  "";
-
-    // if (location.state != null)
-    // {
-    //    uiSessionId = location.state.uiSessionId;
-    //    alert("in SignUp: uiSessionId = " + uiSessionId); 
-    // }
+    const location = useLocation();
 
     const [lang, setLang] = useState("en")
     const [header, setHeader] = useState("Sign Up")

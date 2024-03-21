@@ -17,7 +17,8 @@ import PageContainer from '../PageContainer';
 
 import { UISessionId, AdminUserid } from '../../../AppInitialization';
 
-const Header = () => {
+const Header = (userRole) => {
+      alert("in Header: userRole = " + JSON.stringify(userRole));
 
     // const [headerMenuDisplay, setHeaderMenuDisplay] = React.useContext(Context);
 
@@ -53,14 +54,8 @@ const Header = () => {
         navigate(path);
     }
 
-    const adminUserid = AdminUserid;   alert("in Header: adminUserid = " + adminUserid);
-    const isAdmin = false;
+    const isAdmin = (userRole.userRole == "admin") ? true : false;
 
-    if (AdminUserid.length > 0)
-    {
-        isAdmin = true;   alert("in Header: isAdmin = true");
-    }
-    
     return (
         // <div>Header</div>
         <Box sx={{ flexGrow: 1, background: '#732C02' }}>

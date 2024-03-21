@@ -23,10 +23,10 @@ const UserAdmin = () => {
 
     const [flName, setFLName] = useState("")
     const [userid, setUserid] = useState("")
-    const [password, setPassword] = useState("")
-    const [confirmPassword, setConfirmPassword] = useState("")
-    const [showPassword, setShowPassword] = useState("")
-    const [showConfirmPassword, setShowConfirmPassword] = useState("")
+    const [userPassword, setUserPassword] = useState("")
+    const [confirmUserPassword, setConfirmUserPassword] = useState("")
+    const [showUserPassword, setShowUserPassword] = useState("")
+    const [showConfirmUserPassword, setShowConfirmUserPassword] = useState("")
 
     const [controller, setController] = useState({
         page: 0,
@@ -48,9 +48,9 @@ const UserAdmin = () => {
     
     const reassignUserPassword = (event) => {
                
-        if (userid.length > 0 && password.length > 0)
+        if (userid.length > 0 && userPassword.length > 0)
         {
-            var url = pathBase + `ReassignUserPassword/?userid=${userid}&password=${password}`;  
+            var url = pathBase + `ReassignUserPassword/?userid=${userid}&userPassword=${userPassword}`;  
                     // alert("url = " + url);        
             var response = axios.put(url, {}, {}).then(response => {
                 // alert("response =" + JSON.stringify(response));
@@ -62,7 +62,7 @@ const UserAdmin = () => {
                 setMessage("Userid is required");
             }
             else {    
-                if (password.length === 0) {
+                if (userPassword.length === 0) {
                     setMessage("Password is required");        
                 }
             }
@@ -71,7 +71,7 @@ const UserAdmin = () => {
 
     const addUser = (event) => {
 
-        var url = pathBase + `AddUser/?userFLName=${flName}&userid=${userid}&password=${password}`;  
+        var url = pathBase + `AddUser/?userFLName=${flName}&userid=${userid}&userPassword=${userPassword}`;  
 
         axios.put(url, {}, {})
     .then(response => { /* alert("response = " + JSON.stringify(response)); */ }, 
@@ -121,7 +121,7 @@ const UserAdmin = () => {
                         <TextField id="password" label="Password*" placeholder="Password" 
                                    type={ showPassword ? "text" : "password" }
                                    autoComplete="current-password"  
-                                   onChange={(e) => setPassword(e.target.value)} /> <br/>
+                                   onChange={(e) => setUserPassword(e.target.value)} /> <br/>
 
                         <label for="check">Show Password</label>
                         <input id="check" value={showPassword}
@@ -132,7 +132,7 @@ const UserAdmin = () => {
                         <TextField id="password" label="Confirm Password*" placeholder="Confirm Password" 
                                    type={ showPassword ? "text" : "password" }
                                    autoComplete="current-password"                                     
-                                   onChange={(e) => setConfirmPassword(e.target.value)} /> <br/>
+                                   onChange={(e) => setConfirmUserPassword(e.target.value)} /> <br/>
 
                         <label for="check">Show Confirm Password</label>
                         <input id="check" value={showConfirmPassword}

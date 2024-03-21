@@ -61,7 +61,7 @@ const ForgotPassword = () => {
                 // console.log(error);
                 // }); 
         
-        navigate(`/Home`);            
+        navigate(`/Home`, { state: { userRole: 'temp' } });            
     };
 
     return (

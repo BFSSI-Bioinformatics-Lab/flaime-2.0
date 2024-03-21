@@ -22,22 +22,23 @@ import {
 } from "./styles";
 
 import Header from "../../components/page/Header";
+
 import { useNavigate } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 
 const Home = () => {
 
   const location = useLocation();
-  let isAdmin = false;
+  let userRole = "regular";
 
-  alert("location.state.userRole = " + location.state.userRole);
+  alert("in Home: location = " + JSON.stringify(location));
 
-  if (location.state.userRole === 'admin')
+  if (location != null && location.state != null && location.state.userRole.length > 0)
   {
-    isAdmin = true;   alert("isAdmin= " + isAdmin);
+      userRole = location.state.userRole;
   }
-
-  // const [headerMenuDisplay, setHeaderMenuDisplay] = useState("") 
+  
+   // const [headerMenuDisplay, setHeaderMenuDisplay] = useState("") 
 
   const exploreItems = [
     {
@@ -77,7 +78,7 @@ const Home = () => {
 
   return (
     <HomePageContainer>
-      <Header />
+      <Header userRole={userRole} />
       <div className='landing-img' style={{ position: "relative" }}>
 
         <Image src={landing} height='550px' duration={0} easing='ease' opacity={0.5}></Image>

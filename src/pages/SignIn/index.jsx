@@ -34,10 +34,9 @@ const SignIn = () => {
     });
 
     const [userid, setUserid] = useState("");
-    const [password, setPassword] = useState("");
-    const [showPassword, setShowPassword] = useState("");
-    const [showConfirmPassword, setConfirmShowPassword] = useState("");
-
+    const [userPassword, setUserPassword] = useState("");
+    const [showUserPassword, setShowUserPassword] = useState("");
+    
     const StyledHeader = styled(TableCell)(({ theme }) => ({
       typography: 'subtitle',
       fontWeight: 'bold',
@@ -58,21 +57,22 @@ const SignIn = () => {
         
         setMessage("");
 
-        if (userid.length > 0 && password.length > 0)
+        if (userid.length > 0 && userPassword.length > 0)
         {            
-            const hashedPassword = bcrypt.hashSync(password, BcryptSalt); 
+            const hashedPassword = bcrypt.hashSync(userPassword, BcryptSalt); 
             
-            let url = APIPathBase + `VerifyUser/?userid=${userid}&userPassword=${password}`;  // TO-DO: will be "hashedUserPassword"  
+            let url = APIPathBase + `VerifyUser/?userid=${userid}&userPassword=${userPassword}`;  // TO-DO: will be "hashedUserPassword"  
             
             let result = 0;
 
             axios.get(url).then(response => {
+                alert("in SignIn, verifyUserBtn: response = " + JSON.stringify(response));
 
-                if (response.data.length > 0) {
-                    alert("in SignIn, verifyUserBtn: response = " + JSON.stringify(response.data));        
+                if (response.data.userRole.length > 0) {
+                    alert("in SignIn, verifyUserBtn: response.data.userRole = " + JSON.stringify(response.data.userRole));        
 
                     setMessage("");
-                    navigate('/Home', { state: { userRole: 'admin' } } );   
+                    navigate('/Home', { state: { userRole: response.data } } );   
                 }
                 else {
                     setMessage("Username and Password combination is invalid");
@@ -86,7 +86,7 @@ const SignIn = () => {
                 setMessage("Username is required");
             }
             else {    
-                if (password.length === 0)
+                if (userPassword.length === 0)
                 {
                     setMessage("Password is required");
                 }
@@ -143,14 +143,14 @@ const SignIn = () => {
                                    onChange={(e) => setUserid(e.target.value)} />
                     </Grid>
                     <Grid item>                        
-                        <TextField id="password" label="Password*" placeholder="Password" 
-                                   type={ showPassword ? "text" : "password" }
+                        <TextField id="userPassword" label="Password*" placeholder="Password" 
+                                   type={ showUserPassword ? "text" : "password" }
                                    autoComplete="current-password"                                    
-                                   onChange={(e) => setPassword(e.target.value)} /> <br/>
+                                   onChange={(e) => setUserPassword(e.target.value)} /> <br/>
 
                         <label for="check">Show Password</label>
-                        <input id="check" value={showPassword}
-                               type="checkbox" onChange={() => setShowPassword((prev) => !prev) } />
+                        <input id="check" value={showUserPassword}
+                               type="checkbox" onChange={() => setShowUserPassword((prev) => !prev) } />
                     </Grid>
 {/*                    
                     <Grid item> 
