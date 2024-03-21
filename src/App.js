@@ -23,10 +23,11 @@ import SignUp from "./pages/SignUp";
 import ForgotPassword from "./pages/ForgotPassword";
 import SetNewPassword from "./pages/SetNewPassword";
 import UserAdmin from "./pages/UserAdmin";
+import { APIPathBase, BcryptSalt } from "./AppInitialization";
 
 import ReactDOM from "react-dom/client";
 
-export const AppContext = React.createContext();
+// export const AppContext = React.createContext();
 
 function App() {
 
@@ -41,14 +42,8 @@ function App() {
   const [adminUserid, setAdminUserid] = useState("kate");
   const [currUserid, setCurrUserid]   = useState("greg");
 
-  alert("in App.js: uiSessionId " + uiSessionId);
-  alert("in App.js: adminUserid = " + adminUserid);
-  alert("in App.js: currUserid = " + currUserid);
-
   return (
     <BrowserRouter>
-      <Context.Provider value={{ uiSessionId: uiSessionId }} >
-      </Context.Provider>
  
       <ThemeProvider theme={Theme}>
         <div className="App">          
@@ -85,6 +80,7 @@ function App() {
           <Footer />
         </div>
       </ThemeProvider>
+
     </BrowserRouter>
 
   );

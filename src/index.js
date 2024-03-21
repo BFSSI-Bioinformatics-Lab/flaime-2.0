@@ -1,13 +1,18 @@
-import React from 'react';
+import React, {useState, createContext, useContext, Context} from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
+
+export const AppContext = React.createContext();
+
 root.render(
   <React.StrictMode>
-    <App />
+    <AppContext.Provider value={ "uiSessionId" } >
+      <App />
+    </AppContext.Provider>
   </React.StrictMode>
 );
 

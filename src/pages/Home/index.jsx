@@ -23,8 +23,19 @@ import {
 
 import Header from "../../components/page/Header";
 import { useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 
 const Home = () => {
+
+  const location = useLocation();
+  let isAdmin = false;
+
+  alert("location.state.userRole = " + location.state.userRole);
+
+  if (location.state.userRole === 'admin')
+  {
+    isAdmin = true;   alert("isAdmin= " + isAdmin);
+  }
 
   // const [headerMenuDisplay, setHeaderMenuDisplay] = useState("") 
 

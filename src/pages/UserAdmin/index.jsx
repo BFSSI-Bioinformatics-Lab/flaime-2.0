@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Typography,Grid, Button, } from "@mui/material";
+import { Typography, Grid, Button, TextField } from "@mui/material";
 import { SignInContainer, SignInPageContainer, SignInInputField } from "./styles";
 import axios from 'axios';
 import { styled } from '@mui/material/styles';
@@ -18,14 +18,15 @@ const UserAdmin = () => {
     const [buttonEnterName, setButtonEnterName] = useState("Sign In")
     const [pathBase, setPathBase] = useState("https://localhost:7166/api/")  // 172.17.10.69:7251
 
-    const [user_userid, setUser_userid] = useState("greg")
-    const [user_userPassword, setUser_userPassword] = useState("suc")
-    const [admin_User, setAdmin_User] = useState("")
+    const [message, setMessage] = useState("")
+    const [adminUserid, setAdminUserid] = useState("")
 
     const [flName, setFLName] = useState("")
     const [userid, setUserid] = useState("")
-    const [newPassword, setNewPassword] = useState("")
-    const [confirmNewPassword, setConfirmNewPassword] = useState("")
+    const [password, setPassword] = useState("")
+    const [confirmPassword, setConfirmPassword] = useState("")
+    const [showPassword, setShowPassword] = useState("")
+    const [showConfirmPassword, setShowConfirmPassword] = useState("")
 
     const [controller, setController] = useState({
         page: 0,
@@ -47,21 +48,33 @@ const UserAdmin = () => {
     
     const reassignUserPassword = (event) => {
                
-        var url = pathBase + `ReassignUserPassword/?userid=${userid}&userPassword=${newPassword}`;  
-        alert("url = " + url);        
-        var response = axios.put(url, {}, {}).then(response => {
-            alert("response =" + JSON.stringify(response));
-          }); 
-               
-        navigate(`/Home`);            
+        if (userid.length > 0 && password.length > 0)
+        {
+            var url = pathBase + `ReassignUserPassword/?userid=${userid}&password=${password}`;  
+                    // alert("url = " + url);        
+            var response = axios.put(url, {}, {}).then(response => {
+                // alert("response =" + JSON.stringify(response));
+                navigate(`/Home`);
+            }); 
+        }
+        else {
+            if (userid.length === 0) {
+                setMessage("Userid is required");
+            }
+            else {    
+                if (password.length === 0) {
+                    setMessage("Password is required");        
+                }
+            }
+        }            
     };
 
     const addUser = (event) => {
 
-        var url = pathBase + `AddUser/?userid=${user_userid}&userPassword=${user_userPassword}`;  
+        var url = pathBase + `AddUser/?userFLName=${flName}&userid=${userid}&password=${password}`;  
 
         axios.put(url, {}, {})
-             .then(response => { alert("response = " + JSON.stringify(response)); }, 
+    .then(response => { /* alert("response = " + JSON.stringify(response)); */ }, 
                   error => { console.log(error); } ); 
 
         navigate(`/Home`);                
@@ -69,11 +82,11 @@ const UserAdmin = () => {
 
     const deleteUser = (event) => {
 
-        var url = pathBase + `DeleteUser/?userid=${user_userid}&userPassword=${user_userPassword}`;  
+        var url = pathBase + `DeleteUser/?userid=${userid}`;  
 
         axios.put(url, {}, {})
             .then(response => {
-               alert("response = " + JSON.stringify(response));
+               // alert("response = " + JSON.stringify(response));
             }, 
             error => {
             console.log(error);
@@ -84,31 +97,56 @@ const UserAdmin = () => {
 
     return (
         <SignInPageContainer>
-            <SignInContainer>
+            <SignInContainer>                
                 <Grid container direction="column" justifyContent={"center"} alignItems={"left"} spacing={4}>
                     <Grid item pt={6}>
                         <Typography variant="h4" color="primary"> User Admin </Typography>
                     </Grid>
                     <Grid item>
-                        <Typography > User's Firt & Last Name* </Typography>
-                        <SignInInputField placeholder="UserFLName"
-                            onChange={(e) => setFLName(e.target.value)}  />
+                        <Typography style={{ color: 'red', fontWeight:'bold' }} > {message} </Typography>
                     </Grid>
                     <Grid item>
-                        <Typography > User's Username* </Typography>
-                        <SignInInputField placeholder="Username" 
-                           onChange={(e) => setUserid(e.target.value)}  />
+                      <TextField id="userid" label="First & Last Name*" placeholder="First & Last Name" 
+                                 type="text"
+                                 autoComplete="current-password"                                     
+                                 onChange={(e) => setFLName(e.target.value)} />
                     </Grid>
                     <Grid item>
-                        <Typography > New Password* </Typography>
-                        <SignInInputField placeholder="NewPassword" 
-                            onChange={(e) => setNewPassword(e.target.value)}  />
+                      <TextField id="userid" label="Username*" placeholder="Username" 
+                                 type="text"
+                                 autoComplete="current-password"                                     
+                                 onChange={(e) => setUserid(e.target.value)} />
                     </Grid>
-                    <Grid item>
-                        <Typography > Confirm Password* </Typography>
-                        <SignInInputField placeholder="ConfirmPassword" 
-                            onChange={(e) => setConfirmNewPassword(e.target.value)}  />
+                    <Grid item>                        
+                        <TextField id="password" label="Password*" placeholder="Password" 
+                                   type={ showPassword ? "text" : "password" }
+                                   autoComplete="current-password"  
+                                   onChange={(e) => setPassword(e.target.value)} /> <br/>
+
+                        <label for="check">Show Password</label>
+                        <input id="check" value={showPassword}
+                               type="checkbox" onChange={() => setShowPassword((prev) => !prev) } />
                     </Grid>
+
+                    <Grid item>                        
+                        <TextField id="password" label="Confirm Password*" placeholder="Confirm Password" 
+                                   type={ showPassword ? "text" : "password" }
+                                   autoComplete="current-password"                                     
+                                   onChange={(e) => setConfirmPassword(e.target.value)} /> <br/>
+
+                        <label for="check">Show Confirm Password</label>
+                        <input id="check" value={showConfirmPassword}
+                               type="checkbox" onChange={() => setShowConfirmPassword((prev) => !prev) } />
+                    </Grid>
+
+{/*     
+                    <Grid item> 
+                        <div style={{textAlign:"left"}}>
+                            <div style={{float:"left"}} > <CheckBox></CheckBox> </div>
+                            <div style={{float:"left"}} > Remember Me </div>
+                        </div>
+                    </Grid>
+*/}                    
                     <Grid item>
                         <Button onClick={reassignUserPassword}  variant="contained" color="action" size="large" 
                                 sx={{ width: 250, height: 62, borderRadius: 5, textTransform: "none"}} >

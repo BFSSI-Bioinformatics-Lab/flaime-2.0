@@ -14,7 +14,8 @@ import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 
 import PageContainer from '../PageContainer';
-import {AppContext} from '../../../App.js';
+
+import { UISessionId, AdminUserid } from '../../../AppInitialization';
 
 const Header = () => {
 
@@ -52,10 +53,14 @@ const Header = () => {
         navigate(path);
     }
 
-    const appContext = useContext(AppContext);
-    
-    alert("in Header: appContext = " + JSON.stringify(appContext));
+    const adminUserid = AdminUserid;   alert("in Header: adminUserid = " + adminUserid);
+    const isAdmin = false;
 
+    if (AdminUserid.length > 0)
+    {
+        isAdmin = true;   alert("in Header: isAdmin = true");
+    }
+    
     return (
         // <div>Header</div>
         <Box sx={{ flexGrow: 1, background: '#732C02' }}>
@@ -197,10 +202,10 @@ const Header = () => {
                                 <AccountCircleIcon />
                             </IconButton>
                         </Tooltip>
-
+{isAdmin &&
                         <Tooltip title="Admin">
                             <IconButton
-                                size="large"
+                                size="small"
                                 edge="start"
                                 color="inherit"
                                 aria-label="login"
@@ -209,7 +214,7 @@ const Header = () => {
                                 ADMIN
                             </IconButton>
                         </Tooltip>
-
+}
                     </Toolbar>
                 </PageContainer>
             </AppBar>
