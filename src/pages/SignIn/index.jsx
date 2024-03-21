@@ -66,13 +66,21 @@ const SignIn = () => {
             let result = 0;
 
             axios.get(url).then(response => {
-                alert("in SignIn, verifyUserBtn: response = " + JSON.stringify(response));
-
+                
                 if (response.data.userRole.length > 0) {
-                    alert("in SignIn, verifyUserBtn: response.data.userRole = " + JSON.stringify(response.data.userRole));        
+                    // alert("in SignIn, verifyUserBtn: response.data.userRole = " + JSON.stringify(response.data.userRole));        
 
                     setMessage("");
-                    navigate('/Home', { state: { userRole: response.data } } );   
+                    
+                    alert("in SignIn: response.data.passwordState = " + response.data.passwordState);
+
+                    if (response.data.passwordState.length > 0)
+                    {      alert("navigate(`/SetNewPassword`)");
+                        navigate(`/SetNewPassword`);   
+                    }
+                    else {    alert("navigate(`/Home`)");
+                        navigate(`/Home`, { state: { userRole: response.data.userRole } } );   
+                    }
                 }
                 else {
                     setMessage("Username and Password combination is invalid");

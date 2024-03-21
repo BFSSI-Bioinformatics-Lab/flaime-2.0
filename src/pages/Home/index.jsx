@@ -29,13 +29,13 @@ import { useLocation } from "react-router-dom";
 const Home = () => {
 
   const location = useLocation();
-  let userRole = "regular";
+  let userRoleStr = "regular";
 
-  alert("in Home: location = " + JSON.stringify(location));
+  alert("in Home 1: location = " + JSON.stringify(location));
 
   if (location != null && location.state != null && location.state.userRole.length > 0)
   {
-      userRole = location.state.userRole;
+      userRoleStr = location.state.userRole;   alert("in Home top: userRoleStr = " + userRoleStr);
   }
   
    // const [headerMenuDisplay, setHeaderMenuDisplay] = useState("") 
@@ -78,7 +78,7 @@ const Home = () => {
 
   return (
     <HomePageContainer>
-      <Header userRole={userRole} />
+      <Header userRole={userRoleStr} />
       <div className='landing-img' style={{ position: "relative" }}>
 
         <Image src={landing} height='550px' duration={0} easing='ease' opacity={0.5}></Image>
