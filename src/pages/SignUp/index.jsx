@@ -26,9 +26,9 @@ const Signup = () => {
 
     const [flName, setFLName] = useState("")
     const [userid, setUserid] = useState("")
-    const [password, setPassword] = useState("")
-    const [confirmPassword, setConfirmPassword] = useState("")
-    const [showPassword, setShowPassword] = useState("");
+    const [userPassword, setUserPassword] = useState("")
+    const [confirmUserPassword, setConfirmUserPassword] = useState("")
+    const [showUserPassword, setShowUserPassword] = useState("");
 
     const [controller, setController] = useState({
         page: 0,
@@ -77,10 +77,10 @@ const Signup = () => {
                         <Typography variant="h4" color="primary"> Sign Up </Typography>
                     </Grid>
                     <Grid item>
-                      <TextField id="userid" label="First & Last Name*" placeholder="First & Last Name" 
+                      <TextField id="userFLName" label="First & Last Name*" placeholder="First & Last Name" 
                                    type="text"
                                    autoComplete="current-password"                                     
-                                   onChange={(e) => setFLName(e.target.value)} />
+                                   onChange={(e) => setUserFLName(e.target.value)} />
                     </Grid>
                     <Grid item>
                       <TextField id="userid" label="Username*" placeholder="Username" 
@@ -92,22 +92,22 @@ const Signup = () => {
                         <TextField id="password" label="Password*" placeholder="Password" 
                                    type={ showPassword ? "text" : "password" }
                                    autoComplete="current-password"  
-                                   onChange={(e) => setPassword(e.target.value)} /> <br/>
+                                   onChange={(e) => setUserPassword(e.target.value)} /> <br/>
 
                         <label for="check">Show Password</label>
-                        <input id="check" value={showPassword}
-                               type="checkbox" onChange={() => setShowPassword((prev) => !prev) } />
+                        <input id="check" value={showUserPassword}
+                               type="checkbox" onChange={() => setShowUserPassword((prev) => !prev) } />
                     </Grid>
 
                     <Grid item>                        
-                        <TextField id="password" label="Confirm Password*" placeholder="Confirm Password" 
+                        <TextField id="confirmPassword" label="Confirm Password*" placeholder="Confirm Password" 
                                    type={ showPassword ? "text" : "password" }
                                    autoComplete="current-password"                                     
-                                   onChange={(e) => setConfirmPassword(e.target.value)} /> <br/>
+                                   onChange={(e) => setConfirmUserPassword(e.target.value)} /> <br/>
 
                         <label for="check">Show Password</label>
                         <input id="check" value={showPassword}
-                               type="checkbox" onChange={() => setShowPassword((prev) => !prev) } />
+                               type="checkbox" onChange={() => setShowUserPassword((prev) => !prev) } />
                     </Grid>
 
 {/*     

@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { Typography,Grid, Button, } from "@mui/material";
+import { Typography, Grid, Button, TextField } from "@mui/material";
 import { SignInContainer, SignInPageContainer, SignInInputField } from "../SignIn/styles";
 import axios from 'axios';
 import { styled } from '@mui/material/styles';
 import { CheckBox } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 
 import { Table, TableHead, TableBody, TableRow, TableCell, TablePagination, 
          TableContainer } from '@mui/material';
@@ -20,9 +21,14 @@ const SetNewPassword = () => {
     const [buttonEnterName, setButtonEnterName] = useState("Sign Up")
     const [pathBase, setPathBase] = useState("https://localhost:7166/api/")  // 172.17.10.69:7251
 
-    const [currentPassword, setCurrentPassword] = useState("")
-    const [newPassword, setNewPassword] = useState("")
-    const [confirmNewPassword, setConfirmNewPassword] = useState("")
+    const [currentUserPassword, setCurrentUserPassword] = useState("")
+    const [newUserPassword, setNewUserPassword] = useState("")
+    const [confirmNewUserPassword, setConfirmNewUserPassword] = useState("")
+    const [showCurrentUserPassword, setShowCurrentUserPassword] = useState("")
+    const [showNewUserPassword, setShowNewUserPassword] = useState("")
+    const [showConfirmNewUserPassword, setShowConfirmNewUserPassword] = useState("")
+
+    
     const [errorMessage, setErrorMessage] = useState("")
 
     const [controller, setController] = useState({
@@ -31,8 +37,8 @@ const SetNewPassword = () => {
         search: null
     });
 
-    var userid = "nick";
-    var url = pathBase + `UpdateUserSetPassword/?userid=` + userid + `&userPassword=${newPassword}`; 
+    var userid = ' ';
+    var url = pathBase + `SetPassword/?userid=` + userid + `&userPassword=${newUserPassword}`; 
                                                
     const StyledHeader = styled(TableCell)(({ theme }) => ({
       typography: 'subtitle',
@@ -46,28 +52,39 @@ const SetNewPassword = () => {
 
     let navigate = useNavigate(); 
        
-    const savePasswordBtn = (event) => {
-        
-        if (newPassword == confirmNewPassword)
+        const location = useLocation();
+  
+        userid = "gregTempo";
+
+        // alert("in SetNewPassword: location = " + JSON.stringify(location));
+
+        if (location != null && location.state != null && location.state.userid.length > 0)
         {
-           alert("newPassword == confirmNewPassword: url = " + url);
+            userid = location.state.userid;   // alert("in SetNewPassword: userid = " + userid);
+        }
+
+        const savePasswordBtn = (event) => {
         
-           setErrorMessage("");    
+        if (newUserPassword == confirmNewUserPassword)
+        {
+            // alert("newUserPassword == confirmNewUserPassword: url = " + url);
+        
+            setErrorMessage("");    
 
-           axios.put(url)
+            axios.put(url)
             .then(response => {
-             alert("in SetNewPassword: response = " + JSON.stringify(response));
-           } );   
-
-           alert("before going to Home page");
-           
-           navigate(`/Home`);
+             // alert("in SetNewPassword: response = " + JSON.stringify(response));
+            });    
         }
         else
         {
             setErrorMessage("Passwords are not equal.");    
         }            
-    };
+
+        alert("before going to Home page");
+           
+        navigate(`/Home`, { state: { userRole: 'response.data.userRole' } } );
+    }
 
     return (
         <SignInPageContainer>
@@ -76,27 +93,36 @@ const SetNewPassword = () => {
                     <Grid item pt={6}>
                         <Typography color="red" > {errorMessage} </Typography>
                     </Grid>
+
                     <Grid item pt={6}>
                         <Typography variant="h4" color="primary"> Set New Password </Typography>
                     </Grid>
+                    
                     <Grid item>
                         <Typography > Username </Typography>
-                        <Typography > <b> greg </b> </Typography>
+                        <Typography > <b> {userid} </b> </Typography>
                     </Grid>
-                    <Grid item>
-                        <Typography > Current Password* </Typography>
-                        <SignInInputField placeholder="Current Password" 
-                          onChange={(e) => setCurrentPassword(e.target.value)} />
+                    
+                    <Grid item>                        
+                        <TextField id="newUserPassword" label="New Password*" placeholder="New Password" 
+                                   type={ showNewUserPassword ? "text" : "password" }
+                                   autoComplete="current-password"  
+                                   onChange={(e) => setNewUserPassword(e.target.value)} /> <br/>
+
+                        <label for="check">Show New Password</label>
+                        <input id="check" value={showNewUserPassword}
+                               type="checkbox" onChange={() => setShowNewUserPassword((prev) => !prev) } />
                     </Grid>
-                    <Grid item>
-                        <Typography > New Password* </Typography>
-                        <SignInInputField placeholder="New Password" 
-                          onChange={(e) => setNewPassword(e.target.value)} />
-                    </Grid>
-                    <Grid item>
-                        <Typography > Confirm New Password* </Typography>
-                        <SignInInputField placeholder="Confirm New Password"
-                          onChange={(e) => setConfirmNewPassword(e.target.value)} />
+                    
+                    <Grid item>                        
+                        <TextField id="confirmNewUserPassword" label="Confirm New Password*" placeholder="Confirm New Password" 
+                                   type={ showConfirmNewUserPassword ? "text" : "password" }
+                                   autoComplete="current-password"                                     
+                                   onChange={(e) => setConfirmNewUserPassword(e.target.value)} /> <br/>
+
+                        <label for="check">Show Confirm New Password</label>
+                        <input id="check" value={showConfirmNewUserPassword}
+                               type="checkbox" onChange={() => setShowConfirmNewUserPassword((prev) => !prev) } />
                     </Grid>
                     <Grid item>
                         <Button onClick={savePasswordBtn}  variant="contained" color="action" size="large" 
@@ -111,6 +137,6 @@ const SetNewPassword = () => {
             </SignInContainer>
         </SignInPageContainer>
     )
-}
+  }
 
-export default SetNewPassword;
+  export default SetNewPassword;

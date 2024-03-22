@@ -68,15 +68,16 @@ const SignIn = () => {
             axios.get(url).then(response => {
                 
                 if (response.data.userRole.length > 0) {
-                    // alert("in SignIn, verifyUserBtn: response.data.userRole = " + JSON.stringify(response.data.userRole));        
+                   alert("in SignIn, verifyUserBtn: response.data.userRole = " + JSON.stringify(response.data.userRole));        
 
                     setMessage("");
                     
                     alert("in SignIn: response.data.passwordState = " + response.data.passwordState);
+                    alert("in SignIn: response.data.userid = " + response.data.userid);
 
                     if (response.data.passwordState.length > 0)
-                    {      alert("navigate(`/SetNewPassword`)");
-                        navigate(`/SetNewPassword`);   
+                    {      alert("in SignIn: navigate(`/SetNewPassword`)");  alert("in SignIn: response.data.userid = " + response.data.userid); 
+                        navigate(`/SetNewPassword`,  { state: { userid: response.data.userid } });   
                     }
                     else {    alert("navigate(`/Home`)");
                         navigate(`/Home`, { state: { userRole: response.data.userRole } } );   
