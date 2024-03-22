@@ -18,7 +18,6 @@ import PageContainer from '../PageContainer';
 import { UISessionId, AdminUserid } from '../../../AppInitialization';
 
 const Header = (userRole) => {
-      alert("in Header: userRole = " + JSON.stringify(userRole));
 
     // const [headerMenuDisplay, setHeaderMenuDisplay] = React.useContext(Context);
 

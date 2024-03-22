@@ -28,7 +28,6 @@ const SetNewPassword = () => {
     const [showNewUserPassword, setShowNewUserPassword] = useState("")
     const [showConfirmNewUserPassword, setShowConfirmNewUserPassword] = useState("")
 
-    
     const [errorMessage, setErrorMessage] = useState("")
 
     const [controller, setController] = useState({
@@ -37,9 +36,6 @@ const SetNewPassword = () => {
         search: null
     });
 
-    var userid = ' ';
-    var url = pathBase + `SetPassword/?userid=` + userid + `&userPassword=${newUserPassword}`; 
-                                               
     const StyledHeader = styled(TableCell)(({ theme }) => ({
       typography: 'subtitle',
       fontWeight: 'bold',
@@ -51,39 +47,61 @@ const SetNewPassword = () => {
     }));
 
     let navigate = useNavigate(); 
-       
-        const location = useLocation();
+
+    const location = useLocation();
   
-        userid = "gregTempo";
+    let _userid = "";
+    let _userRole = "";
 
-        // alert("in SetNewPassword: location = " + JSON.stringify(location));
-
-        if (location != null && location.state != null && location.state.userid.length > 0)
+    if (location != null && location.state != null) 
+    {
+        if (location.state.userid != null && location.state.userid.length > 0)
         {
-            userid = location.state.userid;   // alert("in SetNewPassword: userid = " + userid);
+            _userid = location.state.userid;
         }
 
-        const savePasswordBtn = (event) => {
-        
-        if (newUserPassword == confirmNewUserPassword)
+        if (location.state.userRole != null && location.state.userRole.length > 0)
         {
-            // alert("newUserPassword == confirmNewUserPassword: url = " + url);
+            _userRole = location.state.userRole;
+        }
+    }
+
+    var url = pathBase + `SetPassword/?userid=` + _userid + `&userPassword=${newUserPassword}`; 
+                                               
+    const savePasswordBtn = (event) => {
         
+    if (newUserPassword.length > 0 && confirmNewUserPassword.length > 0 && newUserPassword === confirmNewUserPassword)
+        {
             setErrorMessage("");    
 
             axios.put(url)
-            .then(response => {
-             // alert("in SetNewPassword: response = " + JSON.stringify(response));
-            });    
+              .then(response => {
+                  alert("in SetNewPassword: response = " + JSON.stringify(response));
+
+                  navigate(`/Home`, { state: { userRole: _userRole } } );   
+            });                
         }
         else
         {
-            setErrorMessage("Passwords are not equal.");    
-        }            
-
-        alert("before going to Home page");
-           
-        navigate(`/Home`, { state: { userRole: 'response.data.userRole' } } );
+            if (newUserPassword.length == 0)
+            {
+                setErrorMessage("New Password is required");
+            }
+            else
+            {
+                if (confirmNewUserPassword.length == 0)
+                {
+                    setErrorMessage("Confirm New Password is required");
+                }
+                else
+                {
+                    if (newUserPassword != confirmNewUserPassword)
+                    {
+                        setErrorMessage("Passwords are not equal.");
+                    }
+                }                    
+            }                
+        }             
     }
 
     return (
@@ -91,7 +109,7 @@ const SetNewPassword = () => {
             <SignInContainer>
                 <Grid container direction="column" justifyContent={"center"} alignItems={"left"} spacing={4}>
                     <Grid item pt={6}>
-                        <Typography color="red" > {errorMessage} </Typography>
+                        <Typography style={{ color: 'red', fontWeight: 'bold' }} > {errorMessage} </Typography>
                     </Grid>
 
                     <Grid item pt={6}>
@@ -100,7 +118,7 @@ const SetNewPassword = () => {
                     
                     <Grid item>
                         <Typography > Username </Typography>
-                        <Typography > <b> {userid} </b> </Typography>
+                        <Typography > <b> {_userid} </b> </Typography>
                     </Grid>
                     
                     <Grid item>                        

@@ -63,27 +63,32 @@ const SignIn = () => {
             
             let url = APIPathBase + `VerifyUser/?userid=${userid}&userPassword=${userPassword}`;  // TO-DO: will be "hashedUserPassword"  
             
-            let result = 0;
+            // let result = 0;
+            let _userRole = "";            
+            let _passwordState = ""; 
+            let _userid = "";
 
             axios.get(url).then(response => {
                 
-                if (response.data.userRole.length > 0) {
-                   alert("in SignIn, verifyUserBtn: response.data.userRole = " + JSON.stringify(response.data.userRole));        
+                _userRole = response.data.userRole;
+                _passwordState = response.data.passwordState;
+                _userid = response.data.userid;    
 
-                    setMessage("");
+                if (_userRole.length > 0) {
+                   
+                   setMessage("");
                     
-                    alert("in SignIn: response.data.passwordState = " + response.data.passwordState);
-                    alert("in SignIn: response.data.userid = " + response.data.userid);
-
-                    if (response.data.passwordState.length > 0)
-                    {      alert("in SignIn: navigate(`/SetNewPassword`)");  alert("in SignIn: response.data.userid = " + response.data.userid); 
-                        navigate(`/SetNewPassword`,  { state: { userid: response.data.userid } });   
-                    }
-                    else {    alert("navigate(`/Home`)");
-                        navigate(`/Home`, { state: { userRole: response.data.userRole } } );   
-                    }
+                   if (_passwordState.length > 0)
+                   {       
+                      navigate(`/SetNewPassword`,  { state: { userid: _userid, userRole: _userRole } });   
+                   }
+                   else 
+                   {    
+                      navigate(`/Home`, { state: { userRole: _userRole } } );   
+                   }
                 }
-                else {
+                else 
+                {
                     setMessage("Username and Password combination is invalid");
                 }
             });     
@@ -105,9 +110,7 @@ const SignIn = () => {
 
     const signUp = (event) => {  
         
-        // alert("in SignIn signUp function");
-        
-        navigate('/SignUp', { state: { z: ' ' } } );            
+        navigate('/SignUp', { state: { z: ' ' } } );   // TO-DO: set state            
     };
 
     const forgotPassword = (event) => {
@@ -141,8 +144,7 @@ const SignIn = () => {
                         <Typography > 
                             If you have not created an account yet, <br/>
                             then please <a href="#" onClick={signUp} style={{color: "blue"}} >sign up</a> first. 
-                            If password was reassigned by admin, please <a href="#" onClick={setNewPassword} 
-                            style={{color: "blue"}} > set new password </a>.
+                            If password was reassigned by admin, please sign in and set the new password.                            
                         </Typography>
                     </Grid>
                     <Grid item>

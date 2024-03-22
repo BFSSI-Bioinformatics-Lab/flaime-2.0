@@ -95,6 +95,22 @@ const UserAdmin = () => {
         navigate(`/Home`);            
     };
 
+    const showUserids_WithForgotPassword = (event) => {
+        alert("call showUserids_WithForgotPassword");
+
+        var url = pathBase + `GetUserids_WithForgotPassword/?userid=${userid}`;  
+
+        axios.get(url, {}, {})
+            .then(response => {
+               alert("response = " + JSON.stringify(response));
+            }, 
+            error => {
+            console.log(error);
+        }); 
+
+        navigate(`/Home`);            
+    };
+
     return (
         <SignInPageContainer>
             <SignInContainer>                
@@ -119,24 +135,24 @@ const UserAdmin = () => {
                     </Grid>
                     <Grid item>                        
                         <TextField id="password" label="Password*" placeholder="Password" 
-                                   type={ showPassword ? "text" : "password" }
+                                   type={ showUserPassword ? "text" : "password" }
                                    autoComplete="current-password"  
                                    onChange={(e) => setUserPassword(e.target.value)} /> <br/>
 
                         <label for="check">Show Password</label>
-                        <input id="check" value={showPassword}
-                               type="checkbox" onChange={() => setShowPassword((prev) => !prev) } />
+                        <input id="check" value={showUserPassword}
+                               type="checkbox" onChange={() => setShowUserPassword((prev) => !prev) } />
                     </Grid>
 
                     <Grid item>                        
-                        <TextField id="password" label="Confirm Password*" placeholder="Confirm Password" 
-                                   type={ showPassword ? "text" : "password" }
+                        <TextField id="confirmUserPassword" label="Confirm Password*" placeholder="Confirm Password" 
+                                   type={ showUserPassword ? "text" : "password" }
                                    autoComplete="current-password"                                     
                                    onChange={(e) => setConfirmUserPassword(e.target.value)} /> <br/>
 
                         <label for="check">Show Confirm Password</label>
-                        <input id="check" value={showConfirmPassword}
-                               type="checkbox" onChange={() => setShowConfirmPassword((prev) => !prev) } />
+                        <input id="check" value={showConfirmUserPassword}
+                               type="checkbox" onChange={() => setShowConfirmUserPassword((prev) => !prev) } />
                     </Grid>
 
 {/*     
@@ -176,6 +192,17 @@ const UserAdmin = () => {
                             </Typography>
                         </Button>
                       </Grid>
+                      <br/>  
+                      <Grid item>
+                        <Button onClick={showUserids_WithForgotPassword}  variant="contained" color="action" size="large" 
+                                sx={{ width: 250, height: 62, borderRadius: 5, textTransform: "none"}} >
+
+                            <Typography variant="h5" color="white">
+                                Show Userids With Forgot Password 
+                            </Typography>
+                        </Button>
+                      </Grid>
+
                 </Grid>
             </SignInContainer>
         </SignInPageContainer>

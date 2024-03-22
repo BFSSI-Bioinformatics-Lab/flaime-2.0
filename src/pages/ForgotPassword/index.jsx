@@ -51,17 +51,12 @@ const ForgotPassword = () => {
     
     const restorePassword = (event) => {
                       
-        console.log("on ForgotPassword, in restorePassword: making api call: url = " + url);   alert("making API call: url = " + url);
+        console.log("on ForgotPassword, in restorePassword: making api call: url = " + url);   
        
         axios.post(url, {}, {})
              .then(response => {
-               alert("response =" + JSON.stringify(response));
-             });  // , 
-                // error => {
-                // console.log(error);
-                // }); 
-        
-        navigate(`/Home`, { state: { userRole: 'temp' } });            
+                navigate(`/FinalPage`);            
+             });           
     };
 
     return (

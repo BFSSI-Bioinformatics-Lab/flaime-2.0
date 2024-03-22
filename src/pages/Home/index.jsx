@@ -31,11 +31,9 @@ const Home = () => {
   const location = useLocation();
   let userRoleStr = "regular";
 
-  alert("in Home 1: location = " + JSON.stringify(location));
-
   if (location != null && location.state != null && location.state.userRole.length > 0)
   {
-      userRoleStr = location.state.userRole;   alert("in Home top: userRoleStr = " + userRoleStr);
+      userRoleStr = location.state.userRole;   
   }
   
    // const [headerMenuDisplay, setHeaderMenuDisplay] = useState("") 
