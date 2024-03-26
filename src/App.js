@@ -1,3 +1,4 @@
+import React, {useState, createContext, useContext, Context} from "react"
 // import Table from "./components/Table";
 import Home from "./pages/Home";
 import Header from "./components/page/Header";
@@ -18,18 +19,44 @@ import Visualizations from "./pages/data/Visualizations";
 import About from "./pages/About";
 import Advanced_search from "./pages/tools/Advanced_search";
 import SignIn from "./pages/SignIn";
+import SignUp from "./pages/SignUp";
+import ForgotPassword from "./pages/ForgotPassword";
+import SetNewPassword from "./pages/SetNewPassword";
+import UserAdmin from "./pages/UserAdmin";
+import { APIPathBase, BcryptSalt } from "./AppInitialization";
+
+import ReactDOM from "react-dom/client";
+
+// export const AppContext = React.createContext();
 
 function App() {
+
+  const [user, setUser] = useState("user");
+  // const [headerMenuDisplay, setHeaderMenuDisplay] = useState("none") 
+
+  let date = new Date();
+  let dateStr = date.getFullYear() + '.' + date.getMonth() + '.' + date.getDay() + '_' +
+                date.getHours() + '.' + date.getMinutes() + '.' + date.getSeconds() + '.' + date.getMilliseconds(); 
+  
+  const [uiSessionId, setUISessionId] = useState(dateStr);
+  const [adminUserid, setAdminUserid] = useState("kate");
+  const [currUserid, setCurrUserid]   = useState("greg");
+
   return (
     <BrowserRouter>
+ 
       <ThemeProvider theme={Theme}>
-        <div className="App">
-          <Header />
+        <div className="App">          
           <Routes>
-            <Route path="/" element={<Home/>} />
-
-              <Route path="signin" element={<SignIn />} />
-
+          <Route path="/" element={<SignIn />} />            
+            <Route path="/SignUp" element={<SignUp />} />
+            <Route path="/ForgotPassword" element={<ForgotPassword />} />
+            <Route path="/SetNewPassword" element={<SetNewPassword />} />
+            <Route path="/UserAdmin" element={<UserAdmin />} />
+            
+            <Route path="/home" element={<Home />} />
+            <Route path="/Home" element={<Home />} />
+         
             {/* Tools Dropdown */}
             <Route path="tools/product-browser" element={<Product_browser />} />
             <Route path="tools/batch-browser" element={<Batch_browser />} />
@@ -53,6 +80,7 @@ function App() {
           <Footer />
         </div>
       </ThemeProvider>
+
     </BrowserRouter>
 
   );

@@ -40,14 +40,14 @@ const ProductTable = () => {
     const getData = async () => {
       let page_n = controller.page + 1
       // Currently set up for the django API, will need to be changed.
-      // let url = `http://127.0.0.1:8000/api/recent_products_react/?page=${page_n}&size=${controller.rowsPerPage}`
-      let url = `http://127.0.0.1:8000/api/recent_products_react/?page=${page_n}&size=${controller.rowsPerPage}`
+      // let url = `http://127.0.0.1:7166/api/recent_products_react/?page=${page_n}&size=${controller.rowsPerPage}`
+      let url = `http://127.0.0.1:7166/api/recent_products_react/?page=${page_n}&size=${controller.rowsPerPage}`
       console.log(controller.search);
       //https://172.17.10.69:7251/api/StoreProductService/GetStoreProductsAsync?storeid=13&scrapebatchid=-1&mostrecentonly=true&pageNumber=${page_n}&pageSize=${controller.rowsPerPage}
       if (controller.search != null) {
         url = url + `&search=${controller.search}`
       }
-        console.log("making api call");
+        console.log("making api call");   alert("making API call");
         console.log(controller.page);
         console.log(url);
 
@@ -58,14 +58,16 @@ const ProductTable = () => {
           //   password: 'abc'
           // }
         }).then(response => {
+               alert("TEST: response=" + response);
+               alert("TEST: response.data=" + response.data);
+               alert("TEST: response.data.results=" + response.data.results);
           setProductList(response.data.results);
           setProductCount(response.data.count);
           console.log(response.data.results);
 
         }, error => {
           console.log(error);
-        });
-      
+        });      
      };
     getData();
   }, [controller]);
@@ -141,9 +143,9 @@ const ProductTable = () => {
         <TableBody>
           {productList.map((product) => (
             <TableRow key={product.id} hover role="checkbox">
-              <TableCell>
+              <TableCell> <div> TEST-TEST-TEST </div>
                 {/* This needs to be changed from a-href to a Link, and we also need a Router set up for it */}
-              <a href={`http://127.0.0.1:8000/tools/product_browser/${product.id}`} className="url_no_highlight"><PageviewOutlined/></a>
+              <a href={`http://127.0.0.1:7166/tools/product_browser/${product.id}`} className="url_no_highlight"><PageviewOutlined/></a>
               </TableCell>
 
               <TableCell>

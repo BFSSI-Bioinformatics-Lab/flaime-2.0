@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {useState, createContext, useContext} from 'react'
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
@@ -12,19 +12,24 @@ import Tooltip from '@mui/material/Tooltip';
 
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
+
 import PageContainer from '../PageContainer';
 
+import { UISessionId, AdminUserid } from '../../../AppInitialization';
 
+const Header = (userRole) => {
 
-const Header = () => {
+    // const [headerMenuDisplay, setHeaderMenuDisplay] = React.useContext(Context);
 
     const [anchorEl, setAnchorEl] = React.useState(null);
     const [anchorEl2, setAnchorEl2] = React.useState(null);
     const [anchorEl3, setAnchorEl3] = React.useState(null);
-    // const open = Boolean(anchorEl);
-    // const handleClick = (event) => {
-    //   setAnchorEl(event.currentTarget);
-    // };
+
+    const open = Boolean(anchorEl);
+    const handleClick = (event) => {
+      setAnchorEl(event.currentTarget);
+    };
+
     const handleClose = () => {
         setAnchorEl(null);
         setAnchorEl2(null);
@@ -32,15 +37,23 @@ const Header = () => {
     };
 
     let navigate = useNavigate(); 
+
     const routeHome = () =>{ 
         let path = '/'; 
         navigate(path);
     }
 
-    const routeSignIn = () =>{ 
-        let path = '/signin'; 
+    const accountLogin = () =>{ 
+        let path = '/SignIn'; 
         navigate(path);
     }
+
+    const userAdmin = () =>{ 
+        let path = '/UserAdmin'; 
+        navigate(path);
+    }
+
+    const isAdmin = (userRole.userRole == "admin") ? true : false;
 
     return (
         // <div>Header</div>
@@ -49,19 +62,18 @@ const Header = () => {
                 <PageContainer>
                     <Toolbar sx={{ paddingLeft: 0, paddingRight: 0 }} disableGutters>
                         <Typography variant="h6" component="div" 
-                        sx={{ flexGrow: 1, cursor:'pointer' }} onClick={routeHome}>
-                            FLAIME
+                                    sx={{ flexGrow: 1, cursor:'pointer' }} onClick={routeHome} >
+                            FLAIME  
                         </Typography>
 
                         {/* Menu Buttons */}
                         <Button
                             id="tools"
-                            // aria-controls={open ? "tools-menu" : undefined}
+                            //aria-controls={open ? "tools-menu" : undefined}
                             aria-haspopup="true"
-                            // aria-expanded={open ? "true" : undefined}
+                            //aria-expanded={open ? "true" : undefined}
                             onClick={e=>setAnchorEl(e.currentTarget)}
-                            color="inherit"
-                            
+                            color="inherit"                            
                         >
                             tools
                         </Button>
@@ -93,9 +105,9 @@ const Header = () => {
 
                         <Button
                             id="reports"
-                            // aria-controls={open ? "reports-menu" : undefined}
+                            //aria-controls={open ? "reports-menu" : undefined}
                             aria-haspopup="true"
-                            // aria-expanded={open ? "true" : undefined}
+                            //aria-expanded={open ? "true" : undefined}
                             onClick={e=>setAnchorEl2(e.currentTarget)}
                             color="inherit"
                             
@@ -132,8 +144,7 @@ const Header = () => {
                             aria-haspopup="true"
                             // aria-expanded={open ? "true" : undefined}
                             onClick={e=>setAnchorEl3(e.currentTarget)}
-                            color="inherit"
-                            
+                            color="inherit"                            
                         >
                             Data
                         </Button>
@@ -163,9 +174,9 @@ const Header = () => {
 
                         <Button
                             id="about"
-                            // aria-controls={open ? "basic-menu" : undefined}
+                            //aria-controls={open ? "basic-menu" : undefined}
                             aria-haspopup="true"
-                            // aria-expanded={open ? "true" : undefined}
+                            //aria-expanded={open ? "true" : undefined}
                             // onClick={handleClick}
                             color="inherit"
                             sx={{ mr: 2 }}
@@ -174,17 +185,31 @@ const Header = () => {
                             About
                         </Button>
 
+            {isAdmin &&
+                        <Button
+                            id="admin"
+                            //aria-controls={open ? "tools-menu" : undefined}
+                            aria-haspopup="true"
+                            //aria-expanded={open ? "true" : undefined}
+                            onClick={userAdmin}
+                            color="inherit"                            
+                        >
+                            admin
+                        </Button>
+}
+
                         <Tooltip title="Account Login">
                             <IconButton
                                 size="large"
                                 edge="start"
                                 color="inherit"
                                 aria-label="login"
-                                onClick={routeSignIn}
+                                onClick={ accountLogin }
                             >
                                 <AccountCircleIcon />
                             </IconButton>
                         </Tooltip>
+
                     </Toolbar>
                 </PageContainer>
             </AppBar>

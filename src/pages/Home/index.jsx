@@ -1,9 +1,10 @@
-import React from 'react'
+import React, {useState, useContext} from "react"
 import { Image } from 'mui-image'
 import landing from "../../static/images/landing.jpg"
 import { Typography } from '@mui/material'
 import Grid from '@mui/material/Grid';
 import SearchBar from "../../components/inputs/SearchBar";
+import {Context} from "../../App"
 import {
   ExploreItem,
   ArrowButtonLink,
@@ -20,7 +21,22 @@ import {
   ArrowCircleRightIcon
 } from "./styles";
 
+import Header from "../../components/page/Header";
+
+import { useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
+
 const Home = () => {
+
+  const location = useLocation();
+  let userRoleStr = "regular";
+
+  if (location != null && location.state != null && location.state.userRole.length > 0)
+  {
+      userRoleStr = location.state.userRole;   
+  }
+  
+   // const [headerMenuDisplay, setHeaderMenuDisplay] = useState("") 
 
   const exploreItems = [
     {
@@ -48,11 +64,21 @@ const Home = () => {
       icon: <ShoppingCartIcon />,
       link: "reports/nutrient"
     },
-  ]
+  ];
+
+  let navigate = useNavigate();
+
+  const userAdmin = (event) => {
+    navigate(`/UserAdmin`);            
+};
+
+  // setHeaderMenuDisplay("")
 
   return (
     <HomePageContainer>
+      <Header userRole={userRoleStr} />
       <div className='landing-img' style={{ position: "relative" }}>
+
         <Image src={landing} height='550px' duration={0} easing='ease' opacity={0.5}></Image>
         
         <PageTitleTypography variant="h2">FLAIME</PageTitleTypography>
@@ -63,6 +89,7 @@ const Home = () => {
       <SearchBarContainer>
         <SearchBar placeholder="Quick Search" width="452px" height="75px" />
       </SearchBarContainer>
+      
       <ExploreHeadingContainer maxWidth="sm">
         <Typography variant="h2" color="primary.dark" align="center">Explore the FLAIME Database</Typography>
       </ExploreHeadingContainer>
@@ -100,9 +127,7 @@ const Home = () => {
                   </Grid>
                 )
               }
-            </Grid> 
-          
-          
+            </Grid>
         </ExploreSectionBox>  
       </ExploreSectionContainer>
       
