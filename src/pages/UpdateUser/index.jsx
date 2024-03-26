@@ -58,7 +58,7 @@ const UpdateUser = () => {
         // alert("on UpdateUser, in updateUser: making api call: userPassword = " + userPassword + 
         // ", hashedUserPassword = " + hashedUserPassword);  
         
-        axios.post(url, {}, {})
+        axios.post(url)
             .then(response => {
                alert("response =" + JSON.stringify(response));
             }, 

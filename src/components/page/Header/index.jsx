@@ -185,6 +185,19 @@ const Header = (userRole) => {
                             About
                         </Button>
 
+            {isAdmin &&
+                        <Button
+                            id="admin"
+                            //aria-controls={open ? "tools-menu" : undefined}
+                            aria-haspopup="true"
+                            //aria-expanded={open ? "true" : undefined}
+                            onClick={userAdmin}
+                            color="inherit"                            
+                        >
+                            admin
+                        </Button>
+}
+
                         <Tooltip title="Account Login">
                             <IconButton
                                 size="large"
@@ -196,19 +209,7 @@ const Header = (userRole) => {
                                 <AccountCircleIcon />
                             </IconButton>
                         </Tooltip>
-{isAdmin &&
-                        <Tooltip title="Admin">
-                            <IconButton
-                                size="small"
-                                edge="start"
-                                color="inherit"
-                                aria-label="login"
-                                onClick={ userAdmin }
-                            >
-                                ADMIN
-                            </IconButton>
-                        </Tooltip>
-}
+
                     </Toolbar>
                 </PageContainer>
             </AppBar>

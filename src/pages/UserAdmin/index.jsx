@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { Typography, Grid, Button, TextField } from "@mui/material";
 import { SignInContainer, SignInPageContainer, SignInInputField } from "./styles";
-import axios from 'axios';
 import { styled } from '@mui/material/styles';
 import { CheckBox } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 
 import { Table, TableHead, TableBody, TableRow, TableCell, TablePagination, 
          TableContainer } from '@mui/material';
-  
+
+import axios from 'axios';
+import bcrypt from 'bcryptjs';
+                  
 const UserAdmin = () => {
 
     const [lang, setLang] = useState("en")
@@ -19,7 +21,7 @@ const UserAdmin = () => {
     const [pathBase, setPathBase] = useState("https://localhost:7166/api/")  // 172.17.10.69:7251
 
     const [message, setMessage] = useState("")
-    const [adminUserid, setAdminUserid] = useState("")
+    const [adminUserid, setAdminUserid] = useState("nick")  // TO-DO set dynamically
 
     const [flName, setFLName] = useState("")
     const [userid, setUserid] = useState("")
@@ -50,7 +52,8 @@ const UserAdmin = () => {
                
         if (userid.length > 0 && userPassword.length > 0)
         {
-            var url = pathBase + `ReassignUserPassword/?userid=${userid}&userPassword=${userPassword}`;  
+            var url = pathBase + `ReassignUserPassword/?userid=${userid}&userPassword=${userPassword}&` +
+            `adminUserid=${adminUserid}`;  
                     // alert("url = " + url);        
             var response = axios.put(url, {}, {}).then(response => {
                 // alert("response =" + JSON.stringify(response));
@@ -71,7 +74,8 @@ const UserAdmin = () => {
 
     const addUser = (event) => {
 
-        var url = pathBase + `AddUser/?userFLName=${flName}&userid=${userid}&userPassword=${userPassword}`;  
+        var url = pathBase + `AddUser/?userFLName=${flName}&userid=${userid}&userPassword=${userPassword}&` +
+          `adminUserid=${adminUserid}`;  
 
         axios.put(url, {}, {})
     .then(response => { /* alert("response = " + JSON.stringify(response)); */ }, 
@@ -82,7 +86,7 @@ const UserAdmin = () => {
 
     const deleteUser = (event) => {
 
-        var url = pathBase + `DeleteUser/?userid=${userid}`;  
+        var url = pathBase + `DeleteUser/?userid=${userid}&adminUserid=${adminUserid}`;  
 
         axios.put(url, {}, {})
             .then(response => {
@@ -95,22 +99,19 @@ const UserAdmin = () => {
         navigate(`/Home`);            
     };
 
-    const showUserids_WithForgotPassword = (event) => {
-        alert("call showUserids_WithForgotPassword");
+    const saveCryptSalt = (event) => {
 
-        var url = pathBase + `GetUserids_WithForgotPassword/?userid=${userid}`;  
+        alert("call saveCryptSalt");
 
-        axios.get(url, {}, {})
-            .then(response => {
-               alert("response = " + JSON.stringify(response));
-            }, 
-            error => {
-            console.log(error);
-        }); 
+        var cryptSalt = bcrypt.genSaltSync(10);
 
-        navigate(`/Home`);            
+        var url = pathBase + `SaveCryptSalt/?cryptSalt=${cryptSalt}`;  
+
+        axios.post(url).then(response => {
+            alert("SaveCryptSalt = " + JSON.stringify(response));
+        });
     };
-
+    
     return (
         <SignInPageContainer>
             <SignInContainer>                
@@ -118,6 +119,7 @@ const UserAdmin = () => {
                     <Grid item pt={6}>
                         <Typography variant="h4" color="primary"> User Admin </Typography>
                     </Grid>
+    
                     <Grid item>
                         <Typography style={{ color: 'red', fontWeight:'bold' }} > {message} </Typography>
                     </Grid>
@@ -131,7 +133,7 @@ const UserAdmin = () => {
                       <TextField id="userid" label="Username*" placeholder="Username" 
                                  type="text"
                                  autoComplete="current-password"                                     
-                                 onChange={(e) => setUserid(e.target.value)} />
+                                 onChange={(e) => setUserid(e.target.value)} /> 
                     </Grid>
                     <Grid item>                        
                         <TextField id="password" label="Password*" placeholder="Password" 
@@ -155,14 +157,6 @@ const UserAdmin = () => {
                                type="checkbox" onChange={() => setShowConfirmUserPassword((prev) => !prev) } />
                     </Grid>
 
-{/*     
-                    <Grid item> 
-                        <div style={{textAlign:"left"}}>
-                            <div style={{float:"left"}} > <CheckBox></CheckBox> </div>
-                            <div style={{float:"left"}} > Remember Me </div>
-                        </div>
-                    </Grid>
-*/}                    
                     <Grid item>
                         <Button onClick={reassignUserPassword}  variant="contained" color="action" size="large" 
                                 sx={{ width: 250, height: 62, borderRadius: 5, textTransform: "none"}} >
@@ -172,7 +166,7 @@ const UserAdmin = () => {
                             </Typography>
                         </Button>
                       </Grid> 
-                      <br/>
+
                       <Grid item>
                         <Button onClick={addUser}  variant="contained" color="action" size="large" 
                                 sx={{ width: 250, height: 62, borderRadius: 5, textTransform: "none"}} >
@@ -182,7 +176,7 @@ const UserAdmin = () => {
                             </Typography>
                         </Button>
                       </Grid>
-                      <br/>
+            
                       <Grid item>
                         <Button onClick={deleteUser}  variant="contained" color="action" size="large" 
                                 sx={{ width: 250, height: 62, borderRadius: 5, textTransform: "none"}} >
@@ -192,17 +186,16 @@ const UserAdmin = () => {
                             </Typography>
                         </Button>
                       </Grid>
-                      <br/>  
+
                       <Grid item>
-                        <Button onClick={showUserids_WithForgotPassword}  variant="contained" color="action" size="large" 
+                        <Button onClick={saveCryptSalt}  variant="contained" color="action" size="large" 
                                 sx={{ width: 250, height: 62, borderRadius: 5, textTransform: "none"}} >
 
                             <Typography variant="h5" color="white">
-                                Show Userids With Forgot Password 
+                                Save Crypt Salt 
                             </Typography>
                         </Button>
                       </Grid>
-
                 </Grid>
             </SignInContainer>
         </SignInPageContainer>
