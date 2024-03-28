@@ -22,21 +22,46 @@ import {
 } from "./styles";
 
 import Header from "../../components/page/Header";
+import FinalPage from "../../components/page/FinalPage";
 
 import { useNavigate } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 
 const Home = () => {
 
-  const location = useLocation();
-  let userRoleStr = "regular";
+  let navigate = useNavigate();
 
-  if (location != null && location.state != null && location.state.userRole.length > 0)
+  let location = useLocation();
+
+  let _userid = "";
+  let _userRole = "";
+  let _uiSessionId = "";
+  let _isValidUser = false;
+
+  if (location != null && location.state != null) 
   {
-      userRoleStr = location.state.userRole;   
+    if (location.state.userid.length > 0)
+    {
+      _userid = location.state.userid;
+    }
+
+    if (location.state.userRole.length > 0)
+    {
+      _userRole = location.state.userRole;
+    }
+    
+    if (location.state.uiSessionId.length > 0)
+    {
+      _uiSessionId = location.state.uiSessionId;  
+
+      if (_uiSessionId.length > 0)
+      {
+         _isValidUser = true;
+      }
+    }
   }
-  
-   // const [headerMenuDisplay, setHeaderMenuDisplay] = useState("") 
+
+  // const [headerMenuDisplay, setHeaderMenuDisplay] = useState("") 
 
   const exploreItems = [
     {
@@ -66,17 +91,18 @@ const Home = () => {
     },
   ];
 
-  let navigate = useNavigate();
-
   const userAdmin = (event) => {
     navigate(`/UserAdmin`);            
 };
 
   // setHeaderMenuDisplay("")
 
-  return (
-    <HomePageContainer>
-      <Header userRole={userRoleStr} />
+  return ( 
+
+    <HomePageContainer>      
+      {!_isValidUser && <FinalPage /> }
+      {_isValidUser &&  <div>     
+      <Header userRole={_userRole} />
       <div className='landing-img' style={{ position: "relative" }}>
 
         <Image src={landing} height='550px' duration={0} easing='ease' opacity={0.5}></Image>
@@ -93,13 +119,13 @@ const Home = () => {
       <ExploreHeadingContainer maxWidth="sm">
         <Typography variant="h2" color="primary.dark" align="center">Explore the FLAIME Database</Typography>
       </ExploreHeadingContainer>
+
       <ExploreSectionContainer>
         <ExploreSectionBox
           display="flex"
           justifyContent="center"
           alignItems="center"
-        >
-          
+        >          
             <Grid container 
               rowSpacing={{xs: 1, sm: 2, md: 6}} 
               columnSpacing={{ xs: 1, sm: 2, md: 6 }}
@@ -129,10 +155,10 @@ const Home = () => {
               }
             </Grid>
         </ExploreSectionBox>  
-      </ExploreSectionContainer>
-      
-    </HomePageContainer>
+      </ExploreSectionContainer> 
+      </div> }
+    </HomePageContainer> 
   )
 }
 
-export default Home
+export default Home;

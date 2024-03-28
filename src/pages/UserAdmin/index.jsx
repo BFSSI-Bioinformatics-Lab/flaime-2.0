@@ -3,15 +3,54 @@ import { Typography, Grid, Button, TextField } from "@mui/material";
 import { SignInContainer, SignInPageContainer, SignInInputField } from "./styles";
 import { styled } from '@mui/material/styles';
 import { CheckBox } from "@mui/icons-material";
-import { useNavigate } from "react-router-dom";
+import FinalPage from "../../components/page/FinalPage";
 
 import { Table, TableHead, TableBody, TableRow, TableCell, TablePagination, 
          TableContainer } from '@mui/material';
 
+import { useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
+         
 import axios from 'axios';
 import bcrypt from 'bcryptjs';
-                  
+
 const UserAdmin = () => {
+
+  let navigate = useNavigate();
+  
+  // --- Process parameters sent by the page caller ---
+
+  let _ownAdminUserid = "";
+  let _otherUserid = "";
+  let _ownUserRole = "";    // should be admin !!! 
+  let _otherUserRole = "";
+  let _uiSessionId = "";
+  let _isValidUser = false;
+
+  let location = useLocation();
+
+  if (location != null && location.state != null) 
+  {
+    if (location.state.userid.length > 0)
+    {
+      _ownAdminUserid = location.state.userid;
+    }
+
+    if (location.state.userRole.length > 0)
+    {
+      _ownUserRole = location.state.userRole;    // should be admin !!!
+    }
+    
+    if (location.state.uiSessionId.length > 0)
+    {
+      _uiSessionId = location.state.uiSessionId;  
+
+      if (_uiSessionId.length > 0)
+      {
+         _isValidUser = true;
+      }
+    }
+   }
 
     const [lang, setLang] = useState("en")
     const [header, setHeader] = useState("Sign In")
@@ -21,7 +60,8 @@ const UserAdmin = () => {
     const [pathBase, setPathBase] = useState("https://localhost:7166/api/")  // 172.17.10.69:7251
 
     const [message, setMessage] = useState("")
-    const [adminUserid, setAdminUserid] = useState("nick")  // TO-DO set dynamically
+
+    let _adminUserid = '';  
 
     const [flName, setFLName] = useState("")
     const [userid, setUserid] = useState("")
@@ -46,18 +86,18 @@ const UserAdmin = () => {
         fontSize: 14,
     }));
 
-    let navigate = useNavigate(); 
-    
     const reassignUserPassword = (event) => {
                
         if (userid.length > 0 && userPassword.length > 0)
         {
             var url = pathBase + `ReassignUserPassword/?userid=${userid}&userPassword=${userPassword}&` +
-            `adminUserid=${adminUserid}`;  
-                    // alert("url = " + url);        
+            `adminUserid=${_ownAdminUserid}`;  
+                    alert("url = " + url);        
             var response = axios.put(url, {}, {}).then(response => {
                 // alert("response =" + JSON.stringify(response));
-                navigate(`/Home`);
+                navigate(`/Home`, { state: 
+                    { userid: _otherUserid, userRole: _otherUserRole, uiSessionId: _uiSessionId } 
+                } );
             }); 
         }
         else {
@@ -75,18 +115,20 @@ const UserAdmin = () => {
     const addUser = (event) => {
 
         var url = pathBase + `AddUser/?userFLName=${flName}&userid=${userid}&userPassword=${userPassword}&` +
-          `adminUserid=${adminUserid}`;  
+          `adminUserid=${_ownAdminUserid}`;  
 
         axios.put(url, {}, {})
     .then(response => { /* alert("response = " + JSON.stringify(response)); */ }, 
                   error => { console.log(error); } ); 
 
-        navigate(`/Home`);                
+        navigate(`/Home`, { state: 
+            { userid: _otherUserid, userRole: _otherUserRole, uiSessionId: _uiSessionId } 
+        } );                
     };
 
     const deleteUser = (event) => {
 
-        var url = pathBase + `DeleteUser/?userid=${userid}&adminUserid=${adminUserid}`;  
+        var url = pathBase + `DeleteUser/?userid=${_otherUserid}&adminUserid=${_ownAdminUserid}`;  
 
         axios.put(url, {}, {})
             .then(response => {
@@ -96,7 +138,9 @@ const UserAdmin = () => {
             console.log(error);
         }); 
 
-        navigate(`/Home`);            
+        navigate(`/Home`, { state: 
+            { userid: _otherUserid, userRole: _otherUserRole, uiSessionId: _uiSessionId } 
+        } );            
     };
 
     const saveCryptSalt = (event) => {
@@ -114,6 +158,7 @@ const UserAdmin = () => {
     
     return (
         <SignInPageContainer>
+          <div>
             <SignInContainer>                
                 <Grid container direction="column" justifyContent={"center"} alignItems={"left"} spacing={4}>
                     <Grid item pt={6}>
@@ -148,13 +193,13 @@ const UserAdmin = () => {
 
                     <Grid item>                        
                         <TextField id="confirmUserPassword" label="Confirm Password*" placeholder="Confirm Password" 
-                                   type={ showUserPassword ? "text" : "password" }
+                                   type={ showConfirmUserPassword ? "text" : "password" }
                                    autoComplete="current-password"                                     
                                    onChange={(e) => setConfirmUserPassword(e.target.value)} /> <br/>
 
                         <label for="check">Show Confirm Password</label>
                         <input id="check" value={showConfirmUserPassword}
-                               type="checkbox" onChange={() => setShowConfirmUserPassword((prev) => !prev) } />
+                               type="checkbox" onChange={() => setShowConfirmUserPassword((prev2) => !prev2) } />
                     </Grid>
 
                     <Grid item>
@@ -187,17 +232,9 @@ const UserAdmin = () => {
                         </Button>
                       </Grid>
 
-                      <Grid item>
-                        <Button onClick={saveCryptSalt}  variant="contained" color="action" size="large" 
-                                sx={{ width: 250, height: 62, borderRadius: 5, textTransform: "none"}} >
-
-                            <Typography variant="h5" color="white">
-                                Save Crypt Salt 
-                            </Typography>
-                        </Button>
-                      </Grid>
                 </Grid>
-            </SignInContainer>
+            </SignInContainer> 
+          </div> 
         </SignInPageContainer>
     )
 }

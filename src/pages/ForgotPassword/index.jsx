@@ -32,7 +32,7 @@ const ForgotPassword = () => {
         search: null
     });
 
-    var url = pathBase + `AddUserEmail/?userid=${userid}&userEmail=${userEmail}&emailSubject=ForgotPassword&` +
+    var url = pathBase + `AddUserEmail?userid=${userid}&userEmail=${userEmail}&emailSubject=ForgotPassword&` +
                                        `emailMessage=ForgotPassword&emailReason=ForgotPassword`; 
 
     const StyledHeader = styled(TableCell)(({ theme }) => ({

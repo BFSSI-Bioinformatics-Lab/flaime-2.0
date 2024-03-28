@@ -23,7 +23,7 @@ import SignUp from "./pages/SignUp";
 import ForgotPassword from "./pages/ForgotPassword";
 import SetNewPassword from "./pages/SetNewPassword";
 import UserAdmin from "./pages/UserAdmin";
-import { APIPathBase, BcryptSalt } from "./AppInitialization";
+import FinalPage from "./components/page/FinalPage";  
 
 import ReactDOM from "react-dom/client";
 
@@ -34,13 +34,13 @@ function App() {
   const [user, setUser] = useState("user");
   // const [headerMenuDisplay, setHeaderMenuDisplay] = useState("none") 
 
-  let date = new Date();
-  let dateStr = date.getFullYear() + '.' + date.getMonth() + '.' + date.getDay() + '_' +
-                date.getHours() + '.' + date.getMinutes() + '.' + date.getSeconds() + '.' + date.getMilliseconds(); 
+  // let date = new Date();
+  // let dateStr = date.getFullYear() + '.' + date.getMonth() + '.' + date.getDay() + '_' +
+  //               date.getHours() + '.' + date.getMinutes() + '.' + date.getSeconds() + '.' + date.getMilliseconds(); 
   
-  const [uiSessionId, setUISessionId] = useState(dateStr);
-  const [adminUserid, setAdminUserid] = useState("kate");
-  const [currUserid, setCurrUserid]   = useState("greg");
+  // const [uiSessionId, setUISessionId] = useState(dateStr);
+  // const [adminUserid, setAdminUserid] = useState("kate");
+  // const [currUserid, setCurrUserid]   = useState("greg");
 
   return (
     <BrowserRouter>
@@ -56,7 +56,8 @@ function App() {
             
             <Route path="/home" element={<Home />} />
             <Route path="/Home" element={<Home />} />
-         
+            <Route path="/FinalPage" element={<FinalPage />} />
+
             {/* Tools Dropdown */}
             <Route path="tools/product-browser" element={<Product_browser />} />
             <Route path="tools/batch-browser" element={<Batch_browser />} />

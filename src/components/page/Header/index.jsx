@@ -196,7 +196,7 @@ const Header = (userRole) => {
                         >
                             admin
                         </Button>
-}
+            }
 
                         <Tooltip title="Account Login">
                             <IconButton
