@@ -1,9 +1,7 @@
 import axios from "axios";
-import config from "./config.json";
 
-const ApiInstance = axios.create({
-    baseURL: config.BASE_URL
-});
+
+const ApiInstance = axios.create({ baseURL: process.env.REACT_APP_API_URL });
 
 const ApiQueryGet = async (url, controller) => {
     const res = await ApiInstance.get(url, {signal: controller ? controller.signal : null});
