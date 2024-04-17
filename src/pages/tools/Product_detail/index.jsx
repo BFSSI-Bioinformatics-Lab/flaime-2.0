@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react'
 import {useParams} from "react-router-dom"
-import ApiInstance from '../../../api/Api';
+import { ApiQueryGet } from '../../../api/Api';
 import { Image } from 'mui-image'
 import Grid from '@mui/material/Grid';
 import PageContainer from '../../../components/page/PageContainer';
@@ -46,9 +46,9 @@ const Product_detail = () => {
         
         let urlBase = `StoreProductService/SelectStoreProductsAsync?id=${productId}`
 
-        ApiInstance.get(urlBase).then(
-            (res) => {
-                const dataProduct = res.data.responseObjects[0]
+        ApiQueryGet(urlBase).then(
+            (data) => {
+                const dataProduct = data.responseObjects[0]
                 if (dataProduct === undefined) return;
                 setProducts(dataProduct);
                 setProduct(dataProduct);

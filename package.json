@@ -13,6 +13,7 @@
     "@testing-library/user-event": "^13.5.0",
     "axios": "^0.27.2",
     "d3": "^7.8.5",
+    "dotenv": "^16.4.5",
     "mui-image": "^1.0.7",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -22,8 +23,12 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
+    "start:dev": "dotenv -e .env.development react-scripts start",
+    "start:prod": "dotenv -e .env.production react-scripts start",
+    "start": "dotenv -e .env.development react-scripts start",
+    "build:dev": "dotenv -e .env.development react-scripts build",
+    "build:prod": "dotenv -e .env.production react-scripts build",
+    "build": "echo \"Please use build:dev or build:prod \" && exit 1",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
@@ -44,5 +49,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "dotenv-cli": "^7.4.1"
   }
 }
