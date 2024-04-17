@@ -32,8 +32,7 @@ const Product_detail = () => {
     const [product, setProduct] = useState()
 
     const imagePathToUrl = (imagePath) => {
-        // TODO: use the real location of the image
-        return `http://172.17.10.134/media/${imagePath}`;
+        return `${process.env.REACT_APP_IMG_SERVER_URL}/images/${imagePath}`;
     }
 
     const breadcrumbComponent = (crumbs) => {
