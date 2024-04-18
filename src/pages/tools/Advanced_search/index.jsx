@@ -21,6 +21,7 @@ import {
     NutrientFiltersGrid,
     SearchButton
 } from "./styles.js"
+import TextListInput from "../../../components/inputs/TextListInput/index.jsx";
 
 const nutrientNames = nutrientsList.map(nutrient => nutrient.name);
 
@@ -60,6 +61,11 @@ const Advanced_search = () => {
     const [totalTableRows, setTotalTableRows] = useState(0);
     
     const [advancedSearchCancel, setAdvancedSearchCancel] = useState({ fn: () => {} });
+
+    const productNameInputAdditionalFeats = [
+        {title: "Add CSV file", onClick: (event) => { console.log("CSV"); }},
+        {title: "Add Txt file", onClick: (event) => { console.log("TXT"); }}
+    ];
 
     const searchTableColumns = [
         { 
@@ -280,6 +286,7 @@ const Advanced_search = () => {
             <AdvancedSearchSection>
                 <Typography variant="h4">Metadata</Typography>
                 <AdvancedSearchSection>
+                    <TextListInput category={searchCategories[0] ?? {} } placeholder={"List of product names..."} additionalOptions={productNameInputAdditionalFeats}></TextListInput>
                     <AdvancedSearchFilter categories={searchCategories} onInputChange={onSearchFilterChange}/>
                 </AdvancedSearchSection>
             </AdvancedSearchSection>
