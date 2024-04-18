@@ -61,6 +61,13 @@ const Product_browser = () => {
         minWidth: 230,
         flex: 2,
         renderCell: (params) => <a href={`${params.row.siteUrl}`}>{params.row.storeEntity.name}</a>
+    },
+    { 
+      field: 'source',
+      headerName: "Web Scrape",
+      minWidth: 150,
+      flex: 2,
+      renderCell: (params) => params.row.sourceEntity.name
     }
   ];
 
