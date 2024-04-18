@@ -64,7 +64,7 @@ const Product_browser = () => {
     },
     { 
       field: 'source',
-      headerName: "Web Scrape",
+      headerName: "Data Source",
       minWidth: 150,
       flex: 2,
       renderCell: (params) => params.row.sourceEntity.name
