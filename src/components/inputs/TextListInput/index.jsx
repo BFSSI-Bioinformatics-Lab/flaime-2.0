@@ -1,13 +1,24 @@
 import { useAutocomplete } from '@mui/base/useAutocomplete';
-import { Typography } from "@mui/material";
-import { useState } from 'react';
-import { Menu, MenuItem } from '@mui/material';
-import { TextListInputField, TextListInputListbox, AdditionalOptionsIconContainer, TextListInputFieldContainer, TextListInputContainer, AdditionalOptionsIcon, AdditionalOptionsButton } from './styles';
+import { Typography, Tooltip, IconButton, Box, Chip, Stack } from "@mui/material";
+import { useState, useEffect, useContext, useReducer } from 'react';
+import { HelpTooltipIcon } from "../../globalStyles";
+import { 
+    TextListInputField, 
+    TextListInputListbox, 
+    AdditionalOptionsIconContainer, 
+    TextListInputFieldContainer, 
+    TextListInputContainer, 
+    AdditionalOptionsIcon, 
+    AdditionalOptionsButton, 
+    AdditionalOptionsMenuItem,
+    AdditionalOptionsMenu  } from './styles';
 
 
-function TextListInput({category, placeholder, additionalOptions}) {
-    const categoryOptions = category.options ?? [];
+export function TextListInput({title, category= [], placeholder, additionalOptions = [], inputWidth = "300px", helpTxt="", attachments = [], onAttachmentDelete=null, onTextChange=null}) {
+    const categoryOptions = category ?? [];
     additionalOptions = additionalOptions ?? [];
+    const [inputAttachments, setInputAttachments] = useState(attachments);
+    const [, forceUpdate] = useReducer(x => x + 1, 0);
 
     // get the needed values to custom make an autocomplete input
     const {
@@ -20,7 +31,8 @@ function TextListInput({category, placeholder, additionalOptions}) {
       } = useAutocomplete({
         id: 'use-autocomplete-demo',
         options: categoryOptions,
-        getOptionLabel: (option) => option
+        getOptionLabel: (option) => option,
+        freeSolo: true
       });
 
     // modify the focus/unfocus events for the autocomplete input
@@ -38,7 +50,6 @@ function TextListInput({category, placeholder, additionalOptions}) {
         unFocusInput();
     }
 
-
     const [containerBorderWidth, setContainerBorderWidth] = useState("1px");
     const [additionalOptAnchorEl, setAdditionalOptAnchorEl] = useState(null);
     const additionalMenuIsOpen = Boolean(additionalOptAnchorEl);
@@ -46,8 +57,24 @@ function TextListInput({category, placeholder, additionalOptions}) {
     return (
     <div>
         <div {...getRootProps()}>
-            <Typography variant="h5" {...getInputLabelProps()}>{category.title}</Typography>
-            <TextListInputContainer sx={{'border-width': containerBorderWidth}}>
+            <Box sx={{display: "flex"}}>
+                { title !== undefined ? (<Typography variant="h5">{title}</Typography>) : null}
+                { helpTxt !== "" ? (
+                <Tooltip title={helpTxt} arrow>
+                    <IconButton>
+                    <HelpTooltipIcon />
+                    </IconButton>
+                </Tooltip>) : null}
+            </Box>
+            <Stack direction="row" spacing={1}>
+                {inputAttachments.map((attachment, ind) => {
+                    return <Chip label={attachment} onDelete={() => {
+                        onAttachmentDelete(attachment, ind);
+                        forceUpdate();
+                    }}/>
+                })}
+            </Stack>
+            <TextListInputContainer sx={{'border-width': containerBorderWidth, width: inputWidth}}>
                 <AdditionalOptionsIconContainer>
                     <AdditionalOptionsButton 
                         id="additional-button"
@@ -58,32 +85,32 @@ function TextListInput({category, placeholder, additionalOptions}) {
                 >
                         <AdditionalOptionsIcon  />
                     </AdditionalOptionsButton>
-                    <Menu
+                    <AdditionalOptionsMenu
                         id="additional-menu"
                         anchorEl={additionalOptAnchorEl}
                         open={additionalMenuIsOpen}
                         onClose={additionalOptMenuClose}
+                        disableAutoFocus={true}
                         MenuListProps={{
                             'aria-labelledby': 'additional-button',
                         }}
                     >
-                    { additionalOptions.length > 0 ? (
-                        additionalOptions.map((option) => (
-                            <MenuItem onClick={option.onClick}>{option.title}</MenuItem>
-                        ))
-                    ) : null}
-                    </Menu>
+                    { additionalOptions.map((option) => {
+                        const innerComponent = option.component ?? option.title;
+                        const onClick = option.onClick ?? null;
+                        return <AdditionalOptionsMenuItem onClick={onClick}>{innerComponent}</AdditionalOptionsMenuItem>
+                    })}
+                    </AdditionalOptionsMenu>
                 </AdditionalOptionsIconContainer>
                 <TextListInputFieldContainer>
-                    <TextListInputField {...inputProps} placeholder={placeholder}/>
-                    {groupedOptions.length > 0 ? (
+                    <TextListInputField {...inputProps} placeholder={placeholder} onInput={onTextChange}/>
+                </TextListInputFieldContainer>
+                {groupedOptions.length > 0 ? (
                     <TextListInputListbox {...getListboxProps()}>
                         {groupedOptions.map((option, index) => (
                             <li {...getOptionProps({ option, index })}>{option}</li>
                         ))}
-                    </TextListInputListbox>
-                    ) : null}
-                </TextListInputFieldContainer>
+                    </TextListInputListbox> ) : null}
             </TextListInputContainer>
         </div>
     </div>
@@ -106,5 +133,3 @@ function TextListInput({category, placeholder, additionalOptions}) {
         setAdditionalOptAnchorEl(null);
     }
 }
-
-export default TextListInput;
