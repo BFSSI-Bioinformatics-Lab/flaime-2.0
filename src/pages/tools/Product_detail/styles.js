@@ -48,5 +48,5 @@ export const ProductImageContainer = styled("div")(() => ({
 
 export const ProductIngredientsHeadingContainer = styled("div")(() => ({
     marginTop: "40px", 
-    marginBottom: "10px"
+    // marginBottom: "10px"
 }));

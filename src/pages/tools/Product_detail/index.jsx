@@ -14,6 +14,10 @@ import {
     ProductImageContainer,
     ProductIngredientsHeadingContainer
 } from "./styles";
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography } from '@mui/material';
+import Divider from '@mui/material/Divider';
+
+import { nft_order, nutrientMatches } from './nft_flaime_nutrients';
 
 const Product_detail = () => {
     
@@ -38,6 +42,12 @@ const Product_detail = () => {
     const breadcrumbComponent = (crumbs) => {
         return crumbs.join(" > ")
     }
+
+    // list of possible energy values
+    const energy = ['ENERGY (KILOCALORIES)', 'ENERGY (KILOJOULES)'];
+
+
+
 
     useEffect( () =>{
         
@@ -107,14 +117,14 @@ const Product_detail = () => {
                 name: "Atwater Result",
                 value: product.productEntity.atWaterResult ?? "Missing information"
             },
-            {
-                name: "Total Size",
-                value: product.totalSize
-            },
-            {
-                name: "Serving Size",
-                value: product.servingSize ? `${product.servingSize} ${product.servingSizeUnitEntity.name ?? ""}` : null
-            },
+            // {
+            //     name: "Total Size",
+            //     value: product.totalSize
+            // },
+            // {
+            //     name: "Serving Size",
+            //     value: product.servingSize ? `${product.servingSize} ${product.servingSizeUnitEntity.name ?? ""}` : null
+            // },
             {
                 name: "Breadcrumbs",
                 value: breadcrumbComponent(product.breadcrumbEntity.breadcrumbArray)
@@ -142,7 +152,8 @@ const Product_detail = () => {
             >
                 <Grid container spacing={1} direction="row"
                 justifyContent="space-between" alignItems="center">
-                    <Grid xs={12} md={6} item>
+                    {/*Change to md={6} when uncomment the lower part */}
+                     <Grid xs={12} md={12} item> 
                         <Grid container alignItems="center" wrap="nowrap">
                             <Grid item>
                                 <PageIcon></PageIcon>
@@ -153,7 +164,7 @@ const Product_detail = () => {
                         </Grid>
                     </Grid>
 
-                    <Grid container item xs={12} md={6} spacing={3} direction="row"
+                    {/* <Grid container item xs={12} md={6} spacing={3} direction="row"
                 justifyContent="space-around" alignItems="center">
                         <Grid item xs={3}>
                             <ProductStatItem >High Sodium</ProductStatItem>
@@ -167,7 +178,7 @@ const Product_detail = () => {
                         <Grid item xs={1}>
                             
                         </Grid>
-                    </Grid>
+                    </Grid> */}
                 </Grid>
                 {/* <Paper elevation={0} width='50%' sx={{
                     display: "flex",
@@ -218,77 +229,111 @@ const Product_detail = () => {
                             </Grid>
                             <Grid item xs={12} md={6}>
                                 <div>
+                                
                                     {product.storeProductImageEntities && product.storeProductImageEntities.length > 0 && (
-                                        <ProductImageContainer>
+                                        <ProductImageContainer style={{ display: 'flex', justifyContent: 'center' }}>
                                             <Image key={product.storeProductImageEntities[0].imagePath} 
                                                 src={imagePathToUrl(product.storeProductImageEntities[0].imagePath)} 
                                                 alt={product.siteName} 
-                                                width="100%"
+                                                width="50%"
                                             />
                                         </ProductImageContainer>
                                     )}
                                     <Grid container
-                                        direction="row-reverse"
-                                        columnSpacing={12}
+                                        // direction="row-reverse"
+                                        // columnSpacing={12}
                                         justifyContent={"center"}
                                     >
-                                        {product.storeProductNutritionFactEntities && 
-                                            <>
-                                                <Grid item xs={4}><Grid container direction="column-reverse" rowSpacing={2}>
-                                                { product.storeProductNutritionFactEntities.slice(0, 
-                                                    Math.floor(product.storeProductNutritionFactEntities.length / 2)).map(
-                                                        (nutritionFact) => ( nutritionFact.amount !== null &&
-                                                            <Grid xs={12} item >
-                                                                <Grid container 
-                                                                    justifyContent={"space-between"} 
-                                                                    alignItems={"flex-end"}
-                                                                    columnSpacing={1}
-                                                                >
-                                                                    <Grid item sm={6} textAlign={"left"}>
-                                                                        <div>
-                                                                            <b>{nutritionFact.nutrientEntity.symbol}</b>
-                                                                        </div>
-                                                                    </Grid>
-                                                                    <Grid item sm={6} textAlign={"right"}>
-                                                                        <div>{nutritionFact.amount}{nutritionFact.amountUnitEntity.name}</div>
-                                                                    </Grid>
-                                                                </Grid>
-                                                            </Grid>
-                                                ))}
-                                                </Grid></Grid>
-                                                <Grid item xs={4}><Grid container direction="column-reverse" rowSpacing={2}>
-                                                { product.storeProductNutritionFactEntities.slice(
-                                                    Math.floor(product.storeProductNutritionFactEntities.length / 2)).map(
-                                                        (nutritionFact) => ( nutritionFact.amount !== null &&
-                                                            <Grid xs={12} item >
-                                                                <Grid container 
-                                                                    justifyContent={"space-between"} 
-                                                                    alignItems={"flex-end"}
-                                                                    columnSpacing={1}
-                                                                >
-                                                                    <Grid item sm={6} textAlign={"left"}>
-                                                                        <div>
-                                                                            <b>{nutritionFact.nutrientEntity.symbol}</b>
-                                                                        </div>
-                                                                    </Grid>
-                                                                    <Grid item sm={6} textAlign={"right"}>
-                                                                        <div>{nutritionFact.amount}{nutritionFact.amountUnitEntity.name}</div>
-                                                                    </Grid>
-                                                                </Grid>
-                                                            </Grid>
-                                                ))}
-                                                </Grid></Grid>
-                                            </>
-                                        }
+                                        
+                                        <>
+                                            <Grid item xs={8}><Grid container direction="column-reverse" rowSpacing={2}>
+                                            <TableContainer component={Paper}>
+                                                <Typography variant="h6" style={{ padding: '10px' }}>Nutrition Facts</Typography>
+                                                <Typography variant="body2" style={{ padding: '10px' }}>
+                                                    Serving Size:  {product.servingSize ? 
+                                                    `${product.servingSize} ${product.servingSizeUnitEntity.name ?? ""}` : 
+                                                    (product.rawServingSize ? `${product.rawServingSize}` : null)}
+                                                    <br></br>
+                                                    Total size: {product.totalSize}
+                                                </Typography>
+                                                <Divider variant="middle"/>
+                                                <Typography variant="body2" style={{ padding: '10px' }}>{product.storeProductNutritionFactEntities
+                                                    .filter((nutritionFact) => energy.includes(nutritionFact.nutrientEntity.name))
+                                                    .map((nutritionFact) => (
+                                                        `Calories : ${nutritionFact.amount} ${nutritionFact.amountUnitEntity.name}`
+                                                    ))}</Typography>
+                                                <Table size="small" aria-label="a dense table">
+                                                    <TableHead>
+                                                        <TableRow>
+                                                            <TableCell style={{ padding: '0px' }}></TableCell>
+                                                            <TableCell style={{ padding: '0px' }}></TableCell>
+                                                        </TableRow>
+                                                    </TableHead>
+                                                    {/* <TableBody>
+                                                        {product.storeProductNutritionFactEntities
+                                                            .filter((nutritionFact) => nutritionFact.amount !== null && !energy.includes(nutritionFact.nutrientEntity.name))
+                                                            .map((nutritionFact) => (
+                                                                <React.Fragment key={nutritionFact.id}>
+                                                                    <TableRow>
+                                                                        <TableCell>
+                                                                            <span style={{ textTransform: 'capitalize', fontSize: 'smaller' }}>{nutritionFact.nutrientEntity.name.toLowerCase()}</span>
+                                                                        </TableCell>
+                                                                        <TableCell>
+                                                                            {nutritionFact.amount} {nutritionFact.amountUnitEntity.name}
+                                                                        </TableCell>
+                                                                    </TableRow>
+                                                                </React.Fragment>
+                                                            ))}
+                                                    </TableBody> */}
+                                                    <TableBody>
+                                                        {product.storeProductNutritionFactEntities
+                                                            .filter((nutritionFact) => nutritionFact.amount !== null && !energy.includes(nutritionFact.nutrientEntity.name))
+                                                            .map((nutritionFact) => {
+                                                                const localizedKey = Object.keys(nutrientMatches).find(key => nutrientMatches[key].includes(nutritionFact.nutrientEntity.name)) || nutritionFact.nutrientEntity.name;
+
+                                                                return { nutritionFact, localizedKey };
+                                                            })
+                                                            .sort((a, b) => {
+                                                                const aLocalizedKey = a.localizedKey;
+                                                                const bLocalizedKey = b.localizedKey;
+                                                                const aOrder = nft_order[aLocalizedKey] || 9999; // Default to a large number if key not found
+                                                                const bOrder = nft_order[bLocalizedKey] || 9999; // Default to a large number if key not found
+
+                                                                return aOrder - bOrder;
+                                                            })
+                                                            .map(({ nutritionFact, localizedKey }) => (
+                                                                <React.Fragment key={nutritionFact.id}>
+                                                                    <TableRow>
+                                                                        <TableCell>
+                                                                            <span style={{ textTransform: 'capitalize', fontSize: 'smaller' }}>
+                                                                                {localizedKey}
+                                                                                {/* Display the localized key */}
+                                                                            </span>
+                                                                        </TableCell>
+                                                                        <TableCell>
+                                                                            {nutritionFact.amount} {nutritionFact.amountUnitEntity.name}
+                                                                        </TableCell>
+                                                                    </TableRow>
+                                                                </React.Fragment>
+                                                            ))}
+                                                    </TableBody>
+                                                </Table>
+                                            </TableContainer>
+                                            </Grid></Grid>
+                                            
+                                        </>
+                                        
                                     </Grid>
                                     { product.ingredientEn && 
                                         <div>
                                             <ProductIngredientsHeadingContainer>
-                                                <b>INGREDIENTS</b>
+                                            {/* <Typography variant="h6" style={{ padding: '10px' }}><b>Ingredients:</b></Typography> */}
+                                            <Divider> Ingredients</Divider>
                                             </ProductIngredientsHeadingContainer>
-                                            <div>
-                                                {product.ingredientEn.toUpperCase()}
-                                            </div>
+                                            {/* <Divider variant="middle"/> */}
+                                            
+                                            <Typography variant="body2" style={{ padding: '10px', textTransform: 'capitalize' }}>{product.ingredientEn.toLowerCase()}</Typography>
+                                            
                                         </div>
                                     }
                                 </div>
