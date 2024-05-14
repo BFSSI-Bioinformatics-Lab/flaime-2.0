@@ -16,6 +16,8 @@ import {
 } from "./styles";
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography } from '@mui/material';
 import Divider from '@mui/material/Divider';
+import { Modal, Button, makeStyles, Dialog } from '@mui/material';
+
 
 import { nft_order, nutrientMatches } from './nft_flaime_nutrients';
 
@@ -46,7 +48,16 @@ const Product_detail = () => {
     // list of possible energy values
     const energy = ['ENERGY (KILOCALORIES)', 'ENERGY (KILOJOULES)'];
 
+    // States for image modal
+    const [open, setOpen] = useState(false);
 
+    const handleOpen = () => {
+        setOpen(true);
+    };
+
+    const handleClose = () => {
+        setOpen(false);
+    };
 
 
     useEffect( () =>{
@@ -230,7 +241,7 @@ const Product_detail = () => {
                             <Grid item xs={12} md={6}>
                                 <div>
                                 
-                                    {product.storeProductImageEntities && product.storeProductImageEntities.length > 0 && (
+                                    {/* {product.storeProductImageEntities && product.storeProductImageEntities.length > 0 && (
                                         <ProductImageContainer style={{ display: 'flex', justifyContent: 'center' }}>
                                             <Image key={product.storeProductImageEntities[0].imagePath} 
                                                 src={imagePathToUrl(product.storeProductImageEntities[0].imagePath)} 
@@ -238,7 +249,30 @@ const Product_detail = () => {
                                                 width="50%"
                                             />
                                         </ProductImageContainer>
-                                    )}
+                                    )} */}
+                                    <>
+                                        {product.storeProductImageEntities && product.storeProductImageEntities.length > 0 && (
+                                            <ProductImageContainer style={{ display: 'flex', justifyContent: 'center' }}>
+                                                <img
+                                                    key={product.storeProductImageEntities[0].imagePath}
+                                                    src={imagePathToUrl(product.storeProductImageEntities[0].imagePath)}
+                                                    alt={product.siteName}
+                                                    width="50%"
+                                                    onClick={handleOpen}
+                                                    style={{ cursor: 'pointer' }}
+                                                />
+                                            </ProductImageContainer>
+                                        )}
+
+                                        <Dialog open={open} onClose={handleClose}>
+                                                <img
+                                                    key={product.storeProductImageEntities[0].imagePath}
+                                                    src={imagePathToUrl(product.storeProductImageEntities[0].imagePath)}
+                                                    alt={product.siteName}
+                                                />
+                                        </Dialog>
+                                    </>
+
                                     <Grid container
                                         // direction="row-reverse"
                                         // columnSpacing={12}
