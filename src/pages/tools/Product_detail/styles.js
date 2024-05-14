@@ -35,11 +35,14 @@ export const PageTitle = styled(Paper)(({ theme }) => ({
 
 export const DetailItem = styled(Paper)(({ theme }) => ({
     backgroundColor:  '#fff',
-    ...theme.typography.body1,
+    ...theme.typography.body2,
     paddingBottom: theme.spacing(2),
-    marginBottom: theme.spacing(2),
+    paddingLeft: theme.spacing(2),
+    marginTop: theme.spacing(2),
     textAlign: 'start',
-    color: '#191919'
+    color: '#191919',
+    letterSpacing: '0.7px',
+    boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)'
 }));
 
 export const ProductImageContainer = styled("div")(() => ({

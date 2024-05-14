@@ -16,7 +16,7 @@ import {
 } from "./styles";
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography } from '@mui/material';
 import Divider from '@mui/material/Divider';
-import { Modal, Button, makeStyles, Dialog } from '@mui/material';
+import { Modal, Button, makeStyles, Dialog, DialogContent, DialogTitle, Box  } from '@mui/material';
 
 
 import { nft_order, nutrientMatches } from './nft_flaime_nutrients';
@@ -57,6 +57,17 @@ const Product_detail = () => {
 
     const handleClose = () => {
         setOpen(false);
+    };
+
+    // List of images handle of dialog opening
+    const [selectedImage, setSelectedImage] = useState(null);
+
+    const handleImageClick = (imageEntity) => {
+      setSelectedImage(imageEntity);
+    };
+  
+    const handleCloseDialog = () => {
+      setSelectedImage(null);
     };
 
 
@@ -142,7 +153,7 @@ const Product_detail = () => {
             },
             {
                 name: "URL",
-                value: product.siteUrl ? <a href={product.siteUrl}>{product.siteName}</a> : null
+                value: product.siteUrl ? <a href={product.siteUrl} target="_blank" rel="noopener noreferrer">{product.siteName} </a> : null
             }
         ];
         setProductDescItems(items);
@@ -217,13 +228,16 @@ const Product_detail = () => {
                             justifyContent="space-between" alignItems="flex-start">
                             <Grid item xs={12} md={6}>
                                 <div>
-                                    {productDescItems && productDescItems.map((item) => ( item.value && 
-                                        <>
-                                            <DetailItem key={item.name} elevation={0}>{item.name}: {item.value}</DetailItem>
-                                        </>
-                                    ))}
+                                {productDescItems && productDescItems.map((item, index) => (
+                                    item.value && (
+                                    <React.Fragment key={item.name}>
+                                        <DetailItem ><b>{item.name}</b>: {item.value}</DetailItem>
+                                        {/* {index !== productDescItems.length - 1 && <Divider sx={{ margin: '0 30px', backgroundColor: '#F7EADE', width: '30%' }} />} */}
+                                    </React.Fragment>
+                                    )
+                                ))}
                                 </div>
-                                <Grid container 
+                                {/* <Grid container 
                                     direction="row"
                                 >
                                     {product.storeProductImageEntities.length > 1 && product.storeProductImageEntities.slice(1).map(imageEntity => (
@@ -236,7 +250,39 @@ const Product_detail = () => {
                                             />
                                         </Grid>
                                     ))}
-                                </Grid>
+                                </Grid> */}
+                                <>
+                                    <Grid container spacing={2} style={{ marginTop: '20px' }}>
+                                    {product.storeProductImageEntities.length > 1 &&
+                                        product.storeProductImageEntities.slice(1).map((imageEntity) => (
+                                        <Grid key={imageEntity.id} item sm={4} md={4} lg={4}>
+                                            <Paper elevation={3} 
+                                            style={{ padding: '10px', cursor: 'pointer' }} 
+                                            onClick={() => handleImageClick(imageEntity)}>
+                                            <img
+                                                key={imageEntity.imagePath}
+                                                src={imagePathToUrl(imageEntity.imagePath)}
+                                                alt={product.siteName}
+                                                style={{ width: '100%', height: 'auto' }}
+                                            />
+                                            </Paper>
+                                        </Grid>
+                                    ))}
+                                    </Grid>
+                                    <Dialog open={selectedImage !== null} onClose={handleCloseDialog}>
+                                        {selectedImage && (
+                                        <>
+                                            <DialogTitle>{product.siteName}</DialogTitle>
+                                            <DialogContent>
+                                            <Box display="flex" justifyContent="center">
+                                                <img src={imagePathToUrl(selectedImage.imagePath)} alt={product.siteName} style={{ maxWidth: '100%', maxHeight: '80vh' }} />
+                                            </Box>
+                                            </DialogContent>
+                                        </>
+                                        )}
+                                    </Dialog>    
+                                </>
+
                             </Grid>
                             <Grid item xs={12} md={6}>
                                 <div>
