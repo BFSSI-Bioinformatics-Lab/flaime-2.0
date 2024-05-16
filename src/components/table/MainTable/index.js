@@ -100,6 +100,12 @@ const MainTable = ({
                 // onCancelSearch={() => cancelSearch()}
                 />
             }
+            {/* Message that states the data is being loaded.. not great yet. */}
+            {pageState.isLoading && (
+                <div style={{ textAlign: 'center', padding: '10px' }}>
+                    Data is being loaded...
+                </div>
+            )}
             <StripedTable
                 rows={rows}
                 rowCount={pageState.total}

@@ -52,7 +52,7 @@ const Product_browser = () => {
     { 
         field: 'storeProductCode', 
         headerName: 'Code', 
-        minWidth: 50,
+        minWidth: 100,
         flex: 2 
     },
     { 
