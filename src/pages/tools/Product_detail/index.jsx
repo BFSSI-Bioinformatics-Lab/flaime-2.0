@@ -310,13 +310,15 @@ const Product_detail = () => {
                                             </ProductImageContainer>
                                         )}
 
-                                        <Dialog open={open} onClose={handleClose}>
-                                                <img
-                                                    key={product.storeProductImageEntities[0].imagePath}
-                                                    src={imagePathToUrl(product.storeProductImageEntities[0].imagePath)}
-                                                    alt={product.siteName}
-                                                />
-                                        </Dialog>
+                                        {product.storeProductImageEntities && product.storeProductImageEntities.length > 0 && (
+                                            <Dialog open={open} onClose={handleClose}>
+                                            <img
+                                                key={product.storeProductImageEntities[0].imagePath}
+                                                src={imagePathToUrl(product.storeProductImageEntities[0].imagePath)}
+                                                alt={product.siteName}
+                                            />
+                                            </Dialog>
+                                        )}
                                     </>
 
                                     <Grid container
