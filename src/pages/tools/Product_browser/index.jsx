@@ -21,7 +21,7 @@ const Product_browser = () => {
         flex: 1,
         minWidth: 130,
         renderCell: (params) => 
-        <Link to={`${params.row.id}`}>{params.row.id}</Link>,
+        <Link to={`${params.row.id}`} target="_blank">{params.row.id}</Link>,
     },
     { 
         field: 'siteName', 
@@ -60,7 +60,7 @@ const Product_browser = () => {
         headerName: 'External Url', 
         minWidth: 230,
         flex: 2,
-        renderCell: (params) => <a href={`${params.row.siteUrl}`}>{params.row.storeEntity.name}</a>
+        renderCell: (params) => <a href={`${params.row.siteUrl}`} target="_blank" rel="noopener noreferrer">{params.row.storeEntity.name}</a>
     },
     { 
       field: 'source',
