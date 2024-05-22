@@ -16,7 +16,8 @@ import {
 } from "./styles";
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography } from '@mui/material';
 import Divider from '@mui/material/Divider';
-import { Modal, Button, makeStyles, Dialog, DialogContent, DialogTitle, Box  } from '@mui/material';
+import { Dialog, DialogContent, DialogTitle, Box  } from '@mui/material';
+
 
 
 import { nft_order, nutrientMatches } from './nft_flaime_nutrients';
@@ -106,6 +107,10 @@ const Product_detail = () => {
                 value: products.storeEntity.name
             },
             {
+                name: "Source",
+                value: products.sourceEntity.name
+            },
+            {
                 name: "Product Code",
                 value: product.storeProductCode
             },
@@ -178,7 +183,7 @@ const Product_detail = () => {
                      <Grid xs={12} md={12} item> 
                         <Grid container alignItems="center" wrap="nowrap">
                             <Grid item>
-                                <PageIcon></PageIcon>
+                                <PageIcon product={product.storeEntity.name} />
                             </Grid>
                             <Grid item>
                                 <PageTitle elevation={0}>{product.siteName}</PageTitle>
