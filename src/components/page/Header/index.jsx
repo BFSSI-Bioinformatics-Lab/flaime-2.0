@@ -174,7 +174,7 @@ const Header = () => {
                             About
                         </Button>
 
-                        <Tooltip title="Account Login">
+                        {/* <Tooltip title="Account Login">
                             <IconButton
                                 size="large"
                                 edge="start"
@@ -184,7 +184,7 @@ const Header = () => {
                             >
                                 <AccountCircleIcon />
                             </IconButton>
-                        </Tooltip>
+                        </Tooltip> */}
                     </Toolbar>
                 </PageContainer>
             </AppBar>
