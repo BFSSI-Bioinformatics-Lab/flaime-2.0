@@ -17,6 +17,8 @@ import {
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography } from '@mui/material';
 import Divider from '@mui/material/Divider';
 import { Dialog, DialogContent, DialogTitle, Box  } from '@mui/material';
+import axios from 'axios';
+
 
 
 
@@ -76,43 +78,60 @@ const Product_detail = () => {
         
         setProducts(old=>({...old, isLoading: true}))
         
-        let urlBase = `StoreProductService/SelectStoreProductsAsync?id=${productId}`
+        let elasticUrl = process.env.REACT_APP_ELASTIC_URL;
+        const elasticImgUrl = process.env.REACT_APP_ELASTIC_IMG_URL;
 
-        ApiQueryGet(urlBase).then(
-            (data) => {
-                const dataProduct = data.responseObjects[0]
-                if (dataProduct === undefined) return;
-                setProducts(dataProduct);
-                setProduct(dataProduct);
-                // setProducts(old=>({...old, isLoading: false, products: dataProduct}));
-                setLoading(false)
-            }      
-        );
+        // axios.get(`${elasticUrl}/${productId}`).then(
+        //     (data) => {
+        //         const dataProduct = data.data._source;
+        //         if (dataProduct === undefined) return;
+        //         setProducts(dataProduct);
+        //         setProduct(dataProduct);
+        //         // setProducts(old=>({...old, isLoading: false, products: dataProduct}));
+        //         setLoading(false)
+        //         console.log(dataProduct)
+        //     }      
+        // );
+        axios.all([
+          axios.get(`${elasticUrl}/${productId}`),
+          axios.get(`${elasticImgUrl}/${productId}`),
+      ]).then(
+          axios.spread((data, imgData) => {
+              const dataProduct = data.data._source;
+              if (dataProduct === undefined) return;
+              const imgPaths = imgData.data._source.store_product_images;
+              setProducts({ ...dataProduct, store_product_images: imgPaths });
+              setProduct({ ...dataProduct, store_product_images: imgPaths });
+              setLoading(false);
+              // console.log(dataProduct);
+              console.log(imgPaths)
+          })
+      );
     },[productId]);
+    console.log(product)
 
     useEffect(() => {
         if (!product) return;
         const items = [
             {
                 name: "Product Name",
-                value: product.productEntity.nameOfProduct
+                value: product.site_name
             },
             {
                 name: "Brand",
-                value: product.productEntity.brandEntity.hasName ?
-                    product.productEntity.brandEntity.name : null 
+                value: product.raw_brand ? product.raw_brand : null 
             },
             {
                 name: "Store",
-                value: products.storeEntity.name
+                value: products.stores.name
             },
             {
                 name: "Source",
-                value: products.sourceEntity.name
+                value: products.sources.name
             },
             {
                 name: "Product Code",
-                value: product.storeProductCode
+                value: product.store_product_code || "None"
             },
             {
                 name: "UPC",
@@ -120,45 +139,29 @@ const Product_detail = () => {
             },
             {
                 name: "Price",
-                value: product.price ? `${product.price} ${product.priceUnitEntity.name ?? ""}` : null
+                value: product.reading_price ? product.reading_price: null
             },
             {
                 name: "Description",
-                value: products.siteDescription
+                value: product.site_description
             },
             {
                 name: "Category", // does the category need to be verified in order to be displayed?
-                value: product.subcategoryPredictionEntity.verified ? 
-                    product.subcategoryPredictionEntity.predictedCategoryName : null
+                value: product.subcategories.name ? 
+                    product.subcategories.name : null
             },
             {
                 name: "Subcategory", // does the category need to be verified in order to be displayed?
-                value: product.categoryPredictionEntity.verified ? 
-                    product.categoryPredictionEntity.predictedSubcategoryName : null
+                value: product.categories.name ? 
+                    product.categories.name : null
             },
-            {
-                name: "Variety Pack",
-                value: product.productEntity.varietyPackFlag ? "True" : "False"
-            },
-            {
-                name: "Atwater Result",
-                value: product.productEntity.atWaterResult ?? "Missing information"
-            },
-            // {
-            //     name: "Total Size",
-            //     value: product.totalSize
-            // },
-            // {
-            //     name: "Serving Size",
-            //     value: product.servingSize ? `${product.servingSize} ${product.servingSizeUnitEntity.name ?? ""}` : null
-            // },
             {
                 name: "Breadcrumbs",
-                value: breadcrumbComponent(product.breadcrumbEntity.breadcrumbArray)
+                value: breadcrumbComponent(product.bread_crumbs)
             },
             {
                 name: "URL",
-                value: product.siteUrl ? <a href={product.siteUrl} target="_blank" rel="noopener noreferrer">{product.siteName} </a> : null
+                value: product.site_url ? <a href={product.site_url} target="_blank" rel="noopener noreferrer">{product.site_name} </a> : null
             }
         ];
         setProductDescItems(items);
@@ -183,10 +186,10 @@ const Product_detail = () => {
                      <Grid xs={12} md={12} item> 
                         <Grid container alignItems="center" wrap="nowrap">
                             <Grid item>
-                                <PageIcon product={product.storeEntity.name} />
+                                <PageIcon product={product.stores.name} />
                             </Grid>
                             <Grid item>
-                                <PageTitle elevation={0}>{product.siteName}</PageTitle>
+                                <PageTitle elevation={0}>{product.site_name}</PageTitle>
                             </Grid>
                         </Grid>
                     </Grid>
@@ -242,51 +245,36 @@ const Product_detail = () => {
                                     )
                                 ))}
                                 </div>
-                                {/* <Grid container 
-                                    direction="row"
-                                >
-                                    {product.storeProductImageEntities.length > 1 && product.storeProductImageEntities.slice(1).map(imageEntity => (
-                                        <Grid key={imageEntity.id} item sm={12} md={6} 
-                                            lg={Math.max(Math.floor(12 / (product.storeProductImageEntities.length - 1)), 4)}
-                                        >
-                                            <Image key={imageEntity.imagePath} 
-                                                src={imagePathToUrl(imageEntity.imagePath)} 
-                                                alt={product.siteName}  
-                                            />
-                                        </Grid>
-                                    ))}
-                                </Grid> */}
+                                
                                 <>
                                     <Grid container spacing={2} style={{ marginTop: '20px' }}>
-                                    {product.storeProductImageEntities.length > 1 &&
-                                        product.storeProductImageEntities.slice(1).map((imageEntity) => (
-                                        <Grid key={imageEntity.id} item sm={4} md={4} lg={4}>
-                                            <Paper elevation={3} 
-                                            style={{ padding: '10px', cursor: 'pointer' }} 
-                                            onClick={() => handleImageClick(imageEntity)}>
-                                            <img
-                                                key={imageEntity.imagePath}
-                                                src={imagePathToUrl(imageEntity.imagePath)}
-                                                alt={product.siteName}
-                                                style={{ width: '100%', height: 'auto' }}
-                                            />
-                                            </Paper>
-                                        </Grid>
-                                    ))}
+                                        {product.store_product_images.length > 1 &&
+                                            product.store_product_images.slice(1).map((imagePath, index) => (
+                                                <Grid key={index} item sm={4} md={4} lg={4}>
+                                                    <Paper elevation={3} style={{ padding: '10px', cursor: 'pointer' }} onClick={() => handleImageClick(imagePath)}>
+                                                        <img
+                                                            key={imagePath}
+                                                            src={imagePathToUrl(imagePath)}
+                                                            alt={product.site_name}
+                                                            style={{ width: '100%', height: 'auto' }}
+                                                        />
+                                                    </Paper>
+                                                </Grid>
+                                            ))}
                                     </Grid>
                                     <Dialog open={selectedImage !== null} onClose={handleCloseDialog}>
                                         {selectedImage && (
-                                        <>
-                                            <DialogTitle>{product.siteName}</DialogTitle>
-                                            <DialogContent>
-                                            <Box display="flex" justifyContent="center">
-                                                <img src={imagePathToUrl(selectedImage.imagePath)} alt={product.siteName} style={{ maxWidth: '100%', maxHeight: '80vh' }} />
-                                            </Box>
-                                            </DialogContent>
-                                        </>
+                                            <>
+                                                <DialogTitle>{product.site_name}</DialogTitle>
+                                                <DialogContent>
+                                                    <Box display="flex" justifyContent="center">
+                                                        <img src={imagePathToUrl(selectedImage)} alt={product.site_name} style={{ maxWidth: '100%', maxHeight: '80vh' }} />
+                                                    </Box>
+                                                </DialogContent>
+                                            </>
                                         )}
-                                    </Dialog>    
-                                </>
+                                    </Dialog>
+                                </>  
 
                             </Grid>
                             <Grid item xs={12} md={6}>
@@ -302,12 +290,12 @@ const Product_detail = () => {
                                         </ProductImageContainer>
                                     )} */}
                                     <>
-                                        {product.storeProductImageEntities && product.storeProductImageEntities.length > 0 && (
+                                        {product.store_product_images && product.store_product_images.length > 0 && (
                                             <ProductImageContainer style={{ display: 'flex', justifyContent: 'center' }}>
                                                 <img
-                                                    key={product.storeProductImageEntities[0].imagePath}
-                                                    src={imagePathToUrl(product.storeProductImageEntities[0].imagePath)}
-                                                    alt={product.siteName}
+                                                    key={product.store_product_images[0]}
+                                                    src={imagePathToUrl(product.store_product_images[0])}
+                                                    alt={product.site_name}
                                                     width="50%"
                                                     onClick={handleOpen}
                                                     style={{ cursor: 'pointer' }}
@@ -315,12 +303,12 @@ const Product_detail = () => {
                                             </ProductImageContainer>
                                         )}
 
-                                        {product.storeProductImageEntities && product.storeProductImageEntities.length > 0 && (
+                                        {product.store_product_images && product.store_product_images.length > 0 && (
                                             <Dialog open={open} onClose={handleClose}>
                                             <img
-                                                key={product.storeProductImageEntities[0].imagePath}
-                                                src={imagePathToUrl(product.storeProductImageEntities[0].imagePath)}
-                                                alt={product.siteName}
+                                                key={product.store_product_images[0]}
+                                                src={imagePathToUrl(product.store_product_images[0])}
+                                                alt={product.site_name}
                                             />
                                             </Dialog>
                                         )}
@@ -339,15 +327,15 @@ const Product_detail = () => {
                                                 <Typography variant="body2" style={{ padding: '10px' }}>
                                                     Serving Size:  {product.servingSize ? 
                                                     `${product.servingSize} ${product.servingSizeUnitEntity.name ?? ""}` : 
-                                                    (product.rawServingSize ? `${product.rawServingSize}` : null)}
+                                                    (product.raw_serving_size ? `${product.raw_serving_size}` : null)}
                                                     <br></br>
                                                     Total size: {product.totalSize}
                                                 </Typography>
                                                 <Divider variant="middle"/>
-                                                <Typography variant="body2" style={{ padding: '10px' }}>{product.storeProductNutritionFactEntities
-                                                    .filter((nutritionFact) => energy.includes(nutritionFact.nutrientEntity.name))
+                                                <Typography variant="body2" style={{ padding: '10px' }}>{product.store_product_nutrition_facts
+                                                    .filter((nutritionFact) => energy.includes(nutritionFact.nutrients.name))
                                                     .map((nutritionFact) => (
-                                                        `Calories : ${nutritionFact.amount} ${nutritionFact.amountUnitEntity.name}`
+                                                        `Calories : ${nutritionFact.amount} ${nutritionFact.unit}`
                                                     ))}</Typography>
                                                 <Table size="small" aria-label="a dense table">
                                                     <TableHead>
@@ -373,10 +361,10 @@ const Product_detail = () => {
                                                             ))}
                                                     </TableBody> */}
                                                     <TableBody>
-                                                        {product.storeProductNutritionFactEntities
-                                                            .filter((nutritionFact) => nutritionFact.amount !== null && !energy.includes(nutritionFact.nutrientEntity.name))
+                                                        {product.store_product_nutrition_facts
+                                                            .filter((nutritionFact) => nutritionFact.amount !== null && !energy.includes(nutritionFact.nutrients.name))
                                                             .map((nutritionFact) => {
-                                                                const localizedKey = Object.keys(nutrientMatches).find(key => nutrientMatches[key].includes(nutritionFact.nutrientEntity.name)) || nutritionFact.nutrientEntity.name;
+                                                                const localizedKey = Object.keys(nutrientMatches).find(key => nutrientMatches[key].includes(nutritionFact.nutrients.name)) || nutritionFact.nutrients.name;
 
                                                                 return { nutritionFact, localizedKey };
                                                             })
@@ -398,7 +386,7 @@ const Product_detail = () => {
                                                                             </span>
                                                                         </TableCell>
                                                                         <TableCell>
-                                                                            {nutritionFact.amount} {nutritionFact.amountUnitEntity.name}
+                                                                            {nutritionFact.amount} {nutritionFact.unit}
                                                                         </TableCell>
                                                                     </TableRow>
                                                                 </React.Fragment>
