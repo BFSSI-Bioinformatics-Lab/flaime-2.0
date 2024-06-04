@@ -1,0 +1,29 @@
+// SelectInput.jsx
+import React from 'react';
+import { Select, MenuItem } from '@mui/material';
+import { CustomFormControl, CustomInputLabel } from './styles';
+
+const SelectInput = ({ options, value, onChange, label }) => {
+  return (
+    <CustomFormControl variant="outlined">
+      <CustomInputLabel id={`${label}-label`}>{label}</CustomInputLabel>
+      <Select
+        labelId={`${label}-label`}
+        value={value}
+        onChange={onChange}
+        label={label}
+      >
+        <MenuItem value="">
+          <em>None</em>
+        </MenuItem>
+        {options.map(option => (
+          <MenuItem key={option.value} value={option.value}>
+            {option.label}
+          </MenuItem>
+        ))}
+      </Select>
+    </CustomFormControl>
+  );
+};
+
+export default SelectInput;
