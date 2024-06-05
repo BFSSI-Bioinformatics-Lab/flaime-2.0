@@ -332,67 +332,57 @@ const Product_detail = () => {
                                                     Total size: {product.totalSize}
                                                 </Typography>
                                                 <Divider variant="middle"/>
-                                                <Typography variant="body2" style={{ padding: '10px' }}>{product.store_product_nutrition_facts
-                                                    .filter((nutritionFact) => energy.includes(nutritionFact.nutrients.name))
-                                                    .map((nutritionFact) => (
-                                                        `Calories : ${nutritionFact.amount} ${nutritionFact.unit}`
-                                                    ))}</Typography>
-                                                <Table size="small" aria-label="a dense table">
-                                                    <TableHead>
-                                                        <TableRow>
-                                                            <TableCell style={{ padding: '0px' }}></TableCell>
-                                                            <TableCell style={{ padding: '0px' }}></TableCell>
-                                                        </TableRow>
-                                                    </TableHead>
-                                                    {/* <TableBody>
-                                                        {product.storeProductNutritionFactEntities
-                                                            .filter((nutritionFact) => nutritionFact.amount !== null && !energy.includes(nutritionFact.nutrientEntity.name))
-                                                            .map((nutritionFact) => (
-                                                                <React.Fragment key={nutritionFact.id}>
-                                                                    <TableRow>
-                                                                        <TableCell>
-                                                                            <span style={{ textTransform: 'capitalize', fontSize: 'smaller' }}>{nutritionFact.nutrientEntity.name.toLowerCase()}</span>
-                                                                        </TableCell>
-                                                                        <TableCell>
-                                                                            {nutritionFact.amount} {nutritionFact.amountUnitEntity.name}
-                                                                        </TableCell>
-                                                                    </TableRow>
-                                                                </React.Fragment>
-                                                            ))}
-                                                    </TableBody> */}
-                                                    <TableBody>
-                                                        {product.store_product_nutrition_facts
-                                                            .filter((nutritionFact) => nutritionFact.amount !== null && !energy.includes(nutritionFact.nutrients.name))
-                                                            .map((nutritionFact) => {
-                                                                const localizedKey = Object.keys(nutrientMatches).find(key => nutrientMatches[key].includes(nutritionFact.nutrients.name)) || nutritionFact.nutrients.name;
+                                                {product.store_product_nutrition_facts && (
+                                                    <Typography variant="body2" style={{ padding: '10px' }}>{product.store_product_nutrition_facts
+                                                        .filter((nutritionFact) => energy.includes(nutritionFact.nutrients.name))
+                                                        .map((nutritionFact) => (
+                                                            `Calories : ${nutritionFact.amount} ${nutritionFact.unit}`
+                                                        ))}
+                                                    </Typography>
+                                                )}
+                                                {product.store_product_nutrition_facts && (
+                                                    <Table size="small" aria-label="a dense table">
+                                                        <TableHead>
+                                                            <TableRow>
+                                                                <TableCell style={{ padding: '0px' }}></TableCell>
+                                                                <TableCell style={{ padding: '0px' }}></TableCell>
+                                                            </TableRow>
+                                                        </TableHead>
+                                                        
+                                                        <TableBody>
+                                                            {product.store_product_nutrition_facts
+                                                                .filter((nutritionFact) => nutritionFact.amount !== null && !energy.includes(nutritionFact.nutrients.name))
+                                                                .map((nutritionFact) => {
+                                                                    const localizedKey = Object.keys(nutrientMatches).find(key => nutrientMatches[key].includes(nutritionFact.nutrients.name)) || nutritionFact.nutrients.name;
 
-                                                                return { nutritionFact, localizedKey };
-                                                            })
-                                                            .sort((a, b) => {
-                                                                const aLocalizedKey = a.localizedKey;
-                                                                const bLocalizedKey = b.localizedKey;
-                                                                const aOrder = nft_order[aLocalizedKey] || 9999; // Default to a large number if key not found
-                                                                const bOrder = nft_order[bLocalizedKey] || 9999; // Default to a large number if key not found
+                                                                    return { nutritionFact, localizedKey };
+                                                                })
+                                                                .sort((a, b) => {
+                                                                    const aLocalizedKey = a.localizedKey;
+                                                                    const bLocalizedKey = b.localizedKey;
+                                                                    const aOrder = nft_order[aLocalizedKey] || 9999; // Default to a large number if key not found
+                                                                    const bOrder = nft_order[bLocalizedKey] || 9999; // Default to a large number if key not found
 
-                                                                return aOrder - bOrder;
-                                                            })
-                                                            .map(({ nutritionFact, localizedKey }) => (
-                                                                <React.Fragment key={nutritionFact.id}>
-                                                                    <TableRow>
-                                                                        <TableCell>
-                                                                            <span style={{ textTransform: 'capitalize', fontSize: 'smaller' }}>
-                                                                                {localizedKey}
-                                                                                {/* Display the localized key */}
-                                                                            </span>
-                                                                        </TableCell>
-                                                                        <TableCell>
-                                                                            {nutritionFact.amount} {nutritionFact.unit}
-                                                                        </TableCell>
-                                                                    </TableRow>
-                                                                </React.Fragment>
-                                                            ))}
-                                                    </TableBody>
-                                                </Table>
+                                                                    return aOrder - bOrder;
+                                                                })
+                                                                .map(({ nutritionFact, localizedKey }) => (
+                                                                    <React.Fragment key={nutritionFact.id}>
+                                                                        <TableRow>
+                                                                            <TableCell>
+                                                                                <span style={{ textTransform: 'capitalize', fontSize: 'smaller' }}>
+                                                                                    {localizedKey}
+                                                                                    {/* Display the localized key */}
+                                                                                </span>
+                                                                            </TableCell>
+                                                                            <TableCell>
+                                                                                {nutritionFact.amount} {nutritionFact.unit}
+                                                                            </TableCell>
+                                                                        </TableRow>
+                                                                    </React.Fragment>
+                                                                ))}
+                                                        </TableBody>
+                                                    </Table>
+                                                )}
                                             </TableContainer>
                                             </Grid></Grid>
                                             
@@ -416,10 +406,11 @@ const Product_detail = () => {
                         </Grid>
                     }
                 </ProductInfoBox>
+                <Divider variant="middle"/>
             </PageContainer>
-            <Band>
+            {/* <Band>
                 <PageTitle>Visualizations</PageTitle>
-            </Band>
+            </Band> */}
             
         </div>
     </div>
