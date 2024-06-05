@@ -1,4 +1,5 @@
 // import Table from "./components/Table";
+import { useEffect } from 'react';
 import Home from "./pages/Home";
 import Header from "./components/page/Header";
 import Footer from "./components/page/Footer";
@@ -20,6 +21,11 @@ import Advanced_search from "./pages/tools/Advanced_search";
 import SignIn from "./pages/SignIn";
 
 function App() {
+  
+  useEffect(() => {
+    document.title = process.env.REACT_APP_TITLE || 'Default App Title';
+  }, []);
+
   return (
     <BrowserRouter>
       <ThemeProvider theme={Theme}>
