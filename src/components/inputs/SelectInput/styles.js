@@ -8,3 +8,6 @@ export const CustomFormControl = styled(FormControl)(({ theme }) => ({
   width: '100%',
 }));
 
+export const CustomInputLabel = styled(InputLabel)(({ theme }) => ({
+  // Specific styles go here
+}));
