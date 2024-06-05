@@ -5,8 +5,8 @@ import { FooterContainer } from './styles';
 const Footer = () => {
     return  (
         <FooterContainer >
-            <Typography variant="h3" color="primary" align="center">
-                © FLAIME 2022
+            <Typography variant="h4" color="primary" align="center">
+                © FLAIME 2024
             </Typography>
         </FooterContainer>
     )
