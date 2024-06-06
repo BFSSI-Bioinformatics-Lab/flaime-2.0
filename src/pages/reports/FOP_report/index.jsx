@@ -1,65 +1,68 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 
-// Import your components
 import SelectInput from '../../../components/inputs/SelectInput';
 import BarChart from '../../../components/diagrams/BarChart';
 import CategorySelector from '../../../components/inputs/CategorySelector';
 
+import { GetAllStoresControlled } from '../../../api/services/StoreService';
+
+
 const FOPReport = () => {
-  const [sources, setSources] = useState([]);
-  const [selectedSource, setSelectedSource] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('');
-  const [reportData, setReportData] = useState(null);
-  const [loading, setLoading] = useState(false);
+    const [Stores, setStores] = useState([]);
+    const [selectedSource, setSelectedSource] = useState('');
+    const [selectedCategory, setSelectedCategory] = useState('');
+    const [reportData, setReportData] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const [cancelSearch, setCancelSearch] = useState(() => () => {});
 
-  // Fetch sources
-  useEffect(() => {
-    setLoading(true);
-    axios.get('/api/GetAllSources')
-      .then(response => {
-        setSources(response.data.map(source => ({ label: source.name, value: source.id })));
-      })
-      .catch(error => console.error('Error fetching sources', error))
-      .finally(() => setLoading(false));
-  }, []);
+    // Function to fetch all Stores
+    const getAllStores = async () => {
+        cancelSearch();
+        try {
+            const [GetAllStores, GetAllStoresCancel] = GetAllStoresControlled();
+            setCancelSearch(() => GetAllStoresCancel);
+            const data = await GetAllStores();
+            setStores(data.error ? [] : data.stores.map(source => ({ label: source.name, value: source.id })));
+        } catch (e) {
+            console.error('Error fetching Stores', e);
+            if (e.code !== "ERR_CANCELED") {
+                setStores([]);
+            }
+        } finally {
+            setLoading(false);
+        }
+    };
 
-  // Fetch report data based on the category selection
-  useEffect(() => {
-    if (selectedCategory) {
-      setLoading(true);
-      axios.get(`/api/report-data/${selectedCategory}`)
-        .then(response => {
-          setReportData(response.data);
-        })
-        .catch(error => console.error('Error fetching report data', error))
-        .finally(() => setLoading(false));
-    }
-  }, [selectedCategory]);
-
-  return (
-    <div>
-        <h1>FOP Report</h1>
-        {loading && <p>Loading...</p>}
-        <SelectInput 
-            options={sources} 
-            value={selectedSource} 
-            onChange={e => setSelectedSource(e.target.value)}
-            label="Select a Source"
-        />
-        {selectedSource && (
-            <CategorySelector 
-            onChange={setSelectedCategory}
+    // useEffect to fetch Stores
+    useEffect(() => {
+        setLoading(true);
+        getAllStores();
+        return () => cancelSearch();
+    }, []);
+    
+    return (
+        <div>
+            <h1>FOP Report</h1>
+            {loading && <p>Loading...</p>}
+            <SelectInput 
+                options={Stores} 
+                value={selectedSource} 
+                onChange={e => setSelectedSource(e.target.value)}
+                label="Select a Source"
             />
-        )}
-        {reportData && (
-            <BarChart
-            data={reportData}
-            chartTitle={"FOP bar chart TODO change this title"}
-            />
-        )}
-    </div>
-  );
+            {selectedSource && (
+                <CategorySelector 
+                    onChange={setSelectedCategory}
+                />
+            )}
+            {reportData && (
+                <BarChart
+                    data={reportData}
+                    chartTitle={"FOP bar chart TODO change this title"}
+                />
+            )}
+        </div>
+    );
 };
 
 export default FOPReport;

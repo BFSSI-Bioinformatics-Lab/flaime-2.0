@@ -1,21 +1,41 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import { GetAllCategories, GetAllSubcategories } from '../../../api/services/CategoryService';
+
 
 const CategorySelector = () => {
   const [categories, setCategories] = useState([]);
   const [selectedCategories, setSelectedCategories] = useState(new Set());
+  const [subcategories, setSubCategories] = useState([]);
+  const [selectedSubCategories, setSelectedSubCategories] = useState(new Set());
 
   useEffect(() => {
     fetchCategories();
+    fetchSubcategories();
   }, []);
 
   const fetchCategories = async () => {
-    const response = await axios.get('/api/GetAllCategories');
-    setCategories(response.data.map(category => ({
-      ...category,
-      subcategories: [],
-      isExpanded: false
-    })));
+    try {
+      const data = await GetAllCategories();
+      setCategories(data.categories.map(category => ({
+        ...category,
+        subcategories: [],
+        isExpanded: false
+      })));
+    } catch (error) {
+      console.error('Failed to fetch categories', error);
+      setCategories([]);
+    }
+  };
+  
+  const fetchSubcategories = async () => {
+    try {
+      const data = await GetAllSubcategories(); 
+      console.log(data)
+      setSubCategories(data.subcategories);
+    } catch (error) {
+      console.error('Failed to fetch subcategories', error);
+      setSubCategories([]);
+    }
   };
 
   const handleCategorySelect = (categoryId) => {
@@ -27,14 +47,19 @@ const CategorySelector = () => {
     }
     setSelectedCategories(newSelectedCategories);
   };
-
-  const toggleExpand = async (category) => {
-    if (!category.subcategories.length) {
-      const response = await axios.get(`/api/GetAllSubcategories?categoryId=${category.id}`);
-      category.subcategories = response.data;
-    }
-    category.isExpanded = !category.isExpanded;
-    setCategories([...categories]);
+  
+  const toggleExpand = (category) => {
+    const updatedCategories = categories.map(cat => {
+      if (cat.id === category.id) {
+        return {
+          ...cat,
+          isExpanded: !cat.isExpanded,
+          subcategories: cat.isExpanded ? [] : subcategories.filter(sub => sub.category_id === cat.id)
+        };
+      }
+      return cat;
+    });
+    setCategories(updatedCategories);
   };
 
   return (
