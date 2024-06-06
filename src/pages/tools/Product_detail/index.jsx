@@ -247,21 +247,23 @@ const Product_detail = () => {
                                 </div>
                                 
                                 <>
-                                    <Grid container spacing={2} style={{ marginTop: '20px' }}>
-                                        {product.store_product_images.length > 1 &&
-                                            product.store_product_images.slice(1).map((imagePath, index) => (
-                                                <Grid key={index} item sm={4} md={4} lg={4}>
-                                                    <Paper elevation={3} style={{ padding: '10px', cursor: 'pointer' }} onClick={() => handleImageClick(imagePath)}>
-                                                        <img
-                                                            key={imagePath}
-                                                            src={imagePathToUrl(imagePath)}
-                                                            alt={product.site_name}
-                                                            style={{ width: '100%', height: 'auto' }}
-                                                        />
-                                                    </Paper>
-                                                </Grid>
-                                            ))}
-                                    </Grid>
+                                    {product.store_product_images && (
+                                        <Grid container spacing={2} style={{ marginTop: '20px' }}>
+                                            {product.store_product_images.length > 1 &&
+                                                product.store_product_images.slice(1).map((imagePath, index) => (
+                                                    <Grid key={index} item sm={4} md={4} lg={4}>
+                                                        <Paper elevation={3} style={{ padding: '10px', cursor: 'pointer' }} onClick={() => handleImageClick(imagePath)}>
+                                                            <img
+                                                                key={imagePath}
+                                                                src={imagePathToUrl(imagePath)}
+                                                                alt={product.site_name}
+                                                                style={{ width: '100%', height: 'auto' }}
+                                                            />
+                                                        </Paper>
+                                                    </Grid>
+                                                ))}
+                                        </Grid>
+                                    )}
                                     <Dialog open={selectedImage !== null} onClose={handleCloseDialog}>
                                         {selectedImage && (
                                             <>
