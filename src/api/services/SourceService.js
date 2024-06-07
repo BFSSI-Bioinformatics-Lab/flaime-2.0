@@ -1,8 +1,9 @@
 import { ApiQueryGet } from "../Api";
 import { addSignalController } from "../tools";
 
+
 const GetAllSources = async () => {
-    const data = await ApiQueryGet("SourceService/GetAllSourcesAsync", null, "");
+    const data = await ApiQueryGet("SourceService/GetAllSourcesAsync");
     return { error: data.statusCode !== 200, sources: data.responseObjects }
 }
 

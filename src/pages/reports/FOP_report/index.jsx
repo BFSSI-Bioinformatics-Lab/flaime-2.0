@@ -4,48 +4,53 @@ import SelectInput from '../../../components/inputs/SelectInput';
 import BarChart from '../../../components/diagrams/BarChart';
 import CategorySelector from '../../../components/inputs/CategorySelector';
 
-import { GetAllStoresControlled } from '../../../api/services/StoreService';
+import { GetAllSourcesControlled } from '../../../api/services/SourceService';
 
 
 const FOPReport = () => {
-    const [Stores, setStores] = useState([]);
-    const [selectedSource, setSelectedSource] = useState('');
-    const [selectedCategory, setSelectedCategory] = useState('');
+    const [Sources, setSources] = useState([]);
+    const [selectedSource, setSelectedSource] = useState([]);
+    const [selectedCategory, setSelectedCategory] = useState([]);
     const [reportData, setReportData] = useState(null);
     const [loading, setLoading] = useState(false);
     const [cancelSearch, setCancelSearch] = useState(() => () => {});
 
-    // Function to fetch all Stores
-    const getAllStores = async () => {
+    // Function to fetch all Sources
+    const getAllSources = async () => {
         cancelSearch();
         try {
-            const [GetAllStores, GetAllStoresCancel] = GetAllStoresControlled();
-            setCancelSearch(() => GetAllStoresCancel);
-            const data = await GetAllStores();
-            setStores(data.error ? [] : data.stores.map(source => ({ label: source.name, value: source.id })));
+            const [GetAllSources, GetAllSourcesCancel] = GetAllSourcesControlled();
+            setCancelSearch(() => GetAllSourcesCancel);
+            const data = await GetAllSources();
+            setSources(data.error ? [] : data.sources.map(source => ({ label: source.name, value: source.id })));
         } catch (e) {
-            console.error('Error fetching Stores', e);
+            console.error('Error fetching Sources', e);
             if (e.code !== "ERR_CANCELED") {
-                setStores([]);
+                setSources([]);
             }
         } finally {
             setLoading(false);
         }
     };
 
-    // useEffect to fetch Stores
     useEffect(() => {
-        setLoading(true);
-        getAllStores();
-        return () => cancelSearch();
+      console.log('useEffect called: Starting to fetch Sources');
+      setLoading(true);
+      getAllSources();
+  
+      return () => {
+          console.log('useEffect cleanup: Cancelling previous API call');
+          cancelSearch();
+      };
     }, []);
+  
     
     return (
         <div>
             <h1>FOP Report</h1>
             {loading && <p>Loading...</p>}
             <SelectInput 
-                options={Stores} 
+                options={Sources} 
                 value={selectedSource} 
                 onChange={e => setSelectedSource(e.target.value)}
                 label="Select a Source"
