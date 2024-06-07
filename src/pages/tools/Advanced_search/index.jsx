@@ -429,168 +429,129 @@ const Advanced_search = () => {
 
         setSearchInputs(searchInputs);
     }
-      
-    const getProductNames = async () => {
-        const products = await GetAllStoreProductsByPagination({ pageNumber: 1, pageSize: 25 });
-        return products.error ? [] : products.products.map((product) => product.siteName);
-    }
-
-    const getBrands = async () => {
-        const brands = await GetBrandsByPagination({ pageNumber: 1, pageSize: 25 });
-        return brands.error ? [] : brands.brands.map(brand => brand.name);
-    }
-
-    // TODO: remove this once there are updated API calls
-    const getCategories = async () => {
-        const categories = await GetAllCategories();
-        return categories.error ? [] : categories.categories.map(category => category.name);
-    }
-
-    // TODO: remove this once there are updated API calls
-    const getSubcategories = async () => {
-        const categories = await GetAllSubcategories();
-        return categories.error ? [] : categories.subcategories.map(category => category.name);
-    }
-
-    // TODO: Replace the dummy data with the actual API call once there are updated API calls for these data
-    const getCategoryTree = async() => {
-        return [{label: "cat1", value: "cat1", children: [{label: "sub1-1", value: "sub1-1"}, {label: "sub1-2", value: "sub1-2"}]},
-        {label: "cat2", value: "cat2", children: [{label: "sub2-1", value: "sub2-1"}, {label: "sub2-2", value: "sub2-2"}, {label: "sub2-3", value: "sub2-3"}]}];
-    }
-
-    const getIngredients = async () => {
-        return ["Sugar", "Water", "Salt", "Milk", "Apples"]
-    }
-
-    const getStores = async () => {
-        const storesData = await GetAllStores();
-        return storesData.stores.map((store) => { return {label: store.name, value: store.name}});
-    }
-
-    const getSources = async () => {
-        const sourcesData = await GetAllSources();
-        return sourcesData.sources.map((source) => { return {name: source.name, value: source.name}});
-    }
-
-    // TODO: Replace the dummy values with the actual API call once there are updated API calls for these data
-    const getGeoLocations = async () => {
-        return [{label: "Location A", value: "Loc A"}, {label: "Location B", value: "Loc B"}, {label: "Location C", value: "Loc C"}];
-    }
-
-    const getCategoryOptions = async () => {
-        Promise.all([
-            getProductNames(),
-            getBrands(),
-            getCategories(),
-            getSubcategories(),
-            getIngredients(),
-            getStores(),
-            getSources(),
-            getGeoLocations(),
-            getCategoryTree()
-        ])
-        .then(([products, brands, categories, subcategories, ingredients, stores, sources, geoLocations, categoryTree]) => {
-            const newSearchCategories = searchCategories;
-            newSearchCategories["Name"].options = products;
-            newSearchCategories["Brand"].options = brands;
-            newSearchCategories["Category"].options = categories;
-            newSearchCategories["Subcategory"].options = subcategories;
-            newSearchCategories["Ingredients"].options = ingredients;
-            newSearchCategories["Stores"].options = stores;
-            newSearchCategories["Sources"].options = sources;
-            newSearchCategories["GeoLocations"].options = geoLocations;
-            newSearchCategories["Categories"].options = categoryTree;
-
-            const newDropdownValues = dropdownValues;
-            newDropdownValues["Stores"] = stores.map((store) => store.value);
-            newDropdownValues["GeoLocations"] = geoLocations.map((location) => location.value);
-            newDropdownValues["Categories"] = categoryTree.map((category) => category.value);
-
-            for (const categoryKey in newSearchCategories) {
-                const category = newSearchCategories[categoryKey];
-                category.loading = false;
-            }
-
-            setSearchCategories(newSearchCategories);
-            setDropdownValues(newDropdownValues);
-        })
-    }
 
     const onSearchButtonClick = async () => {
-        if (appliedSearchFilters === searchInputs) return;
-        getSearchResultsPage(searchInputs, 10, 1, nutrientValueFilters)
+        if (JSON.stringify(appliedSearchFilters) === JSON.stringify(searchInputs)) return;
+        getSearchResultsPage(searchInputs, 1, 10, nutrientValueFilters)
             .then((rows) => {
+                // Adjust here to extract and structure data correctly
+                const formattedResults = rows.map(row => ({
+                    ...row._source,
+                    productEntity: {
+                        categoryEntity: {
+                            name: row._source.categories?.[0]?.name || 'No category'
+                        },
+                        subCategoryEntity: {
+                            name: row._source.subcategories?.[0]?.name || 'No subcategory'
+                        },
+                        ingredientEn: row._source.ingredient_en
+                    }
+                }));
+                setSearchResults(formattedResults);
                 setAppliedSearchFilters(searchInputs);
                 setAppliedNutrientValueFilters(nutrientValueFilters);
                 if (rows != null) setTotalTableRows(rows)
             })
             .catch((e) => {
-                setTotalTableRows(0)
+                console.error(e);
+                setTotalTableRows(0);
             });
-            
     };
+    
 
     const searchResultsGetRowHeight = () => {
         return "auto";
     }
 
-    const getSearchResultsPage = async (searchFilters, pageSize, pageNumber, nutrients) => {
-        let productsFromFiles = [];
-        for (const fileData of attachedProducts) {
-            productsFromFiles = productsFromFiles.concat(Array.from(fileData.products));
-        }
 
-        const productNames = new Set(productTextBoxContent.split("\n").concat(productsFromFiles));
 
-        const apiInputs = {Names: productNames, Categories: searchFilters.Categories.value, SubCategories: searchFilters.SubCategories.value,
-                           Sources: searchFilters.Sources.value, ShowNFT: searchFilters.ShowNFT.value, Stores: searchFilters.Stores.value,
-                           StartDate: searchFilters.StartDate.value, EndDate: searchFilters.EndDate.value, GeoLocations: searchFilters.GeoLocations.value};
+    const getSearchResultsPage = async (searchFilters, pageNumber, pageSize) => {
+        // Log initial state
+        console.log("Starting search with filters:", searchFilters);
+    
+        // Prepare the list of product names from textbox and files
+        const productNames = new Set([...productTextBoxContent.split("\n"), ...attachedProducts.flatMap(fileData => fileData.products)]);
+        console.log("Compiled product names for search:", Array.from(productNames));
+    
+        // Construct the Elasticsearch query
+        const buildFilters = (filters) => {
+            const filterClauses = [];
+            if (filters.categories && filters.categories.length > 0) {
+                filterClauses.push({
+                    nested: {
+                        path: "categories",
+                        query: { terms: { "categories.name": filters.categories } }
+                    }
+                });
+            }
+            if (filters.subcategories && filters.subcategories.length > 0) {
+                filterClauses.push({
+                    nested: {
+                        path: "subcategories",
+                        query: { terms: { "subcategories.name": filters.subcategories } }
+                    }
+                });
+            }
+            if (filters.stores && filters.stores.length > 0) {
+                filterClauses.push({
+                    nested: {
+                        path: "stores",
+                        query: { terms: { "stores.name": filters.stores } }
+                    }
+                });
+            }
+            return filterClauses;
+        };
         
-        // == TODO: Connect the search inputs to the updated advanced search API call ==
-        console.log("Search Inputs: ", apiInputs);
-
-        // =============================================================================
-
-        // TODO: Remove the code below once connected to the updated advanced search API call
-        const params = Object.fromEntries([
-            ["pageNumber", pageNumber],
-            ["pageSize", pageSize],
-            ["includeDetails", true],
-            ["nutrientName", nutrients.map(ntr => ntr.nutrient)],
-            ["nutrientRange", nutrients.map(ntr => [ntr.min / 100,ntr.max])],
-                ...Object.values(searchFilters).map(filter => 
-            ([filter.id, filter.value])
-        )]);
-        advancedSearchCancel.fn();
-
-        const [advanceSearchProductsCall, advanceSearchProductsCancel] = AdvanceSearchStoreProductsControlled();
-        setAdvancedSearchCancel({ fn: advanceSearchProductsCancel });
-        setSearchResultsIsLoading(true);
-
+        const queryBody = {
+            from: (pageNumber - 1) * pageSize,
+            size: pageSize,
+            query: {
+                bool: {
+                    must: [
+                        { terms: { "site_name.keyword": Array.from(productNames) } }
+                    ],
+                    filter: buildFilters(searchFilters)
+                }
+            }
+        };
+        
+        console.log("Elasticsearch filters applied:", buildFilters(searchFilters));
+        console.log("Elasticsearch query body:", JSON.stringify(queryBody, null, 2));
+    
+    
+        // Make the Elasticsearch request
         try {
-            const results = await advanceSearchProductsCall(params);
-            setSearchResultsIsLoading(false);
-            if (results.error) {
+            const search_url = `${process.env.REACT_APP_ELASTIC_URL}_search/`;
+            console.log(`Search url: ${search_url}`);
+            const response = await fetch(search_url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(queryBody)
+            });
+    
+            const data = await response.json(); // Parse the JSON response
+            if (response.ok) {
+                console.log("Search successful, hits:", data.hits.hits);
+                setSearchResults(data.hits.hits.map(hit => hit._source)); // Process and set the results
+                return data.hits.total.value; // Return the total count for pagination
+            } else {
+                console.error('Search failed:', data);
                 setSearchResults([]);
                 return 0;
-            } else {
-                setSearchResults(results.products);
-                return results.pagination.totalRowCount;
             }
-        } catch (e) {
-            if (e.code !== "ERR_CANCELED") {
-                setSearchResultsIsLoading(false);
-                return 0;
-            }
-            return null;
+        } catch (error) {
+            console.error('Search error:', error);
+            setSearchResults([]);
+            return 0;
         }
-    }
+    };
     
     useEffect(() => {
         if (!optionsLoaded) {
             optionsLoaded = true;
-            const searchCategoryNames = ["Name", "Brand", "Category", "Subcategory", "Contains Ingredient(s)"];
-            getCategoryOptions();
         }
     }, []);
 
@@ -602,8 +563,6 @@ const Advanced_search = () => {
                     <TextListInput title="Product Names" category={searchCategories["Name"].options } placeholder={"List of Product Names (each seperated by a newline)..."} 
                         additionalOptions={productNameInputAdditionalFeats} inputWidth="100%" helpTxt={helpTxt['Name']} attachments={attachedProductFiles} onAttachmentDelete={removeAttachment}
                         onTextChange={onProductTextBoxChange}></TextListInput>
-                    <MultiSelectDropdownTree title="Categories" items={searchCategories.Categories.options} onChange={onCategoryChange} sx={CategorySearchStyle} 
-                        helpTxt={helpTxt['Categories']} texts={{placeholder: 'Categories...'}}></MultiSelectDropdownTree>
                     <Accordion>
                         <FilterCollapsibleSummary
                             expandIcon={<ExpandMoreIcon />}
