@@ -78,8 +78,8 @@ const Product_detail = () => {
         
         setProducts(old=>({...old, isLoading: true}))
         
-        let elasticUrl = `${process.env.REACT_APP_ELASTIC_URL}_doc/}`;
-        const elasticImgUrl = `${process.env.REACT_APP_ELASTIC_IMG_URL}_doc/}`;
+        let elasticUrl = `${process.env.REACT_APP_ELASTIC_URL}/_doc/}`;
+        const elasticImgUrl = `${process.env.REACT_APP_ELASTIC_IMG_URL}/_doc/}`;
 
         // axios.get(`${elasticUrl}/${productId}`).then(
         //     (data) => {

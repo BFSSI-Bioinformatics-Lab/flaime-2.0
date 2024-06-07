@@ -238,27 +238,6 @@ const Advanced_search = () => {
             minWidth: 150,
             flex: 2 
         },
-        {
-            field: "categoryPredictionEntityId",
-            headerName: "Category",
-            minWidth: 150,
-            flex: 3,
-            renderCell: (params) => params.row.productEntity.categoryEntity ? params.row.productEntity.categoryEntity.name : null
-        },
-        {
-            field: "subcategoryPredictionEntityId",
-            headerName: "Subcategory",
-            minWidth: 160,
-            flex: 3,
-            renderCell: (params) => params.row.productEntity.subCategoryEntity ? params.row.productEntity.subCategoryEntity.name : null
-        },
-        { 
-            field: 'ingredientEn', 
-            headerName: 'Ingredients', 
-            minWidth: 350,
-            flex: 5,
-            renderCell: (params) => params.row.productEntity && params.row.productEntity.ingredientEn ? formatIngredients(params.row.productEntity.ingredientEn) : null
-        }
       ];
     
     function readCSVFile(event) {
@@ -433,31 +412,16 @@ const Advanced_search = () => {
     const onSearchButtonClick = async () => {
         if (JSON.stringify(appliedSearchFilters) === JSON.stringify(searchInputs)) return;
         getSearchResultsPage(searchInputs, 1, 10, nutrientValueFilters)
-            .then((rows) => {
-                // Adjust here to extract and structure data correctly
-                const formattedResults = rows.map(row => ({
-                    ...row._source,
-                    productEntity: {
-                        categoryEntity: {
-                            name: row._source.categories?.[0]?.name || 'No category'
-                        },
-                        subCategoryEntity: {
-                            name: row._source.subcategories?.[0]?.name || 'No subcategory'
-                        },
-                        ingredientEn: row._source.ingredient_en
-                    }
-                }));
-                setSearchResults(formattedResults);
+            .then((totalRows) => {
                 setAppliedSearchFilters(searchInputs);
                 setAppliedNutrientValueFilters(nutrientValueFilters);
-                if (rows != null) setTotalTableRows(rows)
+                setTotalTableRows(totalRows);
             })
             .catch((e) => {
                 console.error(e);
                 setTotalTableRows(0);
             });
     };
-    
 
     const searchResultsGetRowHeight = () => {
         return "auto";
@@ -515,14 +479,14 @@ const Advanced_search = () => {
                 }
             }
         };
-        
+            
         console.log("Elasticsearch filters applied:", buildFilters(searchFilters));
         console.log("Elasticsearch query body:", JSON.stringify(queryBody, null, 2));
     
     
         // Make the Elasticsearch request
         try {
-            const search_url = `${process.env.REACT_APP_ELASTIC_URL}_search/`;
+            const search_url = `${process.env.REACT_APP_ELASTIC_URL}/_search`;
             console.log(`Search url: ${search_url}`);
             const response = await fetch(search_url, {
                 method: 'POST',
@@ -532,13 +496,22 @@ const Advanced_search = () => {
                 body: JSON.stringify(queryBody)
             });
     
-            const data = await response.json(); // Parse the JSON response
-            if (response.ok) {
-                console.log("Search successful, hits:", data.hits.hits);
-                setSearchResults(data.hits.hits.map(hit => hit._source)); // Process and set the results
-                return data.hits.total.value; // Return the total count for pagination
+            const data = await response.json();
+            console.log("API Response:", data);
+    
+            if (response.ok && Array.isArray(data.hits.hits)) {
+                const formattedResults = data.hits.hits.map(hit => ({
+                    ...hit._source,
+                    productEntity: {
+                        categoryEntity: { name: hit._source.categories?.[0]?.name || 'No category' },
+                        subCategoryEntity: { name: hit._source.subcategories?.[0]?.name || 'No subcategory' },
+                        ingredientEn: hit._source.ingredient_en
+                    }
+                }));
+                setSearchResults(formattedResults);
+                return data.hits.total.value; // Total results for pagination
             } else {
-                console.error('Search failed:', data);
+                console.error('No data or incorrect data structure:', data);
                 setSearchResults([]);
                 return 0;
             }
@@ -591,20 +564,31 @@ const Advanced_search = () => {
             </AdvancedSearchSection>
             <AdvancedSearchSection>
                 <div>
-                    <MainTable 
-                        rows={searchResults} 
-                        columns={searchTableColumns} 
-                        onPageChange={(pageNumber, pageSize) => 
-                            getSearchResultsPage(appliedSearchFilters, pageNumber, pageSize, appliedNutrientValueFilters)
-                        } 
-                        getRowHeight={searchResultsGetRowHeight}
-                        loading={searchResultsIsLoading}
-                        setLoading={setSearchResultsIsLoading}
-                        pageSize={10}
-                        totalRows={totalTableRows}
-                        searchBar={false}
-                    />
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Brand</th>
+                                <th>Price</th>
+                                <th>Category</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {searchResults.map((item, index) => (
+                                <tr key={index}>
+                                    <td>{item.id}</td>
+                                    <td>{item.site_name}</td>
+                                    <td>{item.raw_brand}</td>
+                                    <td>{item.reading_price}</td>
+                                    <td>{item.categories?.[0]?.name || 'No category'}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                    {searchResultsIsLoading && <p>Loading...</p>}
                 </div>
+
             </AdvancedSearchSection>
         </PageContainer>
     )
