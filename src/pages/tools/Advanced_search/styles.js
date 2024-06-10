@@ -19,25 +19,6 @@ export const NutrientFiltersGrid = styled(Grid)(() => ({
     paddingBottom: 2
 }));
 
-export const FileUploadContainer = styled("div")(({theme}) => ({
-    padding: '10px',
-    "&:hover > *": {
-        backgroundColor: theme.palette.primary.light
-    }
-}))
-
-export const FileUploadInput = styled("input")(() => ({
-    display: 'none'
-}));
-
-export const FileUploadButton = styled("label")(({theme}) => ({
-    backgroundColor: theme.palette.primary.contrastText,
-}));
-
-export const FilterCollapsibleSummary = styled(AccordionSummary)(({theme}) => ({
-    marginTop: "10px"
-}));
-
 export const FilterStyles = {
     marginBottom: '30px'
 }

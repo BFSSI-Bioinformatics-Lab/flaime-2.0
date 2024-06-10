@@ -21,7 +21,7 @@ const SourceSelector = ({ onSelect }) => {
 
     return (
         <div>
-            <h1>Select a Source</h1>
+            <h2>Select a Source</h2>
             {loading ? <p>Loading...</p> : (
                 <SelectInput
                     options={sourcesWithDefault}

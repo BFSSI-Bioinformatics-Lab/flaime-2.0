@@ -93,38 +93,41 @@ const CategorySelector = ({ onChange }) => {
   };
 
   return (
-    <div style={{ height: '300px', overflowY: 'auto' }}>
-      {state.categories.map(category => (
-        <div key={category.id}>
-          <IndeterminateCheckbox
-            id={`category-${category.id}`}
-            checked={getSelectionState(category) === 'full'}
-            indeterminate={getSelectionState(category) === 'partial'}
-            onChange={() => handleCategorySelect(category)}
-            label={category.name}
-          />
-          <button
-            onClick={() => toggleExpand(category)}
-            aria-label={category.isExpanded ? `Collapse ${category.name}` : `Expand ${category.name}`}
-          >
-            {category.isExpanded ? '-' : '+'}
-          </button>
-          {category.isExpanded && (
-            <div style={{ marginLeft: '20px' }}>
-              {category.subcategories.map(sub => (
-                <div key={sub.id} style={{ display: 'block' }}>
-                  <IndeterminateCheckbox
-                    id={`subcategory-${sub.id}`}
-                    checked={state.selectedCategories.has(sub.id)}
-                    onChange={() => handleCategorySelect(sub, true)}
-                    label={sub.name}
-                  />
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      ))}
+    <div>
+      <h2>Select Categories</h2>
+      <div style={{ height: '300px', overflowY: 'auto' }}>
+        {state.categories.map(category => (
+          <div key={category.id}>
+            <IndeterminateCheckbox
+              id={`category-${category.id}`}
+              checked={getSelectionState(category) === 'full'}
+              indeterminate={getSelectionState(category) === 'partial'}
+              onChange={() => handleCategorySelect(category)}
+              label={category.name}
+            />
+            <button
+              onClick={() => toggleExpand(category)}
+              aria-label={category.isExpanded ? `Collapse ${category.name}` : `Expand ${category.name}`}
+            >
+              {category.isExpanded ? '-' : '+'}
+            </button>
+            {category.isExpanded && (
+              <div style={{ marginLeft: '20px' }}>
+                {category.subcategories.map(sub => (
+                  <div key={sub.id} style={{ display: 'block' }}>
+                    <IndeterminateCheckbox
+                      id={`subcategory-${sub.id}`}
+                      checked={state.selectedCategories.has(sub.id)}
+                      onChange={() => handleCategorySelect(sub, true)}
+                      label={sub.name}
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
     </div>
   );
 };
