@@ -7,6 +7,10 @@ const SourceSelector = ({ onSelect }) => {
     const { sources, loading } = useSources();
     const [selectedSource, setSelectedSource] = React.useState('');
 
+    const sourcesWithDefault = [
+        { label: 'Use all sources', value: '-1' },
+        ...sources
+    ];
 
     const handleSelectionChange = (value) => {
         setSelectedSource(value);
@@ -20,7 +24,7 @@ const SourceSelector = ({ onSelect }) => {
             <h1>Select a Source</h1>
             {loading ? <p>Loading...</p> : (
                 <SelectInput
-                    options={sources}
+                    options={sourcesWithDefault}
                     value={selectedSource}
                     onChange={handleSelectionChange}
                     label="Select a Source"

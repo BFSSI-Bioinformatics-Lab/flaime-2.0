@@ -13,14 +13,11 @@ const SelectInput = ({ options, value, onChange, label }) => {
         onChange={(event, child) => onChange(child.props.value)}
         label={label}
       >
-        <MenuItem value="">
-          <em>None</em>
-        </MenuItem>
-        {options.map(option => (
+      {options.map(option => (
           <MenuItem key={option.value} value={option.value}>
-            {option.label}
+              {option.label}
           </MenuItem>
-        ))}
+      ))}
       </Select>
     </CustomFormControl>
   );

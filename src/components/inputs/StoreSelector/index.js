@@ -7,6 +7,10 @@ const StoreSelector = ({ onSelect }) => {
     const { stores, loading } = useStores();
     const [selectedStore, setSelectedStore] = React.useState('');
 
+    const storesWithDefault = [
+        { label: 'Use all stores', value: '-1' },
+        ...stores
+    ];
 
     const handleSelectionChange = (value) => {
         setSelectedStore(value);
@@ -20,7 +24,7 @@ const StoreSelector = ({ onSelect }) => {
             <h1>Select a Store</h1>
             {loading ? <p>Loading...</p> : (
                 <SelectInput
-                    options={stores}
+                    options={storesWithDefault}
                     value={selectedStore}
                     onChange={handleSelectionChange}
                     label="Select a Store"
