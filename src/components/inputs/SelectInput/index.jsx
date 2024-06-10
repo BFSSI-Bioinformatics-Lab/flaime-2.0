@@ -10,7 +10,7 @@ const SelectInput = ({ options, value, onChange, label }) => {
       <Select
         labelId={`${label}-label`}
         value={value}
-        onChange={onChange}
+        onChange={(event, child) => onChange(child.props.value)}
         label={label}
       >
         <MenuItem value="">
