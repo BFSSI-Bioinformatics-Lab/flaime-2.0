@@ -1,97 +1,113 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useReducer } from 'react';
 import { GetAllCategories, GetAllSubcategories } from '../../../api/services/CategoryService';
+import { IndeterminateCheckbox  } from './IndeterminateCheckbox';
 
 
-const CategorySelector = () => {
-  const [categories, setCategories] = useState([]);
-  const [selectedCategories, setSelectedCategories] = useState(new Set());
-  const [subcategories, setSubCategories] = useState([]);
-  const [selectedSubCategories, setSelectedSubCategories] = useState(new Set());
+const categoryReducer = (state, action) => {
+  console.log(`Reducer action type: ${action.type}`);
+  switch (action.type) {
+    case 'FETCH_CATEGORIES':
+      return {
+        ...state,
+        categories: action.payload,
+      };
+    case 'TOGGLE_CATEGORY':
+      return {
+        ...state,
+        categories: state.categories.map(cat => {
+          if (cat.id === action.payload) {
+            return { ...cat, isExpanded: !cat.isExpanded };
+          }
+          return cat;
+        }),
+      };
+    case 'SELECT_CATEGORY':
+      console.log(`Selecting categories with payload: ${action.payload}`);
+      return {
+        ...state,
+        selectedCategories: new Set(action.payload),
+      };
+    default:
+      return state;
+  }
+};
+
+const CategorySelector = ({ onChange }) => {
+  const [state, dispatch] = useReducer(categoryReducer, { categories: [], selectedCategories: new Set() });
+
+  const getSelectionState = (category) => {
+    const subcategoryIds = category.subcategories.map(sub => sub.id);
+    const selectedSubcategoryCount = subcategoryIds.filter(id => state.selectedCategories.has(id)).length;
+  
+    if (selectedSubcategoryCount === 0) {
+      return 'none';
+    } else if (selectedSubcategoryCount === subcategoryIds.length) {
+      return 'full';
+    } else {
+      return 'partial';
+    }
+  }
+  
+  
 
   useEffect(() => {
-    fetchCategories();
-    fetchSubcategories();
+    const fetchData = async () => {
+      console.log("Fetching categories and subcategories...");
+      const categoriesData = await GetAllCategories();
+      const subcategoriesData = await GetAllSubcategories();
+      const categoriesWithSubcategories = categoriesData.categories.map(cat => ({
+        ...cat,
+        subcategories: subcategoriesData.subcategories.filter(sub => sub.categoryEntity.id === cat.id),
+        isExpanded: false,
+      }));
+      console.log("Categories with subcategories loaded:", categoriesWithSubcategories);
+      dispatch({ type: 'FETCH_CATEGORIES', payload: categoriesWithSubcategories });
+    };
+    fetchData();
   }, []);
 
-  useEffect(() => {
-    console.log('Selected Categories:', Array.from(selectedCategories));
-  }, [selectedCategories]);
-
-  const fetchCategories = async () => {
-    try {
-      const data = await GetAllCategories();
-      setCategories(data.categories.map(category => ({
-        ...category,
-        subcategories: [],
-        isExpanded: false
-      })));
-    } catch (error) {
-      console.error('Failed to fetch categories', error);
-      setCategories([]);
-    }
-  };
+  const handleCategorySelect = (category, isSubcategory = false) => {
+    const newSelectedCategories = new Set(state.selectedCategories);
   
-  const fetchSubcategories = async () => {
-    try {
-      const data = await GetAllSubcategories();
-      setSubCategories(data.subcategories);
-    } catch (error) {
-      console.error('Failed to fetch subcategories', error);
-      setSubCategories([]);
-    }
-  };
-
-  const handleCategorySelect = (categoryId, isParent = false) => {
-    const newSelectedCategories = new Set(selectedCategories);
-    
-    if (newSelectedCategories.has(categoryId)) {
-        newSelectedCategories.delete(categoryId);
-    } else {
-        newSelectedCategories.add(categoryId);
-    }
-
-    if (isParent) {
-        const category = categories.find(cat => cat.id === categoryId);
-        if (category && category.subcategories) {
-            category.subcategories.forEach(sub => {
-                if (newSelectedCategories.has(categoryId)) {
-                    newSelectedCategories.add(sub.id);
-                } else {
-                    newSelectedCategories.delete(sub.id);
-                }
-            });
-        }
-    }
-
-    setSelectedCategories(newSelectedCategories);
-};
-  
-  const toggleExpand = (category) => {
-    const updatedCategories = categories.map(cat => {
-      if (cat.id === category.id) {
-        return {
-          ...cat,
-          isExpanded: !cat.isExpanded,
-          subcategories: cat.isExpanded ? [] : subcategories.filter(sub => sub.categoryEntity.id === cat.id)
-        };
+    if (!isSubcategory) {
+      if (category.subcategories.every(sub => newSelectedCategories.has(sub.id))) {
+        category.subcategories.forEach(sub => newSelectedCategories.delete(sub.id));
+      } else {
+        category.subcategories.forEach(sub => newSelectedCategories.add(sub.id));
       }
-      return cat;
+    } else {
+      if (newSelectedCategories.has(category.id)) {
+        newSelectedCategories.delete(category.id);
+      } else {
+        newSelectedCategories.add(category.id);
+      }
+    }
+  
+    dispatch({
+      type: 'SELECT_CATEGORY',
+      payload: Array.from(newSelectedCategories),
     });
-    setCategories(updatedCategories);
+    onChange(Array.from(newSelectedCategories));
+  }
+    
+    
+
+  const toggleExpand = (category) => {
+    console.log(`Toggling expansion for category: ${category.id}`);
+    dispatch({ type: 'TOGGLE_CATEGORY', payload: category.id });
   };
 
   return (
     <div style={{ height: '300px', overflowY: 'auto' }}>
-      {categories.map(category => (
+      {state.categories.map(category => (
         <div key={category.id}>
-          <label style={{ display: 'inline' }}>
-            <input
-              type="checkbox"
-              checked={selectedCategories.has(category.id)}
-              onChange={() => handleCategorySelect(category.id, true)}
-            />
-            {category.name}
-          </label>
+          <IndeterminateCheckbox
+            id={`category-${category.id}`}
+            checked={getSelectionState(category, state.selectedCategories) === 'full'}
+            indeterminate={getSelectionState(category, state.selectedCategories) === 'partial'}
+            onChange={() => handleCategorySelect(category)}
+            label={category.name}
+          />
           <button onClick={() => toggleExpand(category)}>
             {category.isExpanded ? '-' : '+'}
           </button>
@@ -99,14 +115,12 @@ const CategorySelector = () => {
             <div style={{ marginLeft: '20px' }}>
               {category.subcategories.map(sub => (
                 <div key={sub.id} style={{ display: 'block' }}>
-                  <label>
-                    <input
-                      type="checkbox"
-                      checked={selectedCategories.has(sub.id)}
-                      onChange={() => handleCategorySelect(sub.id, false)}
-                    />
-                    {sub.name}
-                  </label>
+                  <IndeterminateCheckbox
+                    id={`subcategory-${sub.id}`}
+                    checked={state.selectedCategories.has(sub.id)}
+                    onChange={() => handleCategorySelect(sub, true)}
+                    label={sub.name}
+                  />
                 </div>
               ))}
             </div>
@@ -115,8 +129,7 @@ const CategorySelector = () => {
       ))}
     </div>
   );
-  
-  
 };
+
 
 export default CategorySelector;
