@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
+import dayjs from 'dayjs';
 import TextFileInput from '../../../components/inputs/TextFileInput';
 import StoreSelector from '../../../components/inputs/StoreSelector';
 import SourceSelector from '../../../components/inputs/SourceSelector';
-import CategorySelector from '../../../components/inputs/CategorySelector';
+import SingleDatePicker from '../../../components/inputs/SingleDatePicker';
 import { Button } from '@mui/material';
 
 const AdvancedSearch = () => {
@@ -20,6 +21,12 @@ const AdvancedSearch = () => {
       value: null
     },
     Stores: {
+      value: null
+    },
+    StartDate: {
+      value: null
+    },
+    EndDate: {
       value: null
     }
   });
@@ -56,14 +63,24 @@ const AdvancedSearch = () => {
     console.log("Selected Store:", selectedStore);
   };
 
-  const handleCategoryChange = (selectedCategories) => {
+  const handleStartDateChange = (startDate) => {
     setSearchInputs(prev => ({
       ...prev,
-      Categories: {
-        value: new Set(selectedCategories)
+      StartDate: {
+        value: startDate
       }
     }));
-    console.log("Selected Categories:", selectedCategories);
+    console.log("Start Date:", startDate);
+  };
+
+  const handleEndDateChange = (endDate) => {
+    setSearchInputs(prev => ({
+      ...prev,
+      EndDate: {
+        value: endDate
+      }
+    }));
+    console.log("End Date:", endDate);
   };
 
   const handleSearch = async () => {
@@ -87,6 +104,33 @@ const AdvancedSearch = () => {
             }
         });
     }
+
+    const dateFilter = {};
+    if (searchInputs.StartDate.value && searchInputs.EndDate.value) {
+        dateFilter.range = {
+            "scrape_batches.scrape_datetime": {
+                gte: searchInputs.StartDate.value,
+                lte: searchInputs.EndDate.value,
+            }
+        };
+    } else if (searchInputs.StartDate.value) {
+        dateFilter.range = {
+            "scrape_batches.scrape_datetime": {
+                gte: searchInputs.StartDate.value,
+            }
+        };
+    } else if (searchInputs.EndDate.value) {
+        dateFilter.range = {
+            "scrape_batches.scrape_datetime": {
+                lte: searchInputs.EndDate.value,
+            }
+        };
+    }
+
+    if (Object.keys(dateFilter).length !== 0) {
+        filters.push(dateFilter);
+    }
+
 
     const queryBody = {
         from: 0,
@@ -143,8 +187,20 @@ const AdvancedSearch = () => {
       />
       <SourceSelector onSelect={handleSourceChange} />
       <StoreSelector onSelect={handleStoreChange} />
-      <CategorySelector onChange={handleCategoryChange} />
-      <Button variant="contained" onClick={handleSearch} style={{ marginTop: '20px' }}>
+      <h2>Select a date range</h2>
+      <div>
+            <SingleDatePicker 
+                label="Start Date"
+                initialDate="1900-01-01" // Very old date for start date
+                onChange={handleStartDateChange}
+            />
+            <SingleDatePicker 
+                label="End Date"
+                initialDate={dayjs().format('YYYY-MM-DD')} // Today's date for end date
+                onChange={handleEndDateChange}
+            />
+        </div>
+        <Button variant="contained" onClick={handleSearch} style={{ marginTop: '20px' }}>
         Search
       </Button>
       {searchResultsIsLoading ? (
