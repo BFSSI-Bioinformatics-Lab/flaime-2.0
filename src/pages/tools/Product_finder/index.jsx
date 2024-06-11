@@ -5,19 +5,14 @@ import StoreSelector from '../../../components/inputs/StoreSelector';
 import SourceSelector from '../../../components/inputs/SourceSelector';
 import RegionSelector from '../../../components/inputs/RegionSelector';
 import SingleDatePicker from '../../../components/inputs/SingleDatePicker';
-import { Button } from '@mui/material';
+import { Button, FormControl, FormControlLabel, Radio, RadioGroup } from '@mui/material';
 
 const ProductFinder = () => {
+  const [inputMode, setInputMode] = useState('Names'); // product name or barcode?
   const [searchInputs, setSearchInputs] = useState({
-    Names: {
+    TextEntries: {
       value: []
     },
-    Categories: {
-      value: new Set()
-    },
-    SubCategories: {
-        value: new Set()
-      },
     Source: {
       value: null
     },
@@ -37,14 +32,19 @@ const ProductFinder = () => {
   const [searchResults, setSearchResults] = useState([]);
   const [searchResultsIsLoading, setSearchResultsIsLoading] = useState(false);
 
+
   const handleTextChange = (newText) => {
     setSearchInputs(prev => ({
       ...prev,
-      Names: {
+      TextEntries: {
         value: newText.split("\n").filter(line => line.trim() !== "")
       }
     }));
-    console.log("Updated Names:", newText);
+    console.log(`Updated ${inputMode}:`, newText);
+  };
+
+  const handleInputModeChange = (event) => {
+    setInputMode(event.target.value);
   };
 
   const handleSourceChange = (selectedSource) => {
@@ -153,6 +153,8 @@ const ProductFinder = () => {
         filters.push(dateFilter);
     }
 
+    const fieldKey = inputMode === 'Names' ? 'site_name.keyword' : 'id';
+
     const queryBody = {
       from: 0,
       size: 100,
@@ -161,9 +163,9 @@ const ProductFinder = () => {
               must: [
                   {
                       bool: {
-                          should: searchInputs.Names.value.map(name => ({
+                          should: searchInputs.TextEntries.value.map(entry => ({
                               term: {
-                                  "site_name.keyword": name
+                                  [fieldKey]: entry
                               }
                           })),
                           minimum_should_match: 1
@@ -209,8 +211,15 @@ const ProductFinder = () => {
 
   return (
     <div>
+      <FormControl>
+        <RadioGroup row value={inputMode} onChange={handleInputModeChange} name="inputMode">
+          <FormControlLabel value="Names" control={<Radio />} label="Product Names" />
+          <FormControlLabel value="IDs" control={<Radio />} label="FLAIME IDs" />
+        </RadioGroup>
+      </FormControl>
+      <h2>Enter product names (or IDs) or upload a file</h2>
       <TextFileInput 
-        text={searchInputs.Names.value.join("\n")}
+        text={searchInputs.TextEntries.value.join("\n")}
         onTextChange={handleTextChange}
       />
       <SourceSelector onSelect={handleSourceChange} />
@@ -240,7 +249,6 @@ const ProductFinder = () => {
                     <tr>
                         <th>ID</th>
                         <th>Name</th>
-                        <th>Brand</th>
                         <th>Price</th>
                         <th>Source</th>
                         <th>Store</th>
@@ -254,7 +262,6 @@ const ProductFinder = () => {
                         <tr key={index}>
                             <td>{item._id}</td>
                             <td>{item._source.site_name}</td>
-                            <td>{item._source.raw_brand}</td>
                             <td>{item._source.reading_price}</td>
                             <td>{item._source.sources.name}</td>
                             <td>{item._source.stores.name}</td>

@@ -20,7 +20,6 @@ const TextFileInput = ({ text, onTextChange }) => {
 
   return (
     <div>
-      <h2>Enter product names or upload a file</h2>
       <TextField
         fullWidth
         multiline
