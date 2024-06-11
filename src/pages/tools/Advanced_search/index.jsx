@@ -153,23 +153,29 @@ const AdvancedSearch = () => {
         filters.push(dateFilter);
     }
 
-
     const queryBody = {
-        from: 0,
-        size: 100,
-        query: {
-            bool: {
-                must: [
-                    {
-                        match: {
-                            "site_name.keyword": searchInputs.Names.value.join(" ")
-                        }
-                    }
-                ],
-                filter: filters
-            }
-        }
+      from: 0,
+      size: 100,
+      query: {
+          bool: {
+              must: [
+                  {
+                      bool: {
+                          should: searchInputs.Names.value.map(name => ({
+                              term: {
+                                  "site_name.keyword": name
+                              }
+                          })),
+                          minimum_should_match: 1
+                      }
+                  }
+              ],
+              filter: filters
+          }
+      }
     };
+  
+
 
     console.log("Elasticsearch query body:", JSON.stringify(queryBody, null, 2));
 
