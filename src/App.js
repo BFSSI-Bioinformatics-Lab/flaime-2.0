@@ -18,7 +18,7 @@ import Download from "./pages/data/Download";
 import Quality from "./pages/data/Quality";
 import Visualizations from "./pages/data/Visualizations";
 import About from "./pages/About";
-import Advanced_search from "./pages/tools/Advanced_search";
+import Product_finder from "./pages/tools/Product_finder";
 import SignIn from "./pages/SignIn";
 
 function App() {
@@ -41,7 +41,7 @@ function App() {
             <Route path="tools/product-browser" element={<Product_browser />} />
             <Route path="tools/batch-browser" element={<Batch_browser />} />
             <Route path="tools/report-builder" element={<Report_builder />} />
-            <Route path="tools/advanced-search" element={<Advanced_search />} />
+            <Route path="tools/product-finder" element={<Product_finder />} />
             {/* Reports Dropdown */}
             <Route path="reports/store" element={<Store_report />} />
             <Route path="reports/category" element={<Category_report />} />

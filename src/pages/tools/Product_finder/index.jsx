@@ -7,7 +7,7 @@ import RegionSelector from '../../../components/inputs/RegionSelector';
 import SingleDatePicker from '../../../components/inputs/SingleDatePicker';
 import { Button } from '@mui/material';
 
-const AdvancedSearch = () => {
+const ProductFinder = () => {
   const [searchInputs, setSearchInputs] = useState({
     Names: {
       value: []
@@ -270,5 +270,5 @@ const AdvancedSearch = () => {
   );
 };
 
-export default AdvancedSearch;
+export default ProductFinder;
 
