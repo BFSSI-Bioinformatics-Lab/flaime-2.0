@@ -22,7 +22,7 @@ const Quality = () => {
       try {
         let queryObject = {
           bool: {
-            should: [
+            must: [
               {
                 match: {
                   most_recent_flag: {
@@ -33,45 +33,51 @@ const Quality = () => {
             ]
           }
         };
+        // if (!idSearchTerm && !storeNameSearchTerm && !sourceNameSearchTerm && !siteNameSearchTerm) {
+        //   queryObject.bool.should.push({
+        //     term: {
+        //       most_recent_flag: {
+        //         value: true
+        //       }
+        //     }
+        //   });}
   
         if (idSearchTerm) {
-          queryObject.bool.should.push({
+          queryObject.bool.must.push({
             term: {
-              id: {
-                value: idSearchTerm
-              }
+              id: idSearchTerm
             }
           });
         }
   
         if (storeNameSearchTerm) {
-          queryObject.bool.should.push({
+          queryObject.bool.must.push({
             match: {
               "stores.name": {
                 query: storeNameSearchTerm,
-                operator: "or"
+                operator: "and"
               }
             }
           });
         }
   
         if (sourceNameSearchTerm) {
-          queryObject.bool.should.push({
+          queryObject.bool.must.push({
             match: {
               "sources.name": {
                 query: sourceNameSearchTerm,
-                operator: "or"
+                operator: "and"
               }
             }
           });
         }
   
         if (siteNameSearchTerm) {
-          queryObject.bool.should.push({
+          queryObject.bool.must.push({
             match: {
               site_name: {
                 query: siteNameSearchTerm,
-                operator: "or"
+                operator: "and"
               }
             }
           });
@@ -175,7 +181,7 @@ const Quality = () => {
               <TableCell>ID</TableCell>
               <TableCell>Store Name</TableCell>
               <TableCell>Source</TableCell>
-              <TableCell>Site URL</TableCell>
+              <TableCell>Product Name</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -191,7 +197,7 @@ const Quality = () => {
         </Table>
       </TableContainer>
       <Pagination
-        count={Math.ceil(totalProducts / rowsPerPage)}
+        count={Math.ceil(totalProducts / rowsPerPage -1)}
         page={page - 1}
         onChange={handleChangePage}
         siblingCount={1}

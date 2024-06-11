@@ -6,90 +6,90 @@ import { TableContainer, Table, TableHead, TableRow, TableCell, TableBody, Pagin
 
 const Download = () => {
   
-  const [products, setProducts] = useState([]);
-  const [page, setPage] = useState(1);
-  const [rowsPerPage, setRowsPerPage] = useState(15);
-  const [totalProducts, setTotalProducts] = useState(0);
-  const [searchTerm, setSearchTerm] = useState('');
+  // const [products, setProducts] = useState([]);
+  // const [page, setPage] = useState(1);
+  // const [rowsPerPage, setRowsPerPage] = useState(15);
+  // const [totalProducts, setTotalProducts] = useState(0);
+  // const [searchTerm, setSearchTerm] = useState('');
 
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const response = await axios.post('http://172.17.10.96:9200/data_v1/_search', {
-          query: {
-            // "term" : {
-            //   "most_recent_flag": true
+  // useEffect(() => {
+  //   const fetchProducts = async () => {
+  //     try {
+  //       const response = await axios.post('http://172.17.10.96:9200/data_v1/_search', {
+  //         query: {
+  //           // "term" : {
+  //           //   "most_recent_flag": true
               
-            // },
+  //           // },
             
-            "bool": {
-              "should": [
-                {
-                  "match": {
-                    "most_recent_flag": {
-                      "query": true,
-                      // "operator": "or"
-                    }
-                  }
-                },
-                {
-                  "match": {
-                    "stores.name": {
-                      "query": searchTerm,
-                      "operator": "or"
-                    }
-                  }
-                },
-                {
-                  "match": {
-                    "site_name": {
-                      "query": searchTerm,
-                      "operator": "or"
-                    }
-                  }
-                },
-                {
-                  "match": {
-                    "id.keyword": {
-                      "query": searchTerm,
-                      "operator": "or"
-                    }
-                  }
-                }
-              ]
-            }
-          },
-          from: (page - 1) * rowsPerPage,
-          size: rowsPerPage
-        });
-        const hits = response.data.hits.hits;
-        setProducts(hits.map(hit => hit._source));
-        setTotalProducts(response.data.hits.total.value);
-      } catch (error) {
-        console.error(error);
-      }
-    };
+  //           "bool": {
+  //             "should": [
+  //               // {
+  //               //   "match": {
+  //               //     "most_recent_flag": {
+  //               //       "query": true,
+  //               //       // "operator": "or"
+  //               //     }
+  //               //   }
+  //               // },
+  //               {
+  //                 "match": {
+  //                   "stores.name": {
+  //                     "query": searchTerm,
+  //                     "operator": "or"
+  //                   }
+  //                 }
+  //               },
+  //               {
+  //                 "match": {
+  //                   "site_name": {
+  //                     "query": searchTerm,
+  //                     "operator": "or"
+  //                   }
+  //                 }
+  //               },
+  //               {
+  //                 "match": {
+  //                   "id.keyword": {
+  //                     "query": searchTerm,
+  //                     "operator": "or"
+  //                   }
+  //                 }
+  //               }
+  //             ]
+  //           }
+  //         },
+  //         from: (page - 1) * rowsPerPage,
+  //         size: rowsPerPage
+  //       });
+  //       const hits = response.data.hits.hits;
+  //       setProducts(hits.map(hit => hit._source));
+  //       setTotalProducts(response.data.hits.total.value);
+  //     } catch (error) {
+  //       console.error(error);
+  //     }
+  //   };
 
-    fetchProducts();
-  }, [page, rowsPerPage, searchTerm]);
+  //   fetchProducts();
+  // }, [page, rowsPerPage, searchTerm]);
 
-  const handleChangePage = (event, newPage) => {
-    setPage(newPage + 1);
-  };
+  // const handleChangePage = (event, newPage) => {
+  //   setPage(newPage + 1);
+  // };
 
-  const handleChangeRowsPerPage = event => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(1);
-  };
+  // const handleChangeRowsPerPage = event => {
+  //   setRowsPerPage(parseInt(event.target.value, 10));
+  //   setPage(1);
+  // };
 
-  const handleSearch = event => {
-    setSearchTerm(event.target.value);
-  };
+  // const handleSearch = event => {
+  //   setSearchTerm(event.target.value);
+  // };
   
   return (
     <div>
       <h2>Download Page</h2>
-      <Paper component="form" className="search-form">
+      {/* <Paper component="form" className="search-form">
         <TextField
           label="Search"
           variant="outlined"
@@ -125,7 +125,7 @@ const Download = () => {
         siblingCount={1}
         rowsPerPage={rowsPerPage}
         onChangeRowsPerPage={handleChangeRowsPerPage}
-      />
+      /> */}
     </div>
   )
 }
