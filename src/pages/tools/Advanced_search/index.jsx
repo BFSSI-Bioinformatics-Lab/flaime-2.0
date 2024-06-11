@@ -3,6 +3,7 @@ import dayjs from 'dayjs';
 import TextFileInput from '../../../components/inputs/TextFileInput';
 import StoreSelector from '../../../components/inputs/StoreSelector';
 import SourceSelector from '../../../components/inputs/SourceSelector';
+import RegionSelector from '../../../components/inputs/RegionSelector';
 import SingleDatePicker from '../../../components/inputs/SingleDatePicker';
 import { Button } from '@mui/material';
 
@@ -17,10 +18,13 @@ const AdvancedSearch = () => {
     SubCategories: {
         value: new Set()
       },
-    Sources: {
+    Source: {
       value: null
     },
-    Stores: {
+    Store: {
+      value: null
+    },
+    Region: {
       value: null
     },
     StartDate: {
@@ -46,17 +50,27 @@ const AdvancedSearch = () => {
   const handleSourceChange = (selectedSource) => {
     setSearchInputs(prev => ({
       ...prev,
-      Sources: {
+      Source: {
         value: selectedSource
       }
     }));
     console.log("Selected Source:", selectedSource);
   };
 
+  const handleRegionChange = (selectedRegion) => {
+    setSearchInputs(prev => ({
+      ...prev,
+      Region: {
+        value: selectedRegion
+      }
+    }));
+    console.log("Selected Region:", selectedRegion);
+  };
+
   const handleStoreChange = (selectedStore) => {
     setSearchInputs(prev => ({
       ...prev,
-      Stores: {
+      Store: {
         value: selectedStore
       }
     }));
@@ -89,18 +103,26 @@ const AdvancedSearch = () => {
 
     const filters = [];
 
-    if (searchInputs.Sources.value) {
+    if (searchInputs.Source.value) {
         filters.push({
             term: {
-                "sources.id": parseInt(searchInputs.Sources.value, 10)
+                "sources.id": parseInt(searchInputs.Source.value, 10)
             }
         });
     }
 
-    if (searchInputs.Stores.value) {
+    if (searchInputs.Store.value) {
         filters.push({
             term: {
-                "stores.id": parseInt(searchInputs.Stores.value, 10)
+                "stores.id": parseInt(searchInputs.Store.value, 10)
+            }
+        });
+    }
+
+    if (searchInputs.Region.value) {
+        filters.push({
+            term: {
+                "scrape_batches.region.keyword": searchInputs.Region.value
             }
         });
     }
@@ -134,7 +156,7 @@ const AdvancedSearch = () => {
 
     const queryBody = {
         from: 0,
-        size: 10,
+        size: 100,
         query: {
             bool: {
                 must: [
@@ -186,6 +208,7 @@ const AdvancedSearch = () => {
         onTextChange={handleTextChange}
       />
       <SourceSelector onSelect={handleSourceChange} />
+      <RegionSelector onSelect={handleRegionChange} />
       <StoreSelector onSelect={handleStoreChange} />
       <h2>Select a date range</h2>
       <div>
