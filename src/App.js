@@ -13,6 +13,7 @@ import Report_builder from "./pages/tools/Report_builder";
 import Category_report from "./pages/reports/Category_report";
 import Nutrient_report from "./pages/reports/Nutrient_report";
 import Store_report from "./pages/reports/Store_report";
+import FOP_report from "./pages/reports/FOP_report";
 import Download from "./pages/data/Download";
 import Quality from "./pages/data/Quality";
 import Visualizations from "./pages/data/Visualizations";
@@ -45,6 +46,7 @@ function App() {
             <Route path="reports/store" element={<Store_report />} />
             <Route path="reports/category" element={<Category_report />} />
             <Route path="reports/nutrient" element={<Nutrient_report />} />
+            <Route path="reports/fop" element={<FOP_report />} />
             {/* Data Dropdown */}
             <Route path="data/quality" element={<Quality />} />
             <Route path="data/download" element={<Download />} />
