@@ -5,6 +5,7 @@ import axios from 'axios';
 import { useState, useEffect } from 'react';
 import { TableContainer, Table, TableHead, TableRow, TableCell, TableBody, Pagination, TextField, Paper } from '@mui/material';
 import PageContainer from '../../components/page/PageContainer';
+import { Link } from 'react-router-dom';
 
 
 const Quality = () => {
@@ -121,13 +122,25 @@ const Quality = () => {
     setSiteNameSearchTerm(event.target.value);
   };
   
+  // Reset search
+  const handleReset = () => {
+    setIdSearchTerm('');
+    setStoreNameSearchTerm('');
+    setSourceNameSearchTerm('');
+    setSiteNameSearchTerm('');
+  };
+
+  // Search form submit - disables reset of table when enter is pressed
+  const handleSearchFormSubmit = (event) => {
+    event.preventDefault(); // Prevent form submission
+  };
 
   return (
     <PageContainer>
     <div>
       Quality
       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-        <Paper component="form" className="search-form" style={{ flex: 1, marginRight: '5px' }}>
+        <Paper component="form" className="search-form" style={{ flex: 1, marginRight: '5px' }} onSubmit={handleSearchFormSubmit}>
           <TextField
             label="Search ID"
             variant="outlined"
@@ -137,9 +150,9 @@ const Quality = () => {
             size="small"
           />
         </Paper>
-        <Paper component="form" className="search-form" style={{ flex: 1, marginRight: '5px' }}>
+        <Paper component="form" className="search-form" style={{ flex: 1, marginRight: '5px' }} onSubmit={handleSearchFormSubmit}>
           <TextField
-            label="Search Store Name"
+            label="Search by Store Name"
             variant="outlined"
             value={storeNameSearchTerm}
             onChange={handleStoreNameSearch}
@@ -147,9 +160,9 @@ const Quality = () => {
             size="small"
           />
         </Paper>
-        <Paper component="form" className="search-form" style={{ flex: 1, marginRight: '5px' }}>
+        <Paper component="form" className="search-form" style={{ flex: 1, marginRight: '5px' }} onSubmit={handleSearchFormSubmit}>
           <TextField
-            label="Search Source Name"
+            label="Search by Data Source"
             variant="outlined"
             value={sourceNameSearchTerm}
             onChange={handleSourceNameSearch}
@@ -157,9 +170,9 @@ const Quality = () => {
             size="small"
           />
         </Paper>
-        <Paper component="form" className="search-form" style={{ flex: 1 }}>
+        <Paper component="form" className="search-form" style={{ flex: 1 }} onSubmit={handleSearchFormSubmit}>
           <TextField
-            label="Search Site Name"
+            label="Search by Produt Name"
             variant="outlined"
             value={siteNameSearchTerm}
             onChange={handleSiteNameSearch}
@@ -167,24 +180,26 @@ const Quality = () => {
             size="small"
           />
         </Paper>
+        <button onClick={handleReset}>Reset Search</button>
       </div>
-      <TableContainer>
+      <TableContainer style={{ width: '80vw', margin: '0 auto' }}>
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell>ID</TableCell>
-              <TableCell>Store Name</TableCell>
-              <TableCell>Source</TableCell>
-              <TableCell>Product Name</TableCell>
+              <TableCell style={{ fontWeight: 'bold', textAlign: 'center', letterSpacing: '1px' }}>Assigned Flaime ID</TableCell>
+              <TableCell style={{ fontWeight: 'bold', textAlign: 'center', letterSpacing: '1px' }}>Store Name</TableCell>
+              <TableCell style={{ fontWeight: 'bold', textAlign: 'center', letterSpacing: '1px' }}>Data Source</TableCell>
+              <TableCell style={{ fontWeight: 'bold', textAlign: 'center', letterSpacing: '1px' }}>Product Name</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {products.map(product => (
               <TableRow key={product.id}>
-                <TableCell>{product.id}</TableCell>
-                <TableCell>{product.stores.name}</TableCell>
-                <TableCell>{product.sources.name}</TableCell>
-                <TableCell>{product.site_name}</TableCell>
+                <TableCell style={{ width: '80px', textAlign: 'center' }}>
+                <Link to={`/tools/product-browser/${product.id}`} target="_blank">{product.id}</Link></TableCell>
+                <TableCell style={{ textAlign: 'center' }}>{product.stores.name}</TableCell>
+                <TableCell style={{ textAlign: 'center' }}>{product.sources.name}</TableCell>
+                <TableCell style={{ width: '500px' }}>{product.site_name}</TableCell>
               </TableRow>
             ))}
           </TableBody>
@@ -198,6 +213,7 @@ const Quality = () => {
         rowsPerPage={rowsPerPage}
         onChangeRowsPerPage={handleChangeRowsPerPage}
       />
+      <div>Total Products: {totalProducts === 10000 ? "over 10,000" : totalProducts}</div>
     </div>
     </PageContainer>
   )
