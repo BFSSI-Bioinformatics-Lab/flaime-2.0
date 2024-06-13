@@ -89,6 +89,8 @@ const Header = () => {
                             onClick={handleClose}>Report Builder</MenuItem>
                             <MenuItem component={Link} to='/tools/product-finder'
                             onClick={handleClose}>Product Finder</MenuItem>
+                            <MenuItem component={Link} to='/tools/advanced-search'
+                            onClick={handleClose}>Advanced Search</MenuItem>
                         </Menu>
 
                         <Button
