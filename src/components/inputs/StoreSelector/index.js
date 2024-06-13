@@ -21,7 +21,7 @@ const StoreSelector = ({ onSelect }) => {
 
     return (
         <div>
-            <h1>Select a Store</h1>
+            <h2>Select a Store</h2>
             {loading ? <p>Loading...</p> : (
                 <SelectInput
                     options={storesWithDefault}
