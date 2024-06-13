@@ -26,6 +26,35 @@ export const buildTextMustClauses = (textEntries, fieldKey) => {
         }
     }];
 };
+
+
+export const buildTextMustClausesForAllFields = (searchInputs) => {
+    const mustClauses = [];
+
+    if (searchInputs.Names) {
+        mustClauses.push({
+            wildcard: {
+                "site_name": {
+                    value: `*${searchInputs.Names}*`
+                }
+            }
+        });
+    }
+    if (searchInputs.IDs) {
+        mustClauses.push({ term: { "id": searchInputs.IDs } });
+    }
+    if (searchInputs.UPCs) {
+        mustClauses.push({ term: { "raw_upc.keyword": searchInputs.UPCs } });
+    }
+    if (searchInputs.NielsenUPCs) {
+        mustClauses.push({ term: { "nielsen_upc.keyword": searchInputs.NielsenUPCs } });
+    }
+
+    return mustClauses;
+};
+
+
+
 export const buildFilterClauses = (searchInputs) => {
     const filters = [];
     

@@ -1,72 +1,124 @@
 import React, { useState } from 'react';
 import dayjs from 'dayjs';
-import { Button, FormControl, FormControlLabel, Radio, RadioGroup } from '@mui/material';
-import TextFileInput from '../../../components/inputs/TextFileInput';
+import { TextField, Button, Alert } from '@mui/material';
 import StoreSelector from '../../../components/inputs/StoreSelector';
 import SourceSelector from '../../../components/inputs/SourceSelector';
 import RegionSelector from '../../../components/inputs/RegionSelector';
 import SingleDatePicker from '../../../components/inputs/SingleDatePicker';
-import { useSearchFilters, buildTextMustClauses, buildFilterClauses, getFieldKey } from '../util';
+import { useSearchFilters, buildTextMustClausesForAllFields, buildFilterClauses } from '../util';
 
 const AdvancedSearch = () => {
     const initialFilters = {
-        TextEntries: { value: [] },
+        Names: '',
+        IDs: '',
+        UPCs: '',
+        NielsenUPCs: '',
         Source: { value: null },
         Store: { value: null },
         Region: { value: null },
         StartDate: { value: null },
         EndDate: { value: null }
     };
-
-    const [inputMode, setInputMode] = useState('Name');
+    
     const [searchInputs, handleInputChange] = useSearchFilters(initialFilters);
     const [searchResults, setSearchResults] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
 
+
+    const handleTextFieldChange = (field) => (event) => {
+        handleInputChange(field, event.target.value);
+        if (errorMessage) setErrorMessage('');
+    };
+    
     const handleSearch = async () => {
+        if (!searchInputs.Names && !searchInputs.IDs && !searchInputs.UPCs && !searchInputs.NielsenUPCs) {
+            setErrorMessage('Please enter at least one search criterion in the text fields.');
+            return;
+        }
         setIsLoading(true);
-        const fieldKey = getFieldKey(inputMode);
-        const textQueries = buildTextMustClauses(searchInputs.TextEntries, fieldKey);
+    
         const filters = buildFilterClauses(searchInputs);
-
+        const mustClauses = buildTextMustClausesForAllFields(searchInputs);
+    
         const queryBody = {
             from: 0,
             size: 100,
             query: {
                 bool: {
-                    must: textQueries,
+                    must: mustClauses,
                     filter: filters
                 }
             }
         };
-
+    
         console.log("Query Body:", JSON.stringify(queryBody, null, 2));
 
-        // Simulate fetching data
-        setTimeout(() => {
-            setIsLoading(false);
-            setSearchResults([]); // Simulate search results
-        }, 1000);
-    };
+        const elastic_url = `${process.env.REACT_APP_ELASTIC_URL}/_search`;
+        try {
+            const response = await fetch(elastic_url, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(queryBody)
+            });
+            const data = await response.json();
+    
+            // Log response from Elasticsearch
+            console.log("Elasticsearch response:", JSON.stringify(data, null, 2));
+    
+            if (response.ok) {
+                console.log("Search successful, hits:", data.hits.hits.length);
+                setSearchResults(data.hits.hits);
+            } else {
+                console.error('Search API error:', data.error || data);
+                setSearchResults([]);
+            }
+        } catch (error) {
+            console.error('Search request failed:', error);
+            setSearchResults([]);
+        }
 
+        setIsLoading(false);
+    };
+    
     const handleSelectorChange = (field) => (value) => {
         handleInputChange(field, { value: value === '-1' ? null : value });
     };
 
     return (
         <div>
-            <FormControl>
-                <RadioGroup row value={inputMode} onChange={e => setInputMode(e.target.value)} name="inputMode">
-                    <FormControlLabel value="Name" control={<Radio />} label="Product Names" />
-                    <FormControlLabel value="ID" control={<Radio />} label="Product IDs" />
-                    <FormControlLabel value="UPC" control={<Radio />} label="UPC" />
-                    <FormControlLabel value="Nielsen_UPC" control={<Radio />} label="Nielsen UPC" />
-                </RadioGroup>
-            </FormControl>
-            <h2>Enter search terms:</h2>
-            <TextFileInput
-                text={searchInputs.TextEntries.value.join("\n")}
-                onTextChange={(text) => handleInputChange('TextEntries', { value: text.split("\n").filter(line => line.trim() !== "") })}
+            {errorMessage && <Alert severity="error">{errorMessage}</Alert>}
+            <TextField
+                label="Product Names"
+                value={searchInputs.Names}
+                onChange={handleTextFieldChange('Names')}
+                fullWidth
+                variant="outlined"
+                margin="normal"
+            />
+            <TextField
+                label="Product IDs"
+                value={searchInputs.IDs}
+                onChange={handleTextFieldChange('IDs')}
+                fullWidth
+                variant="outlined"
+                margin="normal"
+            />
+            <TextField
+                label="UPC"
+                value={searchInputs.UPCs}
+                onChange={handleTextFieldChange('UPCs')}
+                fullWidth
+                variant="outlined"
+                margin="normal"
+            />
+            <TextField
+                label="Nielsen UPC"
+                value={searchInputs.NielsenUPCs}
+                onChange={handleTextFieldChange('NielsenUPCs')}
+                fullWidth
+                variant="outlined"
+                margin="normal"
             />
             <SourceSelector onSelect={handleSelectorChange('Source')} />
             <RegionSelector onSelect={handleSelectorChange('Region')} />
@@ -87,8 +139,42 @@ const AdvancedSearch = () => {
             </Button>
             {isLoading ? <p>Loading...</p> : (
                 <div>
-                    <h2>Results:</h2>
-                    {/* Placeholder for search results */}
+                    <table>
+                    <thead>
+                        <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Price</th>
+                        <th>Source</th>
+                        <th>Store</th>
+                        <th>Date</th>
+                        <th>Region</th>
+                        <th>Category</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {searchResults.map((item, index) => (
+                        <tr key={index}>
+                            <td>{item._id}</td>
+                            <td>{item._source.site_name}</td>
+                            <td>{item._source.reading_price}</td>
+                            <td>{item._source.sources.name}</td>
+                            <td>{item._source.stores.name}</td>
+                            <td>{item._source.scrape_batches.scrape_datetime}</td>
+                            <td>{item._source.scrape_batches.region}</td>
+                            <td>
+                            {item && item._source && item._source.categories && Array.isArray(item._source.categories)
+                                ? item._source.categories
+                                    .map(cat => cat ? cat.name : undefined) 
+                                    .filter(name => name)
+                                    .join(", ") || 'No category'
+                                : 'No category'
+                            }
+                            </td>
+                        </tr>
+                        ))}
+                    </tbody>
+                    </table>
                 </div>
             )}
         </div>
