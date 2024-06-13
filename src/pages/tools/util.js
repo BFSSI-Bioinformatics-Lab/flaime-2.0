@@ -84,6 +84,16 @@ export const buildFilterClauses = (searchInputs) => {
             }
         });
     }
+
+    // Filter by subcategories, only if subcategories is not empty
+    if (searchInputs.Subcategories.value && searchInputs.Subcategories.value.length > 0) {
+        filters.push({
+            terms: {
+                "subcategories.id": searchInputs.Subcategories.value
+            }
+        });
+    }
+    
     
     // Handle date range filters
     const dateFilter = {};

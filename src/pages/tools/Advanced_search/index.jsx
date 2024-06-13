@@ -5,6 +5,7 @@ import StoreSelector from '../../../components/inputs/StoreSelector';
 import SourceSelector from '../../../components/inputs/SourceSelector';
 import RegionSelector from '../../../components/inputs/RegionSelector';
 import SingleDatePicker from '../../../components/inputs/SingleDatePicker';
+import CategorySelector from '../../../components/inputs/CategorySelector';
 import { useSearchFilters, buildTextMustClausesForAllFields, buildFilterClauses } from '../util';
 
 const AdvancedSearch = () => {
@@ -13,6 +14,7 @@ const AdvancedSearch = () => {
         IDs: '',
         UPCs: '',
         NielsenUPCs: '',
+        Subcategories: { value: [] },
         Source: { value: null },
         Store: { value: null },
         Region: { value: null },
@@ -85,6 +87,10 @@ const AdvancedSearch = () => {
         handleInputChange(field, { value: value === '-1' ? null : value });
     };
 
+    const handleCategoryChange = (field) => (value) => {
+        handleInputChange(field, { value });
+    };
+
     return (
         <div>
             {errorMessage && <Alert severity="error">{errorMessage}</Alert>}
@@ -123,6 +129,7 @@ const AdvancedSearch = () => {
             <SourceSelector onSelect={handleSelectorChange('Source')} />
             <RegionSelector onSelect={handleSelectorChange('Region')} />
             <StoreSelector onSelect={handleSelectorChange('Store')} />
+            <CategorySelector onChange={handleCategoryChange('Subcategories')} />
             <h2>Select a date range:</h2>
             <SingleDatePicker
                 label="Start Date"
