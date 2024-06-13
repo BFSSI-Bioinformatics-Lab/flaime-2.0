@@ -153,9 +153,24 @@ const ProductFinder = () => {
         filters.push(dateFilter);
     }
 
-    const fieldKey = inputMode === 'Names' ? 'site_name.keyword' : 'id';
-
-    const queryBody = {
+    const getFieldKey = (inputMode) => {
+      switch(inputMode) {
+          case 'Name':
+              return 'site_name.keyword';
+          case 'ID':
+              return 'id';
+          case 'UPC':
+              return 'raw_upc.keyword';
+          case 'Nielsen_UPC':
+              return 'nielsen_upc.keyword';
+          default:
+              return 'site_name.keyword'; // Default to product names if inputMode is unrecognized
+      }
+  };
+  
+  const fieldKey = getFieldKey(inputMode);
+  
+  const queryBody = {
       from: 0,
       size: 100,
       query: {
@@ -175,7 +190,8 @@ const ProductFinder = () => {
               filter: filters
           }
       }
-    };
+  };
+  
   
 
 
@@ -213,8 +229,10 @@ const ProductFinder = () => {
     <div>
       <FormControl>
         <RadioGroup row value={inputMode} onChange={handleInputModeChange} name="inputMode">
-          <FormControlLabel value="Names" control={<Radio />} label="Product Names" />
-          <FormControlLabel value="IDs" control={<Radio />} label="FLAIME IDs" />
+          <FormControlLabel value="Name" control={<Radio />} label="Product Names" />
+          <FormControlLabel value="ID" control={<Radio />} label="FLAIME ID" />
+          <FormControlLabel value="UPC" control={<Radio />} label="UPC" />
+          <FormControlLabel value="Nielsen_UPC" control={<Radio />} label="Nielsen UPC" />
         </RadioGroup>
       </FormControl>
       <h2>Enter product names (or IDs) or upload a file</h2>
