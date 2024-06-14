@@ -6,6 +6,8 @@ import { useState, useEffect } from 'react';
 import { TableContainer, Table, TableHead, TableRow, TableCell, TableBody, Pagination, TextField, Paper } from '@mui/material';
 import PageContainer from '../../components/page/PageContainer';
 import { Link } from 'react-router-dom';
+import { styled } from '@mui/system';
+import Button from '@mui/material/Button';
 
 
 const Quality = () => {
@@ -19,6 +21,7 @@ const Quality = () => {
   const [storeNameSearchTerm, setStoreNameSearchTerm] = useState('');
   const [sourceNameSearchTerm, setSourceNameSearchTerm] = useState('');
   const [siteNameSearchTerm, setSiteNameSearchTerm] = useState('');
+  const [categorySearchTerm, setCategorySearchTerm] = useState('');
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -77,6 +80,17 @@ const Quality = () => {
             }
           });
         }
+
+        if (categorySearchTerm) {
+          queryObject.bool.must.push({
+            match: {
+              "categories.name": {
+                query: categorySearchTerm,
+                operator: "and"
+              }
+            }
+          });
+        }
   
         const response = await axios.post('http://172.17.10.96:9200/data_v1/_search', {
           query: queryObject,
@@ -92,7 +106,7 @@ const Quality = () => {
     };
   
     fetchProducts();
-  }, [page, rowsPerPage, idSearchTerm, storeNameSearchTerm, sourceNameSearchTerm, siteNameSearchTerm]);
+  }, [page, rowsPerPage, idSearchTerm, storeNameSearchTerm, sourceNameSearchTerm, siteNameSearchTerm, categorySearchTerm]);
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage + 1);
@@ -122,12 +136,16 @@ const Quality = () => {
     setSiteNameSearchTerm(event.target.value);
   };
   
+  const handleCategorySearch = event => {
+    setCategorySearchTerm(event.target.value);
+  };
   // Reset search
   const handleReset = () => {
     setIdSearchTerm('');
     setStoreNameSearchTerm('');
     setSourceNameSearchTerm('');
     setSiteNameSearchTerm('');
+    setCategorySearchTerm('');
   };
 
   // Search form submit - disables reset of table when enter is pressed
@@ -135,12 +153,22 @@ const Quality = () => {
     event.preventDefault(); // Prevent form submission
   };
 
+  const ResetButton = styled(Button)(({ theme }) => ({
+    color: 'white',
+    backgroundColor: theme.palette.primary.dark,
+  }));
+
   return (
     <PageContainer>
     <div>
-      Quality
-      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-        <Paper component="form" className="search-form" style={{ flex: 1, marginRight: '5px' }} onSubmit={handleSearchFormSubmit}>
+      <div>
+        <h1>Product Browser</h1>
+        <p>Search for products by ID, store name, or data source. Use the form below to search for products.</p>
+      </div>
+      <div>
+      {/* Top row of search bars */}
+      <div style={{ display: 'flex', justifyContent: 'space-evenly', margin: '10px 20px' }}>
+        <Paper component="form" className="search-form" style={{ flex: 1, marginRight: '5px', maxWidth: '300px' }} onSubmit={handleSearchFormSubmit}>
           <TextField
             label="Search ID"
             variant="outlined"
@@ -150,7 +178,7 @@ const Quality = () => {
             size="small"
           />
         </Paper>
-        <Paper component="form" className="search-form" style={{ flex: 1, marginRight: '5px' }} onSubmit={handleSearchFormSubmit}>
+        <Paper component="form" className="search-form" style={{ flex: 1, marginRight: '5px', maxWidth: '300px' }} onSubmit={handleSearchFormSubmit}>
           <TextField
             label="Search by Store Name"
             variant="outlined"
@@ -160,7 +188,7 @@ const Quality = () => {
             size="small"
           />
         </Paper>
-        <Paper component="form" className="search-form" style={{ flex: 1, marginRight: '5px' }} onSubmit={handleSearchFormSubmit}>
+        <Paper component="form" className="search-form" style={{ flex: 1, marginRight: '5px', maxWidth: '300px' }} onSubmit={handleSearchFormSubmit}>
           <TextField
             label="Search by Data Source"
             variant="outlined"
@@ -170,9 +198,16 @@ const Quality = () => {
             size="small"
           />
         </Paper>
-        <Paper component="form" className="search-form" style={{ flex: 1 }} onSubmit={handleSearchFormSubmit}>
+      </div>
+      
+
+      
+      {/* Bottom row of search bars */}
+      <div style={{ display: 'flex', justifyContent: 'space-evenly', margin: '10px 20px' }}>
+        <Paper component="form" className="search-form" 
+        style={{ flex: 1, marginRight: '5px', maxWidth: '480px'  }} onSubmit={handleSearchFormSubmit}>
           <TextField
-            label="Search by Produt Name"
+            label="Search by Product Name"
             variant="outlined"
             value={siteNameSearchTerm}
             onChange={handleSiteNameSearch}
@@ -180,8 +215,23 @@ const Quality = () => {
             size="small"
           />
         </Paper>
-        <button onClick={handleReset}>Reset Search</button>
+        <Paper component="form" className="search-form" style={{ flex: 1, maxWidth: '480px'  }} onSubmit={handleSearchFormSubmit}>
+              <TextField
+                label="Search by category"
+                variant="outlined"
+                value={categorySearchTerm}
+                onChange={handleCategorySearch}
+                fullWidth
+                size="small"
+              />
+        </Paper>
+        {/* Reset search button */}
+        <ResetButton style={{ maxWidth: '130px', marginLeft: '5px' }}  onClick={handleReset}>Reset Search</ResetButton>
       </div>
+      
+      
+      
+    </div>
       <TableContainer style={{ width: '80vw', margin: '0 auto' }}>
         <Table>
           <TableHead>
@@ -190,16 +240,20 @@ const Quality = () => {
               <TableCell style={{ fontWeight: 'bold', textAlign: 'center', letterSpacing: '1px' }}>Store Name</TableCell>
               <TableCell style={{ fontWeight: 'bold', textAlign: 'center', letterSpacing: '1px' }}>Data Source</TableCell>
               <TableCell style={{ fontWeight: 'bold', textAlign: 'center', letterSpacing: '1px' }}>Product Name</TableCell>
+              <TableCell style={{ fontWeight: 'bold', textAlign: 'center', letterSpacing: '1px' }}>Category Name</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {products.map(product => (
-              <TableRow key={product.id}>
+            {products.map((product, index) => (
+              <TableRow key={product.id} style={{ background: index % 2 === 0 ? '#f2f2f2' : 'white'}}>
                 <TableCell style={{ width: '80px', textAlign: 'center' }}>
                 <Link to={`/tools/product-browser/${product.id}`} target="_blank">{product.id}</Link></TableCell>
                 <TableCell style={{ textAlign: 'center' }}>{product.stores.name}</TableCell>
-                <TableCell style={{ textAlign: 'center' }}>{product.sources.name}</TableCell>
-                <TableCell style={{ width: '500px' }}>{product.site_name}</TableCell>
+                <TableCell style={{ width: '140px', textAlign: 'center' }}>{product.sources.name}</TableCell>
+                <TableCell style={{ width: '375px' }}>{product.site_name}</TableCell>
+                <TableCell style={{ textAlign: 'center' }}>
+                {product.categories && product.categories[0] && product.categories[0].name ? product.categories[0].name : ''}
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
