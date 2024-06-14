@@ -78,8 +78,8 @@ const Product_detail = () => {
         
         setProducts(old=>({...old, isLoading: true}))
         
-        let elasticUrl = `${process.env.REACT_APP_ELASTIC_URL}/_doc/}`;
-        const elasticImgUrl = `${process.env.REACT_APP_ELASTIC_IMG_URL}/_doc/}`;
+        let elasticUrl = `${process.env.REACT_APP_ELASTIC_URL}/_doc`;
+        const elasticImgUrl = `${process.env.REACT_APP_ELASTIC_IMG_URL}/_doc`;
 
         // axios.get(`${elasticUrl}/${productId}`).then(
         //     (data) => {
@@ -331,7 +331,7 @@ const Product_detail = () => {
                                                     `${product.servingSize} ${product.servingSizeUnitEntity.name ?? ""}` : 
                                                     (product.raw_serving_size ? `${product.raw_serving_size}` : null)}
                                                     <br></br>
-                                                    Total size: {product.totalSize}
+                                                    Total size: {product.total_size}
                                                 </Typography>
                                                 <Divider variant="middle"/>
                                                 {product.store_product_nutrition_facts && (
