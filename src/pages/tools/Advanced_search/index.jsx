@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import dayjs from 'dayjs';
-import { TextField, Button, Alert } from '@mui/material';
+import { TextField, Button, Alert, MenuItem } from '@mui/material';
 import StoreSelector from '../../../components/inputs/StoreSelector';
 import SourceSelector from '../../../components/inputs/SourceSelector';
 import RegionSelector from '../../../components/inputs/RegionSelector';
 import SingleDatePicker from '../../../components/inputs/SingleDatePicker';
 import CategorySelector from '../../../components/inputs/CategorySelector';
+import NutritionFilter from '../../../components/inputs/NutritionFilter';
 import { useSearchFilters, buildTextMustClausesForAllFields, buildFilterClauses } from '../util';
 
 const AdvancedSearch = () => {
@@ -19,7 +20,8 @@ const AdvancedSearch = () => {
         Store: { value: null },
         Region: { value: null },
         StartDate: { value: null },
-        EndDate: { value: null }
+        EndDate: { value: null },
+        Nutrition: { nutrient: '', amount: 0 },
     };
     
     const [searchInputs, handleInputChange] = useSearchFilters(initialFilters);
@@ -91,6 +93,10 @@ const AdvancedSearch = () => {
         handleInputChange(field, { value });
     };
 
+    const handleNutritionChange = (nutrition) => {
+        handleInputChange('Nutrition', nutrition);
+    };
+
     return (
         <div>
             {errorMessage && <Alert severity="error">{errorMessage}</Alert>}
@@ -130,20 +136,28 @@ const AdvancedSearch = () => {
             <RegionSelector onSelect={handleSelectorChange('Region')} />
             <StoreSelector onSelect={handleSelectorChange('Store')} />
             <CategorySelector onChange={handleCategoryChange('Subcategories')} />
-            <h2>Select a date range:</h2>
-            <SingleDatePicker
-                label="Start Date"
-                initialDate="1900-01-01"
-                onChange={(date) => handleInputChange('StartDate', { value: date })}
+            <div>
+                <h2>Select a date range:</h2>
+                <SingleDatePicker
+                    label="Start Date"
+                    initialDate="1900-01-01"
+                    onChange={(date) => handleInputChange('StartDate', { value: date })}
+                />
+                <SingleDatePicker
+                    label="End Date"
+                    initialDate={dayjs().format('YYYY-MM-DD')}
+                    onChange={(date) => handleInputChange('EndDate', { value: date })}
+                />
+            </div>
+            <NutritionFilter
+                value={searchInputs.Nutrition}
+                onChange={handleNutritionChange}
             />
-            <SingleDatePicker
-                label="End Date"
-                initialDate={dayjs().format('YYYY-MM-DD')}
-                onChange={(date) => handleInputChange('EndDate', { value: date })}
-            />
-            <Button variant="contained" onClick={handleSearch} disabled={isLoading} style={{ marginTop: '20px' }}>
-                Search
-            </Button>
+            <div>
+                <Button variant="contained" onClick={handleSearch} disabled={isLoading} style={{ marginTop: '20px' }}>
+                    Search
+                </Button>
+            </div>
             {isLoading ? <p>Loading...</p> : (
                 <div>
                     <table>
@@ -157,6 +171,7 @@ const AdvancedSearch = () => {
                         <th>Date</th>
                         <th>Region</th>
                         <th>Category</th>
+                        <th>Subcategory</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -176,6 +191,15 @@ const AdvancedSearch = () => {
                                     .filter(name => name)
                                     .join(", ") || 'No category'
                                 : 'No category'
+                            }
+                            </td>
+                            <td>
+                            {item && item._source && item._source.subcategories && Array.isArray(item._source.subcategories)
+                                ? item._source.subcategories
+                                    .map(subcat => subcat ? subcat.name : undefined) 
+                                    .filter(name => name)
+                                    .join(", ") || 'No subcategory'
+                                : 'No subcategory'
                             }
                             </td>
                         </tr>
