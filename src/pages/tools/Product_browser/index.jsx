@@ -159,7 +159,7 @@ const Product_browser = () => {
   }));
 
   return (
-    <PageContainer>
+    <div style={{ width: '80vw', margin: '0 auto' }}>
     <div>
       <div>
       <Typography variant="h4" style={{ padding: '10px' }}>Product Browser</Typography>
@@ -283,7 +283,7 @@ const Product_browser = () => {
       />
       
     </div>
-    </PageContainer>
+    </div>
   )
 }
 
