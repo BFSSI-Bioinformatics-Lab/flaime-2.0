@@ -3,11 +3,12 @@
 import React from 'react'
 import axios from 'axios';
 import { useState, useEffect } from 'react';
-import { TableContainer, Table, TableHead, TableRow, TableCell, TableBody, Pagination, TextField, Paper } from '@mui/material';
+import { TableContainer, Table, TableHead, TableRow, TableCell, TableBody, Pagination, TextField, Paper, Typography } from '@mui/material';
 import PageContainer from '../../components/page/PageContainer';
 import { Link } from 'react-router-dom';
 import { styled } from '@mui/system';
 import Button from '@mui/material/Button';
+import Divider from '@mui/material/Divider';
 
 
 const Quality = () => {
@@ -162,12 +163,15 @@ const Quality = () => {
     <PageContainer>
     <div>
       <div>
-        <h1>Product Browser</h1>
-        <p>Search for products by ID, store name, or data source. Use the form below to search for products.</p>
+      <Typography variant="h4" style={{ padding: '10px' }}>Product Browser</Typography>
+        <Typography variant="body1" style={{ padding: '10px', width: '80vw', margin: '0 auto' }}>
+        Search for products by ID, store name, data source, product name or category. Use the form below to search for products. Note you can also search by more than one search term at once.
+        </Typography>
       </div>
+      <Divider variant="middle"/>
       <div>
       {/* Top row of search bars */}
-      <div style={{ display: 'flex', justifyContent: 'space-evenly', margin: '10px 20px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-evenly', margin: '20px 20px' }}>
         <Paper component="form" className="search-form" style={{ flex: 1, marginRight: '5px', maxWidth: '300px' }} onSubmit={handleSearchFormSubmit}>
           <TextField
             label="Search ID"
@@ -228,10 +232,17 @@ const Quality = () => {
         {/* Reset search button */}
         <ResetButton style={{ maxWidth: '130px', marginLeft: '5px' }}  onClick={handleReset}>Reset Search</ResetButton>
       </div>
+      <div>
+      {[idSearchTerm, storeNameSearchTerm, sourceNameSearchTerm, siteNameSearchTerm, categorySearchTerm].some(term => term !== '') && (
+        
+        <Divider style={{ marginTop: '20px', color: '#424242' }} > 
+        Base on your search, there is a total of {totalProducts === 10000 ? "over 10,000" : totalProducts} products
+        </Divider>
+      )}
+      </div>
       
       
-      
-    </div>
+      </div>
       <TableContainer style={{ width: '80vw', margin: '0 auto' }}>
         <Table>
           <TableHead>
@@ -267,7 +278,7 @@ const Quality = () => {
         rowsPerPage={rowsPerPage}
         onChangeRowsPerPage={handleChangeRowsPerPage}
       />
-      <div>Total Products: {totalProducts === 10000 ? "over 10,000" : totalProducts}</div>
+      
     </div>
     </PageContainer>
   )
