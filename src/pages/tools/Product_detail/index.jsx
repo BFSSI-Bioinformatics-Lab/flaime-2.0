@@ -331,7 +331,7 @@ const Product_detail = () => {
                                                     `${product.servingSize} ${product.servingSizeUnitEntity.name ?? ""}` : 
                                                     (product.raw_serving_size ? `${product.raw_serving_size}` : null)}
                                                     <br></br>
-                                                    Total size: {product.totalSize}
+                                                    Total size: {product.total_size}
                                                 </Typography>
                                                 <Divider variant="middle"/>
                                                 {product.store_product_nutrition_facts && (
