@@ -187,7 +187,7 @@ const Download = () => {
   return (
     <div>
       <h2>Download Page</h2>
-      <h2>Scroll Used</h2>
+      <h4>Scroll Used in this page = loads all products</h4>
       <hr></hr>
       <PageContainer>
         <div>
