@@ -164,7 +164,11 @@ const Product_browser = () => {
       <div>
       <Typography variant="h4" style={{ padding: '10px' }}>Product Browser</Typography>
         <Typography variant="body1" style={{ padding: '10px', width: '80vw', margin: '0 auto' }}>
-        Search for products by ID, store name, data source, product name or category. Use the form below to search for products. Note that you can also search by more than one search term at once.
+        Search for products by ID, store name, data source, product name or category. Use the form below to search for products. Note that you can also search by more than one search term at once.<br></br>
+        <ul>
+            <li>Please use full words when searching.</li>
+            <li>If there are over 10000 products as a result of you search, only the first 10000 will be shown.</li>
+        </ul>
         </Typography>
       </div>
       <Divider variant="middle"/>
