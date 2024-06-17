@@ -1,13 +1,11 @@
 import React, {useEffect, useState} from 'react'
 import {useParams} from "react-router-dom"
-// import { ApiQueryGet } from '../../../api/Api';
-// import { Image } from 'mui-image'
+
 import Grid from '@mui/material/Grid';
 import PageContainer from '../../../components/page/PageContainer';
 import Band from '../../../components/page/Band';
 import {
     ProductInfoBox,
-    // ProductStatItem,
     PageIcon,
     PageTitle,
     DetailItem,
@@ -85,17 +83,6 @@ const Product_detail = () => {
         let elasticUrl = `${process.env.REACT_APP_ELASTIC_URL}/_doc`;
         const elasticImgUrl = `${process.env.REACT_APP_ELASTIC_IMG_URL}/_doc`;
 
-        // axios.get(`${elasticUrl}/${productId}`).then(
-        //     (data) => {
-        //         const dataProduct = data.data._source;
-        //         if (dataProduct === undefined) return;
-        //         setProducts(dataProduct);
-        //         setProduct(dataProduct);
-        //         // setProducts(old=>({...old, isLoading: false, products: dataProduct}));
-        //         setLoading(false)
-        //         console.log(dataProduct)
-        //     }      
-        // );
         axios.all([
           axios.get(`${elasticUrl}/${productId}`),
           axios.get(`${elasticImgUrl}/${productId}`),
@@ -197,6 +184,7 @@ const Product_detail = () => {
                             </Grid>
                         </Grid>
                     </Grid>
+                    {/* Boxes on top of page- next to name- to display stats such as sodium, fats and sugars */}
 
                     {/* <Grid container item xs={12} md={6} spacing={3} direction="row"
                 justifyContent="space-around" alignItems="center">
@@ -286,15 +274,7 @@ const Product_detail = () => {
                             <Grid item xs={12} md={6}>
                                 <div>
                                 
-                                    {/* {product.storeProductImageEntities && product.storeProductImageEntities.length > 0 && (
-                                        <ProductImageContainer style={{ display: 'flex', justifyContent: 'center' }}>
-                                            <Image key={product.storeProductImageEntities[0].imagePath} 
-                                                src={imagePathToUrl(product.storeProductImageEntities[0].imagePath)} 
-                                                alt={product.siteName} 
-                                                width="50%"
-                                            />
-                                        </ProductImageContainer>
-                                    )} */}
+                                    
                                     <>
                                         {product.store_product_images && product.store_product_images.length > 0 && (
                                             <ProductImageContainer style={{ display: 'flex', justifyContent: 'center' }}>
@@ -398,7 +378,6 @@ const Product_detail = () => {
                                     { product.ingredientEn && 
                                         <div>
                                             <ProductIngredientsHeadingContainer>
-                                            {/* <Typography variant="h6" style={{ padding: '10px' }}><b>Ingredients:</b></Typography> */}
                                             <Divider> Ingredients</Divider>
                                             </ProductIngredientsHeadingContainer>
                                             {/* <Divider variant="middle"/> */}
