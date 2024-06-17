@@ -1,3 +1,4 @@
+// advanced_search.jsx
 import React, { useState } from 'react';
 import dayjs from 'dayjs';
 import { TextField, Button, Alert, MenuItem } from '@mui/material';
@@ -7,7 +8,7 @@ import RegionSelector from '../../../components/inputs/RegionSelector';
 import SingleDatePicker from '../../../components/inputs/SingleDatePicker';
 import CategorySelector from '../../../components/inputs/CategorySelector';
 import NutritionFilter from '../../../components/inputs/NutritionFilter';
-import { useSearchFilters, buildTextMustClausesForAllFields, buildFilterClauses } from '../util';
+import { useSearchFilters, buildTextMustClausesForAllFields, buildCriteriaMustClauses } from '../util';
 
 const AdvancedSearch = () => {
     const initialFilters = {
@@ -36,29 +37,30 @@ const AdvancedSearch = () => {
     };
     
     const handleSearch = async () => {
-        if (!searchInputs.Names && !searchInputs.IDs && !searchInputs.UPCs && !searchInputs.NielsenUPCs) {
-            setErrorMessage('Please enter at least one search criterion in the text fields.');
-            return;
-        }
+        // make them enter something, anything
+        // if (!searchInputs.Names && !searchInputs.IDs && !searchInputs.UPCs && !searchInputs.NielsenUPCs) {
+        //     setErrorMessage('Please enter at least one search criterion in the text fields.');
+        //     return;
+        // }
         setIsLoading(true);
     
-        const filters = buildFilterClauses(searchInputs);
-        const mustClauses = buildTextMustClausesForAllFields(searchInputs);
+        const textMustClauses = buildTextMustClausesForAllFields(searchInputs);
+        const criteriaMustClauses = buildCriteriaMustClauses(searchInputs);
     
         const queryBody = {
             from: 0,
             size: 100,
             query: {
                 bool: {
-                    must: mustClauses,
-                    filter: filters
+                    must: [...textMustClauses, ...criteriaMustClauses]
                 }
             }
         };
     
         console.log("Query Body:", JSON.stringify(queryBody, null, 2));
-
+        
         const elastic_url = `${process.env.REACT_APP_ELASTIC_URL}/_search`;
+
         try {
             const response = await fetch(elastic_url, {
                 method: 'POST',
