@@ -102,44 +102,45 @@ const AdvancedSearch = () => {
     return (
         <div>
             {errorMessage && <Alert severity="error">{errorMessage}</Alert>}
-            <TextField
-                label="Product Names"
-                value={searchInputs.Names}
-                onChange={handleTextFieldChange('Names')}
-                fullWidth
-                variant="outlined"
-                margin="normal"
-            />
-            <TextField
-                label="Product IDs"
-                value={searchInputs.IDs}
-                onChange={handleTextFieldChange('IDs')}
-                fullWidth
-                variant="outlined"
-                margin="normal"
-            />
-            <TextField
-                label="UPC"
-                value={searchInputs.UPCs}
-                onChange={handleTextFieldChange('UPCs')}
-                fullWidth
-                variant="outlined"
-                margin="normal"
-            />
-            <TextField
-                label="Nielsen UPC"
-                value={searchInputs.NielsenUPCs}
-                onChange={handleTextFieldChange('NielsenUPCs')}
-                fullWidth
-                variant="outlined"
-                margin="normal"
-            />
+            <h2>Product Info</h2>
+            <div>
+                <TextField
+                    label="Product Name"
+                    value={searchInputs.Names}
+                    onChange={handleTextFieldChange('Names')}
+                    variant="outlined"
+                />
+            </div>
+            <div>
+                <TextField
+                    label="Product ID"
+                    value={searchInputs.IDs}
+                    onChange={handleTextFieldChange('IDs')}
+                    variant="outlined"
+                />
+            </div>
+            <div>
+                <TextField
+                    label="UPC"
+                    value={searchInputs.UPCs}
+                    onChange={handleTextFieldChange('UPCs')}
+                    variant="outlined"
+                />
+            </div>
+            <div>
+                <TextField
+                    label="Nielsen UPC"
+                    value={searchInputs.NielsenUPCs}
+                    onChange={handleTextFieldChange('NielsenUPCs')}
+                    variant="outlined"
+                />
+            </div>
             <SourceSelector onSelect={handleSelectorChange('Source')} />
             <RegionSelector onSelect={handleSelectorChange('Region')} />
             <StoreSelector onSelect={handleSelectorChange('Store')} />
             <CategorySelector onChange={handleCategoryChange('Subcategories')} />
             <div>
-                <h2>Select a date range:</h2>
+                <h2>Select a date range</h2>
                 <SingleDatePicker
                     label="Start Date"
                     initialDate="1900-01-01"
