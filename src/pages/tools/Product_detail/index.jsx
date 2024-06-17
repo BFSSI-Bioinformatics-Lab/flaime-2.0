@@ -1,13 +1,13 @@
 import React, {useEffect, useState} from 'react'
 import {useParams} from "react-router-dom"
-import { ApiQueryGet } from '../../../api/Api';
-import { Image } from 'mui-image'
+// import { ApiQueryGet } from '../../../api/Api';
+// import { Image } from 'mui-image'
 import Grid from '@mui/material/Grid';
 import PageContainer from '../../../components/page/PageContainer';
 import Band from '../../../components/page/Band';
 import {
     ProductInfoBox,
-    ProductStatItem,
+    // ProductStatItem,
     PageIcon,
     PageTitle,
     DetailItem,
@@ -46,6 +46,10 @@ const Product_detail = () => {
 
     const breadcrumbComponent = (crumbs) => {
         return crumbs.join(" > ")
+        // if (crumbs) {
+        //     return crumbs.join(" > ");
+        // }
+        // return "";
     }
 
     // list of possible energy values
@@ -157,7 +161,7 @@ const Product_detail = () => {
             },
             {
                 name: "Breadcrumbs",
-                value: breadcrumbComponent(product.bread_crumbs)
+                value: product.bread_crumbs ? breadcrumbComponent(product.bread_crumbs) : null
             },
             {
                 name: "URL",
