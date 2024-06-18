@@ -144,7 +144,7 @@ const Product_browser = () => {
   const handleChangePage = (event, newPage) => {
     setPage(newPage + 1);
   };
-  console.log(aggregationResponse);
+  // console.log(aggregationResponse);
 
   const handleChangeRowsPerPage = event => {
     setRowsPerPage(parseInt(event.target.value, 10));
@@ -272,16 +272,17 @@ const Product_browser = () => {
       <div>
       {[idSearchTerm, storeNameSearchTerm, sourceNameSearchTerm, siteNameSearchTerm, categorySearchTerm].some(term => term !== '') && (
         
-        <Divider style={{ marginTop: '20px', color: '#424242' }} > 
-        Base on your search, there is a total of {totalProducts === 10000 ? "over 10,000" : totalProducts} products
+        <Divider style={{ marginTop: '20px', color: '#424242', marginBottom: '15px' }} > 
+        Base on your search, there is a total of {totalProducts === 10000 ? "over 10,000" : totalProducts} products. <br></br>
+        This is the total per store:
         </Divider>
       )}
       </div>
       {/* card component for number of products per store */}
       <div>
-            <Typography variant="h6" gutterBottom>
+        {/* <Divider style={{ marginTop: '10px', color: '#424242', marginBottom: '10px' }} >
                 Based on your search, these are the number of products per store:
-            </Typography>
+            </Divider> */}
             <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-evenly', maxWidth: '880px', margin: '0 auto' }}>
               {aggregationResponse && aggregationResponse.group_by_stores.buckets.slice(0, 4).map((store, index) => (
                 <Card key={store.key} style={{ flex: '1 0 calc(25% - 10px)', maxWidth: '180px', boxSizing: 'border-box', textAlign: 'center', marginBottom: '10px' }}>
