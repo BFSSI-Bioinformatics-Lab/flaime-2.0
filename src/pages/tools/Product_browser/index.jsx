@@ -1,7 +1,7 @@
 import React from 'react'
 import axios from 'axios';
 import { useState, useEffect } from 'react';
-import { TableContainer, Table, TableHead, TableRow, TableCell, TableBody, Pagination, TextField, Paper, Typography } from '@mui/material';
+import { TableContainer, Table, TableHead, TableRow, TableCell, TableBody, Pagination, TextField, Paper, Typography, Card, CardContent } from '@mui/material';
 import PageContainer from '../../../components/page/PageContainer';
 import { Link } from 'react-router-dom';
 import { styled } from '@mui/system';
@@ -21,6 +21,8 @@ const Product_browser = () => {
   const [sourceNameSearchTerm, setSourceNameSearchTerm] = useState('');
   const [siteNameSearchTerm, setSiteNameSearchTerm] = useState('');
   const [categorySearchTerm, setCategorySearchTerm] = useState('');
+
+  const [aggregationResponse, setAggregationResponse] = useState(null);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -94,12 +96,43 @@ const Product_browser = () => {
         const elasticUrl = `${process.env.REACT_APP_ELASTIC_URL}/_search`;
         const response = await axios.post(`${elasticUrl}`, {
           query: queryObject,
+          aggs: {
+            group_by_stores: {
+              terms: {
+                field: "stores.name.keyword"
+              },
+              aggs: {
+                category_search_count: {
+                  filter: {
+                    term: {
+                      "categories.name": categorySearchTerm
+                    }
+                  }
+                },
+                categories_names_count: {
+                  terms: {
+                    field: "categories.name.keyword"
+                  }
+                },
+                site_name_search_count: {
+                  filter: {
+                    term: {
+                      site_name: siteNameSearchTerm
+                    }
+                  }
+                }
+              }
+            }
+          },
           from: (page - 1) * rowsPerPage,
           size: rowsPerPage
         });
         const hits = response.data.hits.hits;
         setProducts(hits.map(hit => hit._source));
         setTotalProducts(response.data.hits.total.value);
+        // Set the aggregation response
+        setAggregationResponse(response.data.aggregations);
+        
       } catch (error) {
         console.error(error);
       }
@@ -111,6 +144,7 @@ const Product_browser = () => {
   const handleChangePage = (event, newPage) => {
     setPage(newPage + 1);
   };
+  console.log(aggregationResponse);
 
   const handleChangeRowsPerPage = event => {
     setRowsPerPage(parseInt(event.target.value, 10));
