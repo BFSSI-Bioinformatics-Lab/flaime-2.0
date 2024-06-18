@@ -114,11 +114,11 @@ const Product_detail = () => {
             },
             {
                 name: "Store",
-                value: products.stores.name
+                value: product.stores.name
             },
             {
                 name: "Source",
-                value: products.sources.name
+                value: product.sources.name
             },
             {
                 name: "Product Code",
@@ -126,7 +126,11 @@ const Product_detail = () => {
             },
             {
                 name: "UPC",
-                value: product.rawUpc || "None"
+                value: product.raw_upc || "None"
+            },
+            {
+                name: "Nielsen UPC",
+                value: product.nielsen_upc || "None"
             },
             {
                 name: "Price",
@@ -138,13 +142,13 @@ const Product_detail = () => {
             },
             {
                 name: "Category", // does the category need to be verified in order to be displayed?
-                value: product.subcategories.name ? 
-                    product.subcategories.name : null
+                value: product.categories[0].name ? 
+                    product.categories[0].name : null
             },
             {
                 name: "Subcategory", // does the category need to be verified in order to be displayed?
-                value: product.categories.name ? 
-                    product.categories.name : null
+                value: product.subcategories[0].name ? 
+                    product.subcategories[0].name : null
             },
             {
                 name: "Breadcrumbs",
