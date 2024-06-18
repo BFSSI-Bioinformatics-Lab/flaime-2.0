@@ -8,7 +8,7 @@ import RegionSelector from '../../../components/inputs/RegionSelector';
 import SingleDatePicker from '../../../components/inputs/SingleDatePicker';
 import CategorySelector from '../../../components/inputs/CategorySelector';
 import NutritionFilter from '../../../components/inputs/NutritionFilter';
-import { useSearchFilters, buildTextMustClausesForAllFields, buildCriteriaMustClauses } from '../util';
+import { useSearchFilters, buildTextMustClausesForAllFields } from '../util';
 
 const AdvancedSearch = () => {
     const initialFilters = {
@@ -22,7 +22,7 @@ const AdvancedSearch = () => {
         Region: { value: null },
         StartDate: { value: null },
         EndDate: { value: null },
-        Nutrition: { nutrient: '', amount: 0 },
+        Nutrition: { nutrient: '', minAmount: '', maxAmount: '' },
     };
     
     const [searchInputs, handleInputChange] = useSearchFilters(initialFilters);
@@ -43,29 +43,89 @@ const AdvancedSearch = () => {
         //     return;
         // }
         setIsLoading(true);
-    
+
+        // Collecting base queries that aren't related to nutrients
         const textMustClauses = buildTextMustClausesForAllFields(searchInputs);
-        const criteriaMustClauses = buildCriteriaMustClauses(searchInputs);
+
+        // Initialize an array to hold all parts of the nutrient query
+        let nutrientQueries = [];
     
-        const queryBody = {
+        if (searchInputs.Nutrition.nutrient) {
+            // This nested query is for matching the nutrient ID inside the nutrients nested structure
+            nutrientQueries.push({
+                nested: {
+                    path: "store_product_nutrition_facts.nutrients",
+                    query: {
+                        bool: {
+                            must: [
+                                {
+                                    match: {
+                                        "store_product_nutrition_facts.nutrients.id": searchInputs.Nutrition.nutrient
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            });
+        }
+    
+        // Conditionally adding range queries for nutrient amounts if specified
+        if (searchInputs.Nutrition.minAmount) {
+            nutrientQueries.push({
+                range: {
+                    "store_product_nutrition_facts.amount": {
+                        gte: parseFloat(searchInputs.Nutrition.minAmount) // Ensure input is treated as a number
+                    }
+                }
+            });
+        }
+    
+        if (searchInputs.Nutrition.maxAmount) {
+            nutrientQueries.push({
+                range: {
+                    "store_product_nutrition_facts.amount": {
+                        lte: parseFloat(searchInputs.Nutrition.maxAmount) // Ensure input is treated as a number
+                    }
+                }
+            });
+        }
+    
+        // Combining all must clauses including nutrient queries if any
+        const finalQuery = {
             from: 0,
             size: 100,
             query: {
                 bool: {
-                    must: [...textMustClauses, ...criteriaMustClauses]
+                    must: [
+                        ...textMustClauses,
+                        {
+                            nested: {
+                                path: "store_product_nutrition_facts",
+                                query: {
+                                    bool: {
+                                        must: nutrientQueries
+                                    }
+                                }
+                            }
+                        }
+                    ]
                 }
             }
         };
     
-        console.log("Query Body:", JSON.stringify(queryBody, null, 2));
+        console.log("Query Body:", JSON.stringify(finalQuery, null, 2));
+    
         
-        const elastic_url = `${process.env.REACT_APP_ELASTIC_URL}/_search`;
+        // const elastic_url = `${process.env.REACT_APP_ELASTIC_URL}/_search`;
+        const elastic_url = 'http://172.17.10.96:9200/new_index/_search';
+
 
         try {
             const response = await fetch(elastic_url, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(queryBody)
+                body: JSON.stringify(finalQuery)
             });
             const data = await response.json();
     

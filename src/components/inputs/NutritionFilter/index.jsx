@@ -5,14 +5,15 @@ import useNutrients from './useNutrients';
 const NutritionFilter = ({ value, onChange }) => {
     const { nutrients, loading } = useNutrients();
 
+
     const handleNutrientChange = (event) => {
         onChange({ ...value, nutrient: event.target.value });
     };
 
-    const handleAmountChange = (event) => {
-        onChange({ ...value, amount: event.target.value });
+    const handleAmountChange = (field) => (event) => {
+        onChange({ ...value, [field]: event.target.value });
     };
-
+    
     return (
         <div>
             <TextField
@@ -35,8 +36,15 @@ const NutritionFilter = ({ value, onChange }) => {
             <TextField
                 label="Minimum Amount (g)"
                 type="number"
-                value={value.amount}
-                onChange={handleAmountChange}
+                value={value.minAmount}
+                onChange={handleAmountChange('minAmount')}
+                fullWidth
+            />
+            <TextField
+                label="Maximum Amount (g)"
+                type="number"
+                value={value.maxAmount}
+                onChange={handleAmountChange('maxAmount')}
                 fullWidth
             />
         </div>
@@ -44,3 +52,4 @@ const NutritionFilter = ({ value, onChange }) => {
 };
 
 export default NutritionFilter;
+    
