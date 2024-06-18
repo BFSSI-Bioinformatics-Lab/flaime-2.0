@@ -277,6 +277,39 @@ const Product_browser = () => {
         </Divider>
       )}
       </div>
+      {/* card component for number of products per store */}
+      <div>
+            <Typography variant="h6" gutterBottom>
+                Based on your search, these are the number of products per store:
+            </Typography>
+            <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-evenly', maxWidth: '880px', margin: '0 auto' }}>
+              {aggregationResponse && aggregationResponse.group_by_stores.buckets.slice(0, 4).map((store, index) => (
+                <Card key={store.key} style={{ flex: '1 0 calc(25% - 10px)', maxWidth: '180px', boxSizing: 'border-box', textAlign: 'center', marginBottom: '10px' }}>
+                  <CardContent>
+                    <Typography variant="h6" component="h2" style={{ fontSize: '14px' }}>
+                      {store.key}
+                    </Typography>
+                    <Typography color="textSecondary">
+                      {store.doc_count}
+                    </Typography>
+                  </CardContent>
+                </Card>
+              ))}
+
+              {aggregationResponse && aggregationResponse.group_by_stores.buckets.slice(4).map((store, index) => (
+                <Card key={store.key} style={{ flex: '1 0 calc(25% - 10px)', maxWidth: '180px', boxSizing: 'border-box', textAlign: 'center', marginBottom: '10px' }}>
+                  <CardContent>
+                    <Typography variant="h6" component="h2" style={{ fontSize: '14px' }}>
+                      {store.key}
+                    </Typography>
+                    <Typography color="textSecondary">
+                      {store.doc_count}
+                    </Typography>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+        </div>
       
       
       </div>
