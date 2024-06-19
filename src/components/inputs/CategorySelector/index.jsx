@@ -114,6 +114,7 @@ const CategorySelector = ({ onChange }) => {
   return (
     <div>
       <h2>Select Categories</h2>
+      <p>Select the categories to filter by. Top level categories can be expanded to sub-categories. Note that the switch between RA and Sodium categories is currently non-functional.</p>
       <FormControl>
         <RadioGroup row value={categoryScheme} onChange={handleCategorySchemeChange} name="categoryScheme">
           <FormControlLabel value="reference amount" control={<Radio />} label="Reference Amount" />
@@ -129,7 +130,7 @@ const CategorySelector = ({ onChange }) => {
               checked={getSelectionState(category) === 'full'}
               indeterminate={getSelectionState(category) === 'partial'}
               onChange={() => handleCategorySelect(category)}
-              label={category.name}
+              label={`(${category.scheme}) ${category.name}`}
             />
             <button
               onClick={() => toggleExpand(category)}

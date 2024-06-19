@@ -118,7 +118,7 @@ const AdvancedSearch = () => {
     
         
         // const elastic_url = `${process.env.REACT_APP_ELASTIC_URL}/_search`;
-        const elastic_url = 'http://172.17.10.96:9200/new_index/_search';
+        const elastic_url = 'http://172.17.10.96:9200/main_index/_search';
 
 
         try {
@@ -162,6 +162,8 @@ const AdvancedSearch = () => {
     return (
         <div>
             {errorMessage && <Alert severity="error">{errorMessage}</Alert>}
+            <h1>Advanced Search</h1>
+            <p>Enter search terms in any or all of the fields.</p>
             <h2>Product Info</h2>
             <div>
                 <TextField

@@ -13,9 +13,11 @@ const NutritionFilter = ({ value, onChange }) => {
     const handleAmountChange = (field) => (event) => {
         onChange({ ...value, [field]: event.target.value });
     };
-    
+
     return (
         <div>
+            <h2>Nutrient Filter</h2>
+            <p>Select a nutrient to filter by and a minimum and/or maximum value. Note that the unit will be as stored in the database (g/mg/ug/IU)</p>
             <TextField
                 select
                 label="Nutrient"
@@ -34,14 +36,14 @@ const NutritionFilter = ({ value, onChange }) => {
                 )}
             </TextField>
             <TextField
-                label="Minimum Amount (g)"
+                label="Minimum Amount (arbitrary units)"
                 type="number"
                 value={value.minAmount}
                 onChange={handleAmountChange('minAmount')}
                 fullWidth
             />
             <TextField
-                label="Maximum Amount (g)"
+                label="Maximum Amount (arbitrary units)"
                 type="number"
                 value={value.maxAmount}
                 onChange={handleAmountChange('maxAmount')}
