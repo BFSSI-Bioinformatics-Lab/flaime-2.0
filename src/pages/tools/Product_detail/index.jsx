@@ -315,65 +315,49 @@ const Product_detail = () => {
                                             <TableContainer component={Paper}>
                                                 <Typography variant="h6" style={{ padding: '10px' }}>Nutrition Facts</Typography>
                                                 <Typography variant="body2" style={{ padding: '10px' }}>
-                                                    Serving Size:  {product.servingSize ? 
-                                                    `${product.servingSize} ${product.servingSizeUnitEntity.name ?? ""}` : 
-                                                    (product.raw_serving_size ? `${product.raw_serving_size}` : null)}
+                                                    Serving Size: {product.servingSize ? `${product.servingSize} ${product.servingSizeUnitEntity?.name ?? ""}` : 
+                                                    (product.raw_serving_size ? `${product.raw_serving_size}` : "Not specified")}
                                                     <br></br>
-                                                    Total size: {product.total_size}
+                                                    Total size: {product.total_size ?? "Not specified"}
                                                 </Typography>
                                                 <Divider variant="middle"/>
-                                                {product.store_product_nutrition_facts && (
-                                                    <Typography variant="body2" style={{ padding: '10px' }}>{product.store_product_nutrition_facts
-                                                        .filter((nutritionFact) => energy.includes(nutritionFact.nutrients.name))
-                                                        .map((nutritionFact) => (
-                                                            `Calories : ${nutritionFact.amount} ${nutritionFact.unit}`
-                                                        ))}
-                                                    </Typography>
-                                                )}
                                                 {product.store_product_nutrition_facts && (
                                                     <Table size="small" aria-label="a dense table">
                                                         <TableHead>
                                                             <TableRow>
-                                                                <TableCell style={{ padding: '0px' }}></TableCell>
-                                                                <TableCell style={{ padding: '0px' }}></TableCell>
+                                                                <TableCell style={{ padding: '0px' }}>Nutrient</TableCell>
+                                                                <TableCell style={{ padding: '0px' }}>Amount</TableCell>
+                                                                <TableCell style={{ padding: '0px' }}>% Daily Value</TableCell>
                                                             </TableRow>
                                                         </TableHead>
-                                                        
                                                         <TableBody>
-                                                            {product.store_product_nutrition_facts
-                                                                .filter((nutritionFact) => nutritionFact.amount !== null && !energy.includes(nutritionFact.nutrients.name))
-                                                                .map((nutritionFact) => {
-                                                                    const localizedKey = Object.keys(nutrientMatches).find(key => nutrientMatches[key].includes(nutritionFact.nutrients.name)) || nutritionFact.nutrients.name;
-
-                                                                    return { nutritionFact, localizedKey };
-                                                                })
+                                                            {product.store_product_nutrition_facts[0]
+                                                                .filter(nutritionFact => nutritionFact.amount !== null)
                                                                 .sort((a, b) => {
-                                                                    const aLocalizedKey = a.localizedKey;
-                                                                    const bLocalizedKey = b.localizedKey;
-                                                                    const aOrder = nft_order[aLocalizedKey] || 9999; // Default to a large number if key not found
-                                                                    const bOrder = nft_order[bLocalizedKey] || 9999; // Default to a large number if key not found
-
+                                                                    const aOrder = nft_order[a.nutrients.name] || 9999;
+                                                                    const bOrder = nft_order[b.nutrients.name] || 9999;
                                                                     return aOrder - bOrder;
                                                                 })
-                                                                .map(({ nutritionFact, localizedKey }) => (
-                                                                    <React.Fragment key={nutritionFact.id}>
-                                                                        <TableRow>
-                                                                            <TableCell>
-                                                                                <span style={{ textTransform: 'capitalize', fontSize: 'smaller' }}>
-                                                                                    {localizedKey}
-                                                                                    {/* Display the localized key */}
-                                                                                </span>
-                                                                            </TableCell>
-                                                                            <TableCell>
-                                                                                {nutritionFact.amount} {nutritionFact.unit}
-                                                                            </TableCell>
-                                                                        </TableRow>
-                                                                    </React.Fragment>
+                                                                .map((nutritionFact) => (
+                                                                    <TableRow key={nutritionFact.id}>
+                                                                        <TableCell>
+                                                                            <span style={{ textTransform: 'capitalize', fontSize: 'smaller' }}>
+                                                                                {nutritionFact.nutrients.name}
+                                                                            </span>
+                                                                        </TableCell>
+                                                                        <TableCell>
+                                                                            {nutritionFact.amount} {nutritionFact.unit || ""}
+                                                                        </TableCell>
+                                                                        <TableCell>
+                                                                            {nutritionFact.daily_value !== null ? `${nutritionFact.daily_value}%` : ""}
+                                                                        </TableCell>
+                                                                    </TableRow>
                                                                 ))}
                                                         </TableBody>
                                                     </Table>
                                                 )}
                                             </TableContainer>
+
                                             </Grid></Grid>
                                             
                                         </>
