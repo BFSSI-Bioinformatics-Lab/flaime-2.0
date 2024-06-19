@@ -1,6 +1,8 @@
-import React, { useEffect, useReducer, useCallback } from 'react';
+import React, { useState, useEffect, useReducer, useCallback } from 'react';
+import { FormControl, FormControlLabel, Radio, RadioGroup } from '@mui/material';
 import { GetAllCategories, GetAllSubcategories } from '../../../api/services/CategoryService';
 import { IndeterminateCheckbox } from './IndeterminateCheckbox';
+
 
 const categoryReducer = (state, action) => {
   console.log(`Reducer action type: ${action.type}`);
@@ -31,16 +33,27 @@ const categoryReducer = (state, action) => {
   }
 };
 
-const fetchData = async (dispatch) => {
+const fetchData = async (dispatch, categoryScheme) => {
   try {
-    console.log("Fetching categories and subcategories...");
+    console.log(`Fetching categories and subcategories for scheme: ${categoryScheme}...`);
+
     const categoriesData = await GetAllCategories();
     const subcategoriesData = await GetAllSubcategories();
-    const categoriesWithSubcategories = categoriesData.categories.map(cat => ({
+
+    // console.log(`Categories fetched: ${JSON.stringify(categoriesData.categories)}`);
+    // console.log(`Subcategories fetched: ${JSON.stringify(subcategoriesData.subcategories)}`);
+
+    // TODO: uncomment this once the schemes are loaded properly
+    const filteredCategories = categoriesData.categories;
+    // const filteredCategories = categoriesData.categories.filter(cat => cat.scheme === categoryScheme);
+    // console.log(`Filtered categories based on scheme '${categoryScheme}': ${JSON.stringify(filteredCategories)}`);
+
+    const categoriesWithSubcategories = filteredCategories.map(cat => ({
       ...cat,
       subcategories: subcategoriesData.subcategories.filter(sub => sub.categoryEntity.id === cat.id),
       isExpanded: false,
     }));
+
     console.log("Categories with subcategories loaded:", categoriesWithSubcategories);
     dispatch({ type: 'FETCH_CATEGORIES', payload: categoriesWithSubcategories });
   } catch (error) {
@@ -50,6 +63,8 @@ const fetchData = async (dispatch) => {
 };
 
 const CategorySelector = ({ onChange }) => {
+  const [categoryScheme, setCategoryScheme] = useState('RA');
+
   const [state, dispatch] = useReducer(categoryReducer, { categories: [], selectedCategories: new Set() });
 
   const getSelectionState = useCallback((category) => {
@@ -60,9 +75,13 @@ const CategorySelector = ({ onChange }) => {
   }, [state.selectedCategories]);
 
   useEffect(() => {
-    fetchData(dispatch);
-  }, [dispatch]);
+    fetchData(dispatch, categoryScheme);
+  }, [dispatch, categoryScheme]);
 
+  const handleCategorySchemeChange = (event) => {
+    setCategoryScheme(event.target.value);
+  };
+  
   const handleCategorySelect = (category, isSubcategory = false) => {
     const newSelectedCategories = new Set(state.selectedCategories);
 
@@ -95,6 +114,14 @@ const CategorySelector = ({ onChange }) => {
   return (
     <div>
       <h2>Select Categories</h2>
+      <p>Select the categories to filter by. Top level categories can be expanded to sub-categories. Note that the switch between RA and Sodium categories is currently non-functional.</p>
+      <FormControl>
+        <RadioGroup row value={categoryScheme} onChange={handleCategorySchemeChange} name="categoryScheme">
+          <FormControlLabel value="reference amount" control={<Radio />} label="Reference Amount" />
+          <FormControlLabel value="Sodium" control={<Radio />} label="Sodium" />
+          {/* <FormControlLabel value="nielsen" control={<Radio />} label="Nielsen" /> */}
+        </RadioGroup>
+      </FormControl>
       <div style={{ height: '300px', overflowY: 'auto' }}>
         {state.categories.map(category => (
           <div key={category.id}>
@@ -103,7 +130,7 @@ const CategorySelector = ({ onChange }) => {
               checked={getSelectionState(category) === 'full'}
               indeterminate={getSelectionState(category) === 'partial'}
               onChange={() => handleCategorySelect(category)}
-              label={category.name}
+              label={`(${category.scheme}) ${category.name}`}
             />
             <button
               onClick={() => toggleExpand(category)}
