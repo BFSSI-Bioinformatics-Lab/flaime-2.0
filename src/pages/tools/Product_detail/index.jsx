@@ -12,15 +12,12 @@ import {
     ProductImageContainer,
     ProductIngredientsHeadingContainer
 } from "./styles";
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography } from '@mui/material';
+import { Paper, Typography } from '@mui/material';
 import Divider from '@mui/material/Divider';
 import { Dialog, DialogContent, DialogTitle, Box  } from '@mui/material';
 import axios from 'axios';
+import NutritionFactsTable from '../../../components/nutrition_facts_table/NutritionFactsTable';
 
-
-
-
-import { nft_order, nutrientMatches } from './nft_flaime_nutrients';
 
 const Product_detail = () => {
     
@@ -309,59 +306,10 @@ const Product_detail = () => {
                                         // columnSpacing={12}
                                         justifyContent={"center"}
                                     >
-                                        
-                                        <>
                                             <Grid item xs={8}><Grid container direction="column-reverse" rowSpacing={2}>
-                                            <TableContainer component={Paper}>
-                                                <Typography variant="h6" style={{ padding: '10px' }}>Nutrition Facts</Typography>
-                                                <Typography variant="body2" style={{ padding: '10px' }}>
-                                                    Serving Size: {product.servingSize ? `${product.servingSize} ${product.servingSizeUnitEntity?.name ?? ""}` : 
-                                                    (product.raw_serving_size ? `${product.raw_serving_size}` : "Not specified")}
-                                                    <br></br>
-                                                    Total size: {product.total_size ?? "Not specified"}
-                                                </Typography>
-                                                <Divider variant="middle"/>
-                                                {product.store_product_nutrition_facts && (
-                                                    <Table size="small" aria-label="a dense table">
-                                                        <TableHead>
-                                                            <TableRow>
-                                                                <TableCell style={{ padding: '0px' }}>Nutrient</TableCell>
-                                                                <TableCell style={{ padding: '0px' }}>Amount</TableCell>
-                                                                <TableCell style={{ padding: '0px' }}>% Daily Value</TableCell>
-                                                            </TableRow>
-                                                        </TableHead>
-                                                        <TableBody>
-                                                            {product.store_product_nutrition_facts[0]
-                                                                .filter(nutritionFact => nutritionFact.amount !== null)
-                                                                .sort((a, b) => {
-                                                                    const aOrder = nft_order[a.nutrients.name] || 9999;
-                                                                    const bOrder = nft_order[b.nutrients.name] || 9999;
-                                                                    return aOrder - bOrder;
-                                                                })
-                                                                .map((nutritionFact) => (
-                                                                    <TableRow key={nutritionFact.id}>
-                                                                        <TableCell>
-                                                                            <span style={{ textTransform: 'capitalize', fontSize: 'smaller' }}>
-                                                                                {nutritionFact.nutrients.name}
-                                                                            </span>
-                                                                        </TableCell>
-                                                                        <TableCell>
-                                                                            {nutritionFact.amount} {nutritionFact.unit || ""}
-                                                                        </TableCell>
-                                                                        <TableCell>
-                                                                            {nutritionFact.daily_value !== null ? `${nutritionFact.daily_value}%` : ""}
-                                                                        </TableCell>
-                                                                    </TableRow>
-                                                                ))}
-                                                        </TableBody>
-                                                    </Table>
-                                                )}
-                                            </TableContainer>
-
-                                            </Grid></Grid>
-                                            
-                                        </>
-                                        
+                                                <NutritionFactsTable product={product} />
+                                            </Grid>
+                                        </Grid>
                                     </Grid>
                                     { product.ingredientEn && 
                                         <div>
