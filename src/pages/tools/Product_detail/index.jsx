@@ -142,12 +142,12 @@ const Product_detail = () => {
             },
             {
                 name: "Category", // does the category need to be verified in order to be displayed?
-                value: product.categories[0].name ? 
-                    product.categories[0].name : null
+                value: product.categories[0] && product.categories[0].name ? 
+                product.categories[0].name : null
             },
             {
                 name: "Subcategory", // does the category need to be verified in order to be displayed?
-                value: product.subcategories[0].name ? 
+                value: product.subcategories[0] && product.subcategories[0].name ? 
                     product.subcategories[0].name : null
             },
             {
