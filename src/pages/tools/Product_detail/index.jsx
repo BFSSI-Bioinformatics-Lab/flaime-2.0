@@ -32,7 +32,7 @@ const ProductDetail = () => {
     if (isLoading) {
         return <div>Loading...</div>;
     }
-
+    console.log("Product:", product);
     const productDescItems = product ? [
         { name: "Product Name", value: product.site_name },
         { name: "Brand", value: product.raw_brand || "None" },
@@ -66,23 +66,27 @@ const ProductDetail = () => {
                     {product && (
                         <Grid container columnSpacing={6} direction="row" justifyContent="space-between" alignItems="flex-start">
                             <Grid item xs={12} md={6}>
-                                <ProductImages product={product} />
+                                
                                 {productDescItems.map(item => (
                                     item.value && <DetailItem key={item.name}><b>{item.name}</b>: {item.value}</DetailItem>
                                 ))}
-                            </Grid>
-                            <Grid item xs={12} md={6}>
-                                <NutritionFactsTable product={product} />
-                                {product.ingredientEn && (
+                                {product.ingredient_en && (
                                     <div>
                                         <ProductIngredientsHeadingContainer>
                                             <Divider> Ingredients </Divider>
                                         </ProductIngredientsHeadingContainer>
                                         <Typography variant="body2" style={{ padding: '10px', textTransform: 'capitalize' }}>
-                                            {product.ingredientEn.toLowerCase()}
+                                            {product.ingredient_en.toLowerCase()}
                                         </Typography>
                                     </div>
                                 )}
+                            </Grid>
+                            <Grid item xs={12} md={6} style={{ margin: '0 auto', maxWidth: '500px' }}>
+                                <NutritionFactsTable product={product} />
+                                
+                                <div>
+                                <ProductImages product={product} />
+                                </div>
                             </Grid>
                         </Grid>
                     )}

@@ -31,7 +31,7 @@ const NutritionFactsTable = ({ product }) => (
       <Table size="small" aria-label="a dense table">
         <TableHead>
           <TableRow>
-            <TableCell style={{ padding: '0px' }}>Nutrient</TableCell>
+            <TableCell >Nutrient</TableCell>
             <TableCell style={{ padding: '0px' }}>Amount</TableCell>
             <TableCell style={{ padding: '0px' }}>% Daily Value</TableCell>
           </TableRow>
