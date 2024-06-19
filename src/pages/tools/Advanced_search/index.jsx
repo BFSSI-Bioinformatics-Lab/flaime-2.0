@@ -117,8 +117,7 @@ const AdvancedSearch = () => {
         console.log("Query Body:", JSON.stringify(finalQuery, null, 2));
     
         
-        // const elastic_url = `${process.env.REACT_APP_ELASTIC_URL}/_search`;
-        const elastic_url = 'http://172.17.10.96:9200/main_index/_search';
+        const elastic_url = `${process.env.REACT_APP_ELASTIC_URL}/_search`;
 
 
         try {
