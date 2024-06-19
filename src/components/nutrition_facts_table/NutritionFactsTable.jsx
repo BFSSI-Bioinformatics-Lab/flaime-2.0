@@ -5,6 +5,11 @@ import Divider from '@mui/material/Divider';
 // Assuming nft_order and nutrientMatches are imported from your configuration file
 import { nft_order, nutrientMatches } from './nft_flaime_nutrients';
 
+// list of possible energy values
+const energy = ['ENERGY (KILOCALORIES)', 'ENERGY (KILOJOULES)'];
+
+
+
 const NutritionFactsTable = ({ product }) => (
   <TableContainer component={Paper}>
     <Typography variant="h6" style={{ padding: '10px' }}>Nutrition Facts</Typography>
@@ -13,6 +18,13 @@ const NutritionFactsTable = ({ product }) => (
       (product.raw_serving_size ? `${product.raw_serving_size}` : "Not specified")}
       <br></br>
       Total size: {product.total_size ?? "Not specified"}
+    </Typography>
+    <Typography variant="body2" style={{ padding: '10px' }}>
+        {product.store_product_nutrition_facts[0]
+            .filter((nutritionFact) => energy.includes(nutritionFact.nutrients.name))
+            .map((nutritionFact) => (
+                `Calories : ${nutritionFact.amount}`
+            ))}
     </Typography>
     <Divider variant="middle" />
     {product.store_product_nutrition_facts && (
@@ -26,6 +38,7 @@ const NutritionFactsTable = ({ product }) => (
         </TableHead>
         <TableBody>
           {product.store_product_nutrition_facts[0]
+            .filter((nutritionFact) => !energy.includes(nutritionFact.nutrients.name))
             .map(nutritionFact => {
               const localizedKey = Object.keys(nutrientMatches).find(key =>
                 nutrientMatches[key].includes(nutritionFact.nutrients.name)
