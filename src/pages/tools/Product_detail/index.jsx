@@ -20,19 +20,10 @@ import NutritionFactsTable from '../../../components/nutrition_facts_table/Nutri
 
 
 const Product_detail = () => {
-    
-
     const {productId} = useParams()
-    // const thisProduct = productsData.find(prod => prod.id === productId)
     console.log(productId)
-    const [products, setProducts] = useState([])
     const [isLoading, setLoading] = useState(true);
     const [productDescItems, setProductDescItems] = useState([]);
-    // const [products, setProducts] = useState({
-    //     isLoading: true,
-    //     products:[]
-    // });
-
     const [product, setProduct] = useState()
 
     const imagePathToUrl = (imagePath) => {
@@ -41,10 +32,6 @@ const Product_detail = () => {
 
     const breadcrumbComponent = (crumbs) => {
         return crumbs.join(" > ")
-        // if (crumbs) {
-        //     return crumbs.join(" > ");
-        // }
-        // return "";
     }
 
     // list of possible energy values
@@ -73,10 +60,7 @@ const Product_detail = () => {
     };
 
 
-    useEffect( () =>{
-        
-        setProducts(old=>({...old, isLoading: true}))
-        
+    useEffect( () =>{        
         let elasticUrl = `${process.env.REACT_APP_ELASTIC_URL}/_doc`;
         const elasticImgUrl = `${process.env.REACT_APP_ELASTIC_IMG_URL}/_doc`;
 
@@ -88,10 +72,8 @@ const Product_detail = () => {
               const dataProduct = data.data._source;
               if (dataProduct === undefined) return;
               const imgPaths = imgData.data._source.store_product_images;
-              setProducts({ ...dataProduct, store_product_images: imgPaths });
               setProduct({ ...dataProduct, store_product_images: imgPaths });
               setLoading(false);
-              // console.log(dataProduct);
               console.log(imgPaths)
           })
       );
@@ -185,36 +167,7 @@ const Product_detail = () => {
                             </Grid>
                         </Grid>
                     </Grid>
-                    {/* Boxes on top of page- next to name- to display stats such as sodium, fats and sugars */}
-
-                    {/* <Grid container item xs={12} md={6} spacing={3} direction="row"
-                justifyContent="space-around" alignItems="center">
-                        <Grid item xs={3}>
-                            <ProductStatItem >High Sodium</ProductStatItem>
-                        </Grid>
-                        <Grid item xs={3}>
-                            <ProductStatItem >Low Fat</ProductStatItem>
-                        </Grid>
-                        <Grid item xs={3}>
-                            <ProductStatItem >No Sugar</ProductStatItem>
-                        </Grid> 
-                        <Grid item xs={1}>
-                            
-                        </Grid>
-                    </Grid> */}
-                </Grid>
-                {/* <Paper elevation={0} width='50%' sx={{
-                    display: "flex",
-                    // justifyContent: "start",
-                    alignItems: 'center',
-                    overflow: 'hidden'    
-                }}>
-                    <Typography variant='h5' color='white'>
-                        {products.products.siteName}
-                    </Typography>
-                </Paper> */}
-                {/* <Paper></Paper> */}
-                
+                </Grid>               
             </Band>
         
         
@@ -233,7 +186,6 @@ const Product_detail = () => {
                                     item.value && (
                                     <React.Fragment key={item.name}>
                                         <DetailItem ><b>{item.name}</b>: {item.value}</DetailItem>
-                                        {/* {index !== productDescItems.length - 1 && <Divider sx={{ margin: '0 30px', backgroundColor: '#F7EADE', width: '30%' }} />} */}
                                     </React.Fragment>
                                     )
                                 ))}
@@ -301,11 +253,7 @@ const Product_detail = () => {
                                         )}
                                     </>
 
-                                    <Grid container
-                                        // direction="row-reverse"
-                                        // columnSpacing={12}
-                                        justifyContent={"center"}
-                                    >
+                                    <Grid container justifyContent={"center"}>
                                             <Grid item xs={8}><Grid container direction="column-reverse" rowSpacing={2}>
                                                 <NutritionFactsTable product={product} />
                                             </Grid>
@@ -316,8 +264,6 @@ const Product_detail = () => {
                                             <ProductIngredientsHeadingContainer>
                                             <Divider> Ingredients</Divider>
                                             </ProductIngredientsHeadingContainer>
-                                            {/* <Divider variant="middle"/> */}
-                                            
                                             <Typography variant="body2" style={{ padding: '10px', textTransform: 'capitalize' }}>{product.ingredientEn.toLowerCase()}</Typography>
                                             
                                         </div>
@@ -328,11 +274,7 @@ const Product_detail = () => {
                     }
                 </ProductInfoBox>
                 <Divider variant="middle"/>
-            </PageContainer>
-            {/* <Band>
-                <PageTitle>Visualizations</PageTitle>
-            </Band> */}
-            
+            </PageContainer>            
         </div>
     </div>
   )
