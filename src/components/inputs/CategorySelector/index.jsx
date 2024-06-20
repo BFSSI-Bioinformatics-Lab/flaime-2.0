@@ -110,7 +110,7 @@ const CategorySelector = ({ onChange }) => {
     console.log(`Toggling expansion for category: ${category.id}`);
     dispatch({ type: 'TOGGLE_CATEGORY', payload: category.id });
   };
-
+  
   return (
     <Card variant="outlined">
       <CardHeader title="Select Categories" />
@@ -127,15 +127,19 @@ const CategorySelector = ({ onChange }) => {
         <Divider />
         <div style={{ height: '300px', overflowY: 'auto' }}>
           {state.categories.map(category => (
-            <div key={category.id}>
+            <div key={category.id} style={{ margin: '5px 0' }}>
               <IndeterminateCheckbox
                 id={`category-${category.id}`}
                 checked={getSelectionState(category) === 'full'}
                 indeterminate={getSelectionState(category) === 'partial'}
                 onChange={() => handleCategorySelect(category)}
-                label={`(${category.scheme}) ${category.name}`}
+                label={`${category.scheme} `}
               />
-              <Button variant='outlined' size='small' style={{ marginLeft: '5px', minWidth: '25px', padding: '0' }}
+              <span style={{ fontSize: '15px', margin: '0 4px'}}>
+              {category.name}
+              </span>
+              
+              <Button variant='outlined' size='small' style={{ marginLeft: '5px', minWidth: '22px', padding: '0' }}
                 onClick={() => toggleExpand(category)}
                 aria-label={category.isExpanded ? `Collapse ${category.name}` : `Expand ${category.name}`}
               >
