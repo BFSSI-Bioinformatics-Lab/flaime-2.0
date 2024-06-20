@@ -1,6 +1,7 @@
 // components/inputs/RegionSelector/index.js
 import React from 'react';
 import SelectInput from '../SelectInput';
+import { Typography } from '@mui/material';
 
 const RegionSelector = ({ onSelect }) => {
     //const { regions, loading } = useRegions();
@@ -21,14 +22,15 @@ const RegionSelector = ({ onSelect }) => {
     };
 
     return (
-        <div>
-            <h2>Select a Region</h2>
+        <div style={{ maxWidth: '320px', minWidth: '280px' }}>
+            <Typography variant="h5" style={{ padding: '10px' }}>Select a Region</Typography>
             {loading ? <p>Loading...</p> : (
                 <SelectInput
                     options={regionsWithDefault}
                     value={selectedRegion}
                     onChange={handleSelectionChange}
                     label="Select a Region"
+                    InputProps={{ style: { minWidth: '280px', overflow: 'hidden' } }}
                 />
             )}
         </div>

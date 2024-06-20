@@ -2,6 +2,7 @@
 import React from 'react';
 import useSources from './useSources';
 import SelectInput from '../SelectInput';
+import { Typography } from '@mui/material';
 
 const SourceSelector = ({ onSelect }) => {
     const { sources, loading } = useSources();
@@ -20,14 +21,15 @@ const SourceSelector = ({ onSelect }) => {
     };
 
     return (
-        <div>
-            <h2>Select a Source</h2>
+        <div style={{ maxWidth: '320px', minWidth: '280px' }}>
+            <Typography variant="h5" style={{ padding: '10px' }}>Select a Source</Typography>
             {loading ? <p>Loading...</p> : (
                 <SelectInput
                     options={sourcesWithDefault}
                     value={selectedSource}
                     onChange={handleSelectionChange}
                     label="Select a Source"
+                    InputProps={{ style: { minWidth: '280px', overflow: 'hidden' } }}
                 />
             )}
         </div>

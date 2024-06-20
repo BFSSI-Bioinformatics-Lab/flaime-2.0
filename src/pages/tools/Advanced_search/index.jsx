@@ -1,7 +1,8 @@
 // advanced_search.jsx
 import React, { useState } from 'react';
 import dayjs from 'dayjs';
-import { TextField, Button, Alert, MenuItem } from '@mui/material';
+import { TextField, Button, Alert, MenuItem, Typography, Divider } from '@mui/material';
+import PageContainer from '../../../components/page/PageContainer';
 import StoreSelector from '../../../components/inputs/StoreSelector';
 import SourceSelector from '../../../components/inputs/SourceSelector';
 import RegionSelector from '../../../components/inputs/RegionSelector';
@@ -159,120 +160,132 @@ const AdvancedSearch = () => {
     };
 
     return (
-        <div>
-            {errorMessage && <Alert severity="error">{errorMessage}</Alert>}
-            <h1>Advanced Search</h1>
-            <p>Enter search terms in any or all of the fields.</p>
-            <h2>Product Info</h2>
+        <PageContainer>
             <div>
-                <TextField
-                    label="Product Name"
-                    value={searchInputs.Names}
-                    onChange={handleTextFieldChange('Names')}
-                    variant="outlined"
-                />
-            </div>
-            <div>
-                <TextField
-                    label="Product ID"
-                    value={searchInputs.IDs}
-                    onChange={handleTextFieldChange('IDs')}
-                    variant="outlined"
-                />
-            </div>
-            <div>
-                <TextField
-                    label="UPC"
-                    value={searchInputs.UPCs}
-                    onChange={handleTextFieldChange('UPCs')}
-                    variant="outlined"
-                />
-            </div>
-            <div>
-                <TextField
-                    label="Nielsen UPC"
-                    value={searchInputs.NielsenUPCs}
-                    onChange={handleTextFieldChange('NielsenUPCs')}
-                    variant="outlined"
-                />
-            </div>
-            <SourceSelector onSelect={handleSelectorChange('Source')} />
-            <RegionSelector onSelect={handleSelectorChange('Region')} />
-            <StoreSelector onSelect={handleSelectorChange('Store')} />
-            <CategorySelector onChange={handleCategoryChange('Subcategories')} />
-            <div>
-                <h2>Select a date range</h2>
-                <SingleDatePicker
-                    label="Start Date"
-                    initialDate="1900-01-01"
-                    onChange={(date) => handleInputChange('StartDate', { value: date })}
-                />
-                <SingleDatePicker
-                    label="End Date"
-                    initialDate={dayjs().format('YYYY-MM-DD')}
-                    onChange={(date) => handleInputChange('EndDate', { value: date })}
-                />
-            </div>
-            <NutritionFilter
-                value={searchInputs.Nutrition}
-                onChange={handleNutritionChange}
-            />
-            <div>
-                <Button variant="contained" onClick={handleSearch} disabled={isLoading} style={{ marginTop: '20px' }}>
-                    Search
-                </Button>
-            </div>
-            {isLoading ? <p>Loading...</p> : (
-                <div>
-                    <table>
-                    <thead>
-                        <tr>
-                        <th>ID</th>
-                        <th>Name</th>
-                        <th>Price</th>
-                        <th>Source</th>
-                        <th>Store</th>
-                        <th>Date</th>
-                        <th>Region</th>
-                        <th>Category</th>
-                        <th>Subcategory</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {searchResults.map((item, index) => (
-                        <tr key={index}>
-                            <td>{item._id}</td>
-                            <td>{item._source.site_name}</td>
-                            <td>{item._source.reading_price}</td>
-                            <td>{item._source.sources.name}</td>
-                            <td>{item._source.stores.name}</td>
-                            <td>{item._source.scrape_batches.scrape_datetime}</td>
-                            <td>{item._source.scrape_batches.region}</td>
-                            <td>
-                            {item && item._source && item._source.categories && Array.isArray(item._source.categories)
-                                ? item._source.categories
-                                    .map(cat => cat ? cat.name : undefined) 
-                                    .filter(name => name)
-                                    .join(", ") || 'No category'
-                                : 'No category'
-                            }
-                            </td>
-                            <td>
-                            {item && item._source && item._source.subcategories && Array.isArray(item._source.subcategories)
-                                ? item._source.subcategories
-                                    .map(subcat => subcat ? subcat.name : undefined) 
-                                    .filter(name => name)
-                                    .join(", ") || 'No subcategory'
-                                : 'No subcategory'
-                            }
-                            </td>
-                        </tr>
-                        ))}
-                    </tbody>
-                    </table>
+                {errorMessage && <Alert severity="error">{errorMessage}</Alert>}
+                <Typography variant="h4" style={{ padding: '10px' }}>Advanced Search</Typography>
+                <Typography variant="body1" style={{ padding: '10px', width: '80vw', margin: '0 auto' }}>
+                Enter search terms in any or all of the fields.
+                </Typography>
+                <Divider style={{ width: '80vw', margin: '10px auto' }}/>
+                <Typography variant="h5" style={{ padding: '10px' }}>Product Info</Typography>
+                
+                <div style={{ display: 'flex', justifyContent: 'space-around', paddingBottom: '15px' }}>
+                    <div style={{ maxWidth: '320px', minWidth: '280px' }}>
+                        <TextField
+                            label="Product Name"
+                            value={searchInputs.Names}
+                            onChange={handleTextFieldChange('Names')}
+                            variant="outlined"
+                            InputProps={{ style: { minWidth: '280px', overflow: 'hidden' } }}
+                        />
+                    </div>
+                    <div>
+                        <TextField
+                            label="Product ID"
+                            value={searchInputs.IDs}
+                            onChange={handleTextFieldChange('IDs')}
+                            variant="outlined"
+                        />
+                    </div>
+                    <div>
+                        <TextField
+                            label="UPC"
+                            value={searchInputs.UPCs}
+                            onChange={handleTextFieldChange('UPCs')}
+                            variant="outlined"
+                        />
+                    </div>
+                    <div>
+                        <TextField
+                            label="Nielsen UPC"
+                            value={searchInputs.NielsenUPCs}
+                            onChange={handleTextFieldChange('NielsenUPCs')}
+                            variant="outlined"
+                        />
+                    </div>
                 </div>
-            )}
-        </div>
+                <Divider style={{ width: '50vw', margin: '10px auto' }}/>
+                <div style={{ display: 'flex', justifyContent: 'space-around', paddingBottom: '10px' }}>
+                <SourceSelector onSelect={handleSelectorChange('Source')} />
+                <RegionSelector onSelect={handleSelectorChange('Region')} />
+                <StoreSelector onSelect={handleSelectorChange('Store')} />
+                </div>
+                <CategorySelector onChange={handleCategoryChange('Subcategories')} />
+                <div>
+                    <h2>Select a date range</h2>
+                    <SingleDatePicker
+                        label="Start Date"
+                        initialDate="1900-01-01"
+                        onChange={(date) => handleInputChange('StartDate', { value: date })}
+                    />
+                    <SingleDatePicker
+                        label="End Date"
+                        initialDate={dayjs().format('YYYY-MM-DD')}
+                        onChange={(date) => handleInputChange('EndDate', { value: date })}
+                    />
+                </div>
+                <NutritionFilter
+                    value={searchInputs.Nutrition}
+                    onChange={handleNutritionChange}
+                />
+                <div>
+                    <Button variant="contained" onClick={handleSearch} disabled={isLoading} style={{ marginTop: '20px' }}>
+                        Search
+                    </Button>
+                </div>
+                {isLoading ? <p>Loading...</p> : (
+                    <div>
+                        <table>
+                        <thead>
+                            <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Price</th>
+                            <th>Source</th>
+                            <th>Store</th>
+                            <th>Date</th>
+                            <th>Region</th>
+                            <th>Category</th>
+                            <th>Subcategory</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {searchResults.map((item, index) => (
+                            <tr key={index}>
+                                <td>{item._id}</td>
+                                <td>{item._source.site_name}</td>
+                                <td>{item._source.reading_price}</td>
+                                <td>{item._source.sources.name}</td>
+                                <td>{item._source.stores.name}</td>
+                                <td>{item._source.scrape_batches.scrape_datetime}</td>
+                                <td>{item._source.scrape_batches.region}</td>
+                                <td>
+                                {item && item._source && item._source.categories && Array.isArray(item._source.categories)
+                                    ? item._source.categories
+                                        .map(cat => cat ? cat.name : undefined) 
+                                        .filter(name => name)
+                                        .join(", ") || 'No category'
+                                    : 'No category'
+                                }
+                                </td>
+                                <td>
+                                {item && item._source && item._source.subcategories && Array.isArray(item._source.subcategories)
+                                    ? item._source.subcategories
+                                        .map(subcat => subcat ? subcat.name : undefined) 
+                                        .filter(name => name)
+                                        .join(", ") || 'No subcategory'
+                                    : 'No subcategory'
+                                }
+                                </td>
+                            </tr>
+                            ))}
+                        </tbody>
+                        </table>
+                    </div>
+                )}
+            </div>
+        </PageContainer>
     );
 };
 
