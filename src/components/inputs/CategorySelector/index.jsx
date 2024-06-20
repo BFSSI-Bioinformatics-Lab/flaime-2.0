@@ -153,7 +153,9 @@ const CategorySelector = ({ onChange }) => {
                         id={`subcategory-${sub.id}`}
                         checked={state.selectedCategories.has(sub.id)}
                         onChange={() => handleCategorySelect(sub, true)}
-                        label={sub.name}
+                        label={
+                          <span style={{ fontSize: '12px', color: 'secondary', margin: '0 3px' }}>{sub.name}</span>
+                        }
                       />
                     </div>
                   ))}
