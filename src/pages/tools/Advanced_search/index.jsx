@@ -1,7 +1,7 @@
 // advanced_search.jsx
 import React, { useState } from 'react';
 import dayjs from 'dayjs';
-import { TextField, Button, Alert, MenuItem, Typography, Divider, Grid } from '@mui/material';
+import { TextField, Button, Alert, Typography, Divider, Grid } from '@mui/material';
 import PageContainer from '../../../components/page/PageContainer';
 import StoreSelector from '../../../components/inputs/StoreSelector';
 import SourceSelector from '../../../components/inputs/SourceSelector';
@@ -10,7 +10,7 @@ import SingleDatePicker from '../../../components/inputs/SingleDatePicker';
 import CategorySelector from '../../../components/inputs/CategorySelector';
 import NutritionFilter from '../../../components/inputs/NutritionFilter';
 import { useSearchFilters, buildTextMustClausesForAllFields } from '../util';
-import { DIALOG_WIDTH } from '@mui/x-date-pickers/internals';
+
 
 const AdvancedSearch = () => {
     const initialFilters = {
