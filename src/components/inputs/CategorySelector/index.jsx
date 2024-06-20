@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useReducer, useCallback } from 'react';
-import { FormControl, FormControlLabel, Radio, RadioGroup, Card, CardContent, CardHeader, Divider } from '@mui/material';
+import { FormControl, FormControlLabel, Radio, RadioGroup, Card, CardContent, CardHeader, Divider, Button } from '@mui/material';
 import { GetAllCategories, GetAllSubcategories } from '../../../api/services/CategoryService';
 import { IndeterminateCheckbox } from './IndeterminateCheckbox';
 
@@ -135,12 +135,12 @@ const CategorySelector = ({ onChange }) => {
                 onChange={() => handleCategorySelect(category)}
                 label={`(${category.scheme}) ${category.name}`}
               />
-              <button
+              <Button variant='outlined' size='small' style={{ marginLeft: '5px', minWidth: '25px', padding: '0' }}
                 onClick={() => toggleExpand(category)}
                 aria-label={category.isExpanded ? `Collapse ${category.name}` : `Expand ${category.name}`}
               >
                 {category.isExpanded ? '-' : '+'}
-              </button>
+              </Button>
               {category.isExpanded && (
                 <div style={{ marginLeft: '20px' }}>
                   {category.subcategories.map(sub => (
