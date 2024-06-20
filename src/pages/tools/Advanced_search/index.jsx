@@ -10,6 +10,7 @@ import SingleDatePicker from '../../../components/inputs/SingleDatePicker';
 import CategorySelector from '../../../components/inputs/CategorySelector';
 import NutritionFilter from '../../../components/inputs/NutritionFilter';
 import { useSearchFilters, buildTextMustClausesForAllFields } from '../util';
+import { DIALOG_WIDTH } from '@mui/x-date-pickers/internals';
 
 const AdvancedSearch = () => {
     const initialFilters = {
@@ -218,7 +219,7 @@ const AdvancedSearch = () => {
                     </Grid>
                     <Grid item xs={12} md={6}>
                         <Typography variant="h5" style={{ padding: '10px 20px 20px 20px' }}>Select a date range</Typography>
-                        <div style={{ display: 'flex', justifyContent: 'space-around', paddingBottom: '15px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-around', padding: '15px 20px' }}>
                             
                             <SingleDatePicker
                                 label="Start Date"
@@ -231,12 +232,16 @@ const AdvancedSearch = () => {
                                 onChange={(date) => handleInputChange('EndDate', { value: date })}
                             />
                         </div>
+                        <Divider style={{ width: '300px', margin: '10px auto' }}/>
+                        <div>
+                            <NutritionFilter
+                                value={searchInputs.Nutrition}
+                                onChange={handleNutritionChange}
+                            />
+                        </div>
                     </Grid>
                 </Grid>
-                <NutritionFilter
-                    value={searchInputs.Nutrition}
-                    onChange={handleNutritionChange}
-                />
+                
                 <div>
                     <Button variant="contained" onClick={handleSearch} disabled={isLoading} style={{ marginTop: '20px' }}>
                         Search
