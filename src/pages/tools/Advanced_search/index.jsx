@@ -1,7 +1,7 @@
 // advanced_search.jsx
 import React, { useState } from 'react';
 import dayjs from 'dayjs';
-import { TextField, Button, Alert, MenuItem, Typography, Divider } from '@mui/material';
+import { TextField, Button, Alert, MenuItem, Typography, Divider, Grid } from '@mui/material';
 import PageContainer from '../../../components/page/PageContainer';
 import StoreSelector from '../../../components/inputs/StoreSelector';
 import SourceSelector from '../../../components/inputs/SourceSelector';
@@ -206,27 +206,33 @@ const AdvancedSearch = () => {
                     </div>
                 </div>
                 <Divider style={{ width: '60vw', margin: '10px auto' }}/>
-                <div style={{ display: 'flex', justifyContent: 'space-around', paddingBottom: '20px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-around', paddingBottom: '25px' }}>
                     <SourceSelector onSelect={handleSelectorChange('Source')} />
                     <RegionSelector onSelect={handleSelectorChange('Region')} />
                     <StoreSelector onSelect={handleSelectorChange('Store')} />
                 </div>
 
-                <CategorySelector onChange={handleCategoryChange('Subcategories')} />
-                
-                <div>
-                    <h2>Select a date range</h2>
-                    <SingleDatePicker
-                        label="Start Date"
-                        initialDate="1900-01-01"
-                        onChange={(date) => handleInputChange('StartDate', { value: date })}
-                    />
-                    <SingleDatePicker
-                        label="End Date"
-                        initialDate={dayjs().format('YYYY-MM-DD')}
-                        onChange={(date) => handleInputChange('EndDate', { value: date })}
-                    />
-                </div>
+                <Grid container spacing={1} direction="row" justifyContent="space-between" >
+                    <Grid item xs={12} md={6}>
+                        <CategorySelector onChange={handleCategoryChange('Subcategories')} />
+                    </Grid>
+                    <Grid item xs={12} md={6}>
+                        <Typography variant="h5" style={{ padding: '10px 20px 20px 20px' }}>Select a date range</Typography>
+                        <div style={{ display: 'flex', justifyContent: 'space-around', paddingBottom: '15px' }}>
+                            
+                            <SingleDatePicker
+                                label="Start Date"
+                                initialDate="1900-01-01"
+                                onChange={(date) => handleInputChange('StartDate', { value: date })}
+                            />
+                            <SingleDatePicker
+                                label="End Date"
+                                initialDate={dayjs().format('YYYY-MM-DD')}
+                                onChange={(date) => handleInputChange('EndDate', { value: date })}
+                            />
+                        </div>
+                    </Grid>
+                </Grid>
                 <NutritionFilter
                     value={searchInputs.Nutrition}
                     onChange={handleNutritionChange}
