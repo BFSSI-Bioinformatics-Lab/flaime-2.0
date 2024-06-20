@@ -58,7 +58,7 @@ const NutritionFactsTable = ({ product }) => (
                   </span>
                 </TableCell>
                 <TableCell>
-                  {amount} {unit || ""}
+                  {amount && `${amount} ${unit}`}
                 </TableCell>
                 <TableCell>
                   {daily_value !== null ? `${daily_value}%` : ""}
