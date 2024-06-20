@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useReducer, useCallback } from 'react';
-import { FormControl, FormControlLabel, Radio, RadioGroup } from '@mui/material';
+import { FormControl, FormControlLabel, Radio, RadioGroup, Card, CardContent, CardHeader, Divider } from '@mui/material';
 import { GetAllCategories, GetAllSubcategories } from '../../../api/services/CategoryService';
 import { IndeterminateCheckbox } from './IndeterminateCheckbox';
 
@@ -112,50 +112,54 @@ const CategorySelector = ({ onChange }) => {
   };
 
   return (
-    <div>
-      <h2>Select Categories</h2>
-      <p>Select the categories to filter by. Top level categories can be expanded to sub-categories. Note that the switch between RA and Sodium categories is currently non-functional.</p>
-      <FormControl>
-        <RadioGroup row value={categoryScheme} onChange={handleCategorySchemeChange} name="categoryScheme">
-          <FormControlLabel value="reference amount" control={<Radio />} label="Reference Amount" />
-          <FormControlLabel value="Sodium" control={<Radio />} label="Sodium" />
-          {/* <FormControlLabel value="nielsen" control={<Radio />} label="Nielsen" /> */}
-        </RadioGroup>
-      </FormControl>
-      <div style={{ height: '300px', overflowY: 'auto' }}>
-        {state.categories.map(category => (
-          <div key={category.id}>
-            <IndeterminateCheckbox
-              id={`category-${category.id}`}
-              checked={getSelectionState(category) === 'full'}
-              indeterminate={getSelectionState(category) === 'partial'}
-              onChange={() => handleCategorySelect(category)}
-              label={`(${category.scheme}) ${category.name}`}
-            />
-            <button
-              onClick={() => toggleExpand(category)}
-              aria-label={category.isExpanded ? `Collapse ${category.name}` : `Expand ${category.name}`}
-            >
-              {category.isExpanded ? '-' : '+'}
-            </button>
-            {category.isExpanded && (
-              <div style={{ marginLeft: '20px' }}>
-                {category.subcategories.map(sub => (
-                  <div key={sub.id} style={{ display: 'block' }}>
-                    <IndeterminateCheckbox
-                      id={`subcategory-${sub.id}`}
-                      checked={state.selectedCategories.has(sub.id)}
-                      onChange={() => handleCategorySelect(sub, true)}
-                      label={sub.name}
-                    />
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
-    </div>
+    <Card variant="outlined">
+      <CardHeader title="Select Categories" />
+      <CardContent style={{ paddingTop: '0' }}>
+        <p>Select the categories to filter by. Top level categories can be expanded to sub-categories. Note that the switch between RA and Sodium categories is currently non-functional.</p>
+        <Divider style={{ width: '300px', margin: ' 5px auto' }}/>
+        <FormControl>
+          <RadioGroup row value={categoryScheme} onChange={handleCategorySchemeChange} name="categoryScheme">
+            <FormControlLabel value="reference amount" control={<Radio />} label="Reference Amount" />
+            <FormControlLabel value="Sodium" control={<Radio />} label="Sodium" />
+            {/* <FormControlLabel value="nielsen" control={<Radio />} label="Nielsen" /> */}
+          </RadioGroup>
+        </FormControl>
+        <Divider />
+        <div style={{ height: '300px', overflowY: 'auto' }}>
+          {state.categories.map(category => (
+            <div key={category.id}>
+              <IndeterminateCheckbox
+                id={`category-${category.id}`}
+                checked={getSelectionState(category) === 'full'}
+                indeterminate={getSelectionState(category) === 'partial'}
+                onChange={() => handleCategorySelect(category)}
+                label={`(${category.scheme}) ${category.name}`}
+              />
+              <button
+                onClick={() => toggleExpand(category)}
+                aria-label={category.isExpanded ? `Collapse ${category.name}` : `Expand ${category.name}`}
+              >
+                {category.isExpanded ? '-' : '+'}
+              </button>
+              {category.isExpanded && (
+                <div style={{ marginLeft: '20px' }}>
+                  {category.subcategories.map(sub => (
+                    <div key={sub.id} style={{ display: 'block' }}>
+                      <IndeterminateCheckbox
+                        id={`subcategory-${sub.id}`}
+                        checked={state.selectedCategories.has(sub.id)}
+                        onChange={() => handleCategorySelect(sub, true)}
+                        label={sub.name}
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
   );
 };
 

@@ -167,7 +167,7 @@ const AdvancedSearch = () => {
                 <Typography variant="body1" style={{ padding: '10px', width: '80vw', margin: '0 auto' }}>
                 Enter search terms in any or all of the fields.
                 </Typography>
-                <Divider style={{ width: '80vw', margin: '10px auto' }}/>
+                <Divider style={{ width: '60vw', margin: '15px auto 5px auto' }}/>
                 <Typography variant="h5" style={{ padding: '10px' }}>Product Info</Typography>
                 
                 <div style={{ display: 'flex', justifyContent: 'space-around', paddingBottom: '15px' }}>
@@ -205,13 +205,15 @@ const AdvancedSearch = () => {
                         />
                     </div>
                 </div>
-                <Divider style={{ width: '50vw', margin: '10px auto' }}/>
-                <div style={{ display: 'flex', justifyContent: 'space-around', paddingBottom: '10px' }}>
-                <SourceSelector onSelect={handleSelectorChange('Source')} />
-                <RegionSelector onSelect={handleSelectorChange('Region')} />
-                <StoreSelector onSelect={handleSelectorChange('Store')} />
+                <Divider style={{ width: '60vw', margin: '10px auto' }}/>
+                <div style={{ display: 'flex', justifyContent: 'space-around', paddingBottom: '20px' }}>
+                    <SourceSelector onSelect={handleSelectorChange('Source')} />
+                    <RegionSelector onSelect={handleSelectorChange('Region')} />
+                    <StoreSelector onSelect={handleSelectorChange('Store')} />
                 </div>
+
                 <CategorySelector onChange={handleCategoryChange('Subcategories')} />
+                
                 <div>
                     <h2>Select a date range</h2>
                     <SingleDatePicker
