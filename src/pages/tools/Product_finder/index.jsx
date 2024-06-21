@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import dayjs from 'dayjs';
-import { Button, FormControl, FormControlLabel, Radio, RadioGroup } from '@mui/material';
+import { Button, FormControl, FormControlLabel, Radio, RadioGroup, Typography, Divider, Grid } from '@mui/material';
+import PageContainer from '../../../components/page/PageContainer';
 import TextFileInput from '../../../components/inputs/TextFileInput';
 import StoreSelector from '../../../components/inputs/StoreSelector';
 import SourceSelector from '../../../components/inputs/SourceSelector';
@@ -114,8 +115,14 @@ const ProductFinder = () => {
 };
 
 return (
+  <PageContainer>
     <div>
-      <FormControl>
+      <Typography variant="h4" style={{ padding: '10px' }}>Product Finder</Typography>
+      <Typography variant="body1" style={{ padding: '10px', width: '80vw', margin: '0 auto' }}>
+        Here you can enter a list of product names or FLAIME IDs to search for. <br/> You can also further filter by source, region, and store. 
+      </Typography>
+      <Divider style={{ width: '60vw', margin: '15px auto 15px auto' }}/>
+      <FormControl style={{ margin: '0 25%' }}>
         <RadioGroup row value={inputMode} onChange={handleInputModeChange} name="inputMode">
           <FormControlLabel value="Name" control={<Radio />} label="Product Names" />
           <FormControlLabel value="ID" control={<Radio />} label="FLAIME ID" />
@@ -123,6 +130,7 @@ return (
           <FormControlLabel value="Nielsen_UPC" control={<Radio />} label="Nielsen UPC" />
         </RadioGroup>
       </FormControl>
+      <Divider style={{ width: '60vw', margin: '15px auto 5px auto' }}/>
       <h2>Enter product names (or IDs) or upload a file</h2>
       <TextFileInput 
         text={searchInputs.TextEntries.value.join("\n")}
@@ -180,6 +188,7 @@ return (
         </table>
       )}
     </div>
+    </PageContainer>
   );
 };
 
