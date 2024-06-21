@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useReducer, useCallback } from 'react';
-import { FormControl, FormControlLabel, Radio, RadioGroup, Card, CardContent, CardHeader, Divider } from '@mui/material';
+import { FormControl, FormControlLabel, Radio, RadioGroup, Card, CardContent, CardHeader, Divider, Button } from '@mui/material';
 import { GetAllCategories, GetAllSubcategories } from '../../../api/services/CategoryService';
 import { IndeterminateCheckbox } from './IndeterminateCheckbox';
 
@@ -110,7 +110,7 @@ const CategorySelector = ({ onChange }) => {
     console.log(`Toggling expansion for category: ${category.id}`);
     dispatch({ type: 'TOGGLE_CATEGORY', payload: category.id });
   };
-
+  
   return (
     <Card variant="outlined">
       <CardHeader title="Select Categories" />
@@ -127,20 +127,24 @@ const CategorySelector = ({ onChange }) => {
         <Divider />
         <div style={{ height: '300px', overflowY: 'auto' }}>
           {state.categories.map(category => (
-            <div key={category.id}>
+            <div key={category.id} style={{ margin: '5px 0' }}>
               <IndeterminateCheckbox
                 id={`category-${category.id}`}
                 checked={getSelectionState(category) === 'full'}
                 indeterminate={getSelectionState(category) === 'partial'}
                 onChange={() => handleCategorySelect(category)}
-                label={`(${category.scheme}) ${category.name}`}
+                label={`${category.scheme} `}
               />
-              <button
+              <span style={{ fontSize: '15px', margin: '0 4px'}}>
+              {category.name}
+              </span>
+              
+              <Button variant='outlined' size='small' style={{ marginLeft: '5px', minWidth: '22px', padding: '0' }}
                 onClick={() => toggleExpand(category)}
                 aria-label={category.isExpanded ? `Collapse ${category.name}` : `Expand ${category.name}`}
               >
                 {category.isExpanded ? '-' : '+'}
-              </button>
+              </Button>
               {category.isExpanded && (
                 <div style={{ marginLeft: '20px' }}>
                   {category.subcategories.map(sub => (
@@ -149,7 +153,9 @@ const CategorySelector = ({ onChange }) => {
                         id={`subcategory-${sub.id}`}
                         checked={state.selectedCategories.has(sub.id)}
                         onChange={() => handleCategorySelect(sub, true)}
-                        label={sub.name}
+                        label={
+                          <span style={{ fontSize: '12px', color: 'secondary', margin: '0 3px' }}>{sub.name}</span>
+                        }
                       />
                     </div>
                   ))}
