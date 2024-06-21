@@ -89,7 +89,7 @@ export const buildFilterClauses = (searchInputs) => {
     const filters = [];
     
     // Filter by source ID, only if source is not null
-    if (searchInputs.Source.value !== null) {
+    if (searchInputs.Source & searchInputs.Source.value !== null) {
         filters.push({
             term: {
                 "sources.id": parseInt(searchInputs.Source.value, 10)
@@ -98,7 +98,7 @@ export const buildFilterClauses = (searchInputs) => {
     }
     
     // Filter by store ID, only if store is not null
-    if (searchInputs.Store.value !== null) {
+    if (searchInputs.Store & searchInputs.Store.value !== null) {
         filters.push({
             term: {
                 "stores.id": parseInt(searchInputs.Store.value, 10)
@@ -107,40 +107,30 @@ export const buildFilterClauses = (searchInputs) => {
     }
     
     // Filter by region keyword, only if region is not null
-    if (searchInputs.Region.value !== null) {
+    if (searchInputs.Region & searchInputs.Region.value !== null) {
         filters.push({
             term: {
                 "scrape_batches.region.keyword": searchInputs.Region.value
             }
         });
     }
-
-    // Filter by subcategories, only if subcategories is not empty
-    if (searchInputs.Subcategories.value && searchInputs.Subcategories.value.length > 0) {
-        filters.push({
-            terms: {
-                "subcategories.id": searchInputs.Subcategories.value
-            }
-        });
-    }
-    
     
     // Handle date range filters
     const dateFilter = {};
-    if (searchInputs.StartDate.value && searchInputs.EndDate.value) {
+    if (searchInputs.StartDate & searchInputs.StartDate.value && searchInputs.EndDate & searchInputs.EndDate.value) {
         dateFilter.range = {
             "scrape_batches.scrape_datetime": {
                 gte: searchInputs.StartDate.value,
                 lte: searchInputs.EndDate.value
             }
         };
-    } else if (searchInputs.StartDate.value) {
+    } else if (searchInputs.StartDate & searchInputs.StartDate.value) {
         dateFilter.range = {
             "scrape_batches.scrape_datetime": {
                 gte: searchInputs.StartDate.value
             }
         };
-    } else if (searchInputs.EndDate.value) {
+    } else if (searchInputs.EndDate & searchInputs.EndDate.value) {
         dateFilter.range = {
             "scrape_batches.scrape_datetime": {
                 lte: searchInputs.EndDate.value
