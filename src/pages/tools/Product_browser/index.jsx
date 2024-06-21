@@ -93,6 +93,8 @@ const Product_browser = () => {
           });
         }
         
+        console.log(queryObject);
+
         const elasticUrl = `${process.env.REACT_APP_ELASTIC_URL}/_search`;
         const response = await axios.post(`${elasticUrl}`, {
           query: queryObject,
