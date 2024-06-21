@@ -131,14 +131,21 @@ return (
         </RadioGroup>
       </FormControl>
       <Divider style={{ width: '60vw', margin: '15px auto 5px auto' }}/>
-      <h2>Enter product names (or IDs) or upload a file</h2>
-      <TextFileInput 
-        text={searchInputs.TextEntries.value.join("\n")}
-        onTextChange={handleTextChange}
-      />
-      <SourceSelector onSelect={handleSourceChange} />
-      <RegionSelector onSelect={handleRegionChange} />
-      <StoreSelector onSelect={handleStoreChange} />
+      
+      <div style={{ width: '75vw', margin: '10px auto'}}>
+        <Typography variant="h5">Enter product names (or IDs) or upload a file</Typography>
+        <TextFileInput 
+          text={searchInputs.TextEntries.value.join("\n")}
+          onTextChange={handleTextChange}
+        />
+      </div>
+      <Divider style={{ width: '60vw', margin: '15px auto 5px auto' }}/>
+      <div style={{ display: 'flex', justifyContent: 'space-around', paddingBottom: '25px' }}>
+        <SourceSelector onSelect={handleSourceChange} />
+        <RegionSelector onSelect={handleRegionChange} />
+        <StoreSelector onSelect={handleStoreChange} />
+      </div>
+      
       <h2>Select a date range</h2>
       <div>
         <SingleDatePicker 
