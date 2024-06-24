@@ -67,7 +67,7 @@ const ProductDetail = () => {
                         <Grid container columnSpacing={6} direction="row" justifyContent="space-between" alignItems="flex-start">
                             <Grid item xs={12} md={6}>
                                 
-                                {productDescItems.map(item => (
+                                {productDescItems && productDescItems.map(item => (
                                     item.value && <DetailItem key={item.name}><b>{item.name}</b>: {item.value}</DetailItem>
                                 ))}
                                 {product.ingredient_en && (

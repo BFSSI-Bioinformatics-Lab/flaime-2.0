@@ -19,6 +19,7 @@ const NutritionFactsTable = ({ product }) => (
       <br></br>
       Total size: {product.total_size ?? "Not specified"}
     </Typography>
+    {product.store_product_nutrition_facts && product.store_product_nutrition_facts[0] && (
     <Typography variant="body2" style={{ padding: '10px' }}>
         {product.store_product_nutrition_facts[0]
             .filter((nutritionFact) => energy.includes(nutritionFact.nutrients.name))
@@ -26,8 +27,9 @@ const NutritionFactsTable = ({ product }) => (
                 `Calories : ${nutritionFact.amount}`
             ))}
     </Typography>
+    )}
     <Divider variant="middle" />
-    {product.store_product_nutrition_facts && (
+    {product.store_product_nutrition_facts && product.store_product_nutrition_facts[0] && (
       <Table size="small" aria-label="a dense table">
         <TableHead>
           <TableRow>
