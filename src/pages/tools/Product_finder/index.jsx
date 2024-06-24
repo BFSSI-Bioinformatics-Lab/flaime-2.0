@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import dayjs from 'dayjs';
 import { Button, FormControl, FormControlLabel, Radio, RadioGroup, Typography, Divider, Grid, 
-  Table, TableHead, TableBody, TableRow, TableCell, TablePagination } from '@mui/material';
+  Table, TableHead, TableBody, TableRow, TableCell, TablePagination, Select, MenuItem, Checkbox, 
+  ListItemText } from '@mui/material';
 import PageContainer from '../../../components/page/PageContainer';
 import TextFileInput from '../../../components/inputs/TextFileInput';
 import StoreSelector from '../../../components/inputs/StoreSelector';
@@ -26,6 +27,23 @@ const ProductFinder = () => {
   const [searchResultsIsLoading, setSearchResultsIsLoading] = useState(false);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+
+  const [columnsVisibility, setColumnsVisibility] = useState({
+    id: true,
+    name: true,
+    price: true,
+    source: true,
+    store: true,
+    date: true,
+    region: true,
+    category: true,
+  });
+
+  const [selectedColumns, setSelectedColumns] = useState(Object.keys(columnsVisibility));
+
+  const handleColumnSelection = (event) => {
+    setSelectedColumns(event.target.value);
+  };
 
   // Handler for changing main input mode (radio buttons)
   const handleInputModeChange = (event) => {
@@ -172,6 +190,24 @@ return (
             onChange={handleEndDateChange}
         />
       </div>
+
+      <div>
+      
+      <Select
+        multiple
+        value={selectedColumns}
+        onChange={handleColumnSelection}
+        renderValue={() => 'Select Visible Table Columns'}
+        
+      >
+        {Object.keys(columnsVisibility).map((column) => (
+          <MenuItem key={column} value={column}>
+            <Checkbox checked={selectedColumns.indexOf(column) > -1} />
+            <ListItemText primary={column} />
+          </MenuItem>
+        ))}
+      </Select>
+      </div>
       <Button variant="contained" onClick={handleSearch} style={{ marginTop: '20px' }}>
         Search
       </Button>
@@ -182,20 +218,35 @@ return (
       <Table>
         <TableHead>
           <TableRow>
-            <TableCell>ID</TableCell>
+          {selectedColumns.map((column) => (
+            <TableCell key={column}>{column}</TableCell>
+          ))}
+            {/* <TableCell>ID</TableCell>
             <TableCell>Name</TableCell>
             <TableCell>Price</TableCell>
             <TableCell>Source</TableCell>
             <TableCell>Store</TableCell>
             <TableCell>Date</TableCell>
             <TableCell>Region</TableCell>
-            <TableCell>Category</TableCell>
+            <TableCell>Category</TableCell> */}
           </TableRow>
         </TableHead>
         <TableBody>
           {displayedResults.map((item, index) => (
             <TableRow key={index}>
-              <TableCell>{item._id}</TableCell>
+              {selectedColumns.map((column) => (
+                <TableCell key={column}>
+                  {column === 'id' && <span>{item._id}</span>}
+                  {column === 'name' && <span>{item._source.site_name}</span>}
+                  {column === 'price' && <span>{item._source.reading_price}</span>}
+                  {column === 'source' && <span>{item._source.sources.name}</span>}
+                  {column === 'store' && <span>{item._source.stores.name}</span>}
+                  {column === 'date' && <span>{item._source.scrape_batches.scrape_datetime}</span>}
+                  {column === 'region' && <span>{item._source.scrape_batches.region}</span>}
+                  {column === 'category' && <span>{item._source.categories ? item._source.categories.map(cat => cat.name).join(", ") : 'No category'}</span>}
+                </TableCell>
+              ))}
+              {/* <TableCell>{item._id}</TableCell>
               <TableCell>{item._source.site_name}</TableCell>
               <TableCell>{item._source.reading_price}</TableCell>
               <TableCell>{item._source.sources.name}</TableCell>
@@ -204,7 +255,7 @@ return (
               <TableCell>{item._source.scrape_batches.region}</TableCell>
               <TableCell>
                 {item._source.categories ? item._source.categories.map(cat => cat.name).join(", ") : 'No category'}
-              </TableCell>
+              </TableCell> */}
             </TableRow>
           ))}
         </TableBody>
