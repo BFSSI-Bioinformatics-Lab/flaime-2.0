@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import dayjs from 'dayjs';
-import { Button, FormControl, FormControlLabel, Radio, RadioGroup, Typography, Divider, Grid } from '@mui/material';
+import { Button, FormControl, FormControlLabel, Radio, RadioGroup, Typography, Divider, Grid, 
+  Table, TableHead, TableBody, TableRow, TableCell, TablePagination } from '@mui/material';
 import PageContainer from '../../../components/page/PageContainer';
 import TextFileInput from '../../../components/inputs/TextFileInput';
 import StoreSelector from '../../../components/inputs/StoreSelector';
@@ -23,6 +24,8 @@ const ProductFinder = () => {
   const [searchInputs, handleInputChange] = useSearchFilters(initialFilters);
   const [searchResults, setSearchResults] = useState([]);
   const [searchResultsIsLoading, setSearchResultsIsLoading] = useState(false);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
   // Handler for changing main input mode (radio buttons)
   const handleInputModeChange = (event) => {
@@ -63,6 +66,15 @@ const ProductFinder = () => {
   };
   const handleEndDateChange = (date) => {
     handleInputChange('EndDate', { value: date });
+  };
+
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
   };
 
   const handleSearch = async () => {
@@ -113,6 +125,7 @@ const ProductFinder = () => {
     }
     setSearchResultsIsLoading(false);
 };
+const displayedResults = searchResults.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 
 return (
   <PageContainer>
@@ -165,34 +178,48 @@ return (
       {searchResultsIsLoading ? (
         <p>Loading...</p>
       ) : (
-        <table>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Name</th>
-              <th>Price</th>
-              <th>Source</th>
-              <th>Store</th>
-              <th>Date</th>
-              <th>Region</th>
-              <th>Category</th>
-            </tr>
-          </thead>
-          <tbody>
-            {searchResults.map((item, index) => (
-              <tr key={index}>
-                <td>{item._id}</td>
-                <td>{item._source.site_name}</td>
-                <td>{item._source.reading_price}</td>
-                <td>{item._source.sources.name}</td>
-                <td>{item._source.stores.name}</td>
-                <td>{item._source.scrape_batches.scrape_datetime}</td>
-                <td>{item._source.scrape_batches.region}</td>
-                <td>{item._source.categories ? item._source.categories.map(cat => cat.name).join(", ") : 'No category'}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <>
+      <Table>
+        <TableHead>
+          <TableRow>
+            <TableCell>ID</TableCell>
+            <TableCell>Name</TableCell>
+            <TableCell>Price</TableCell>
+            <TableCell>Source</TableCell>
+            <TableCell>Store</TableCell>
+            <TableCell>Date</TableCell>
+            <TableCell>Region</TableCell>
+            <TableCell>Category</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {displayedResults.map((item, index) => (
+            <TableRow key={index}>
+              <TableCell>{item._id}</TableCell>
+              <TableCell>{item._source.site_name}</TableCell>
+              <TableCell>{item._source.reading_price}</TableCell>
+              <TableCell>{item._source.sources.name}</TableCell>
+              <TableCell>{item._source.stores.name}</TableCell>
+              <TableCell>{item._source.scrape_batches.scrape_datetime}</TableCell>
+              <TableCell>{item._source.scrape_batches.region}</TableCell>
+              <TableCell>
+                {item._source.categories ? item._source.categories.map(cat => cat.name).join(", ") : 'No category'}
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+      <TablePagination
+        rowsPerPageOptions={[5, 10, 25]}
+        component="div"
+        count={searchResults.length}
+        rowsPerPage={rowsPerPage}
+        page={page}
+        onChangePage={handleChangePage}
+        onChangeRowsPerPage={handleChangeRowsPerPage}
+      />
+    </>
+        
       )}
     </div>
     </PageContainer>
