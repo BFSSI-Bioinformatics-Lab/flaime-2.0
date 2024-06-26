@@ -11,6 +11,7 @@ import RegionSelector from '../../../components/inputs/RegionSelector';
 import SingleDatePicker from '../../../components/inputs/SingleDatePicker';
 import { useSearchFilters, buildFilterClauses, buildTextMustClauses, getFieldKey } from '../util';
 import { StyledTableCell } from './styles';
+import { ResetButton } from '../../../components/buttons';
 
 const ProductFinder = () => {
   const initialFilters = {
@@ -45,6 +46,18 @@ const ProductFinder = () => {
   const handleColumnSelection = (event) => {
     setSelectedColumns(event.target.value);
   };
+
+  // Reset button 
+  const handleReset = () => {
+    handleInputChange('TextEntries', { value: [] });
+    handleInputChange('Source', { value: null });
+    handleInputChange('Store', { value: null });
+    handleInputChange('Region', { value: null });
+    handleInputChange('StartDate', { value: null });
+    handleInputChange('EndDate', { value: null });
+    // setInputMode('Names');
+    
+};
 
   // Handler for changing main input mode (radio buttons)
   const handleInputModeChange = (event) => {
@@ -192,26 +205,31 @@ return (
         />
       </div>
 
-      <div>
       
-      <Select
-        multiple
-        value={selectedColumns}
-        onChange={handleColumnSelection}
-        renderValue={() => 'Select Visible Table Columns'}
-        
-      >
-        {Object.keys(columnsVisibility).map((column) => (
-          <MenuItem key={column} value={column}>
-            <Checkbox checked={selectedColumns.indexOf(column) > -1} />
-            <ListItemText primary={column} />
-          </MenuItem>
-        ))}
-      </Select>
+      <div style={{ marginTop: '20px' }}>
+        <Button variant="contained" onClick={handleSearch}>
+          Search
+        </Button>
+        <ResetButton   onClick={handleReset}>Reset Search</ResetButton>
       </div>
-      <Button variant="contained" onClick={handleSearch} style={{ marginTop: '20px' }}>
-        Search
-      </Button>
+      
+      <div style={{ marginTop: '20px' }}>
+        <Select
+          multiple
+          value={selectedColumns}
+          onChange={handleColumnSelection}
+          renderValue={() => 'Select Visible Table Columns'}
+          
+        >
+          {Object.keys(columnsVisibility).map((column) => (
+            <MenuItem key={column} value={column}>
+              <Checkbox checked={selectedColumns.indexOf(column) > -1} />
+              <ListItemText primary={column} />
+            </MenuItem>
+          ))}
+        </Select>
+      </div>
+
       {searchResultsIsLoading ? (
         <p>Loading...</p>
       ) : (

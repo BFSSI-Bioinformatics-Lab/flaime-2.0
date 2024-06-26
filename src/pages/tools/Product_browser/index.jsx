@@ -4,8 +4,6 @@ import { useState, useEffect } from 'react';
 import { TableContainer, Table, TableHead, TableRow, TableCell, TableBody, Pagination, TextField, Paper, Typography, Card, CardContent } from '@mui/material';
 import PageContainer from '../../../components/page/PageContainer';
 import { Link } from 'react-router-dom';
-import { styled } from '@mui/system';
-import Button from '@mui/material/Button';
 import Divider from '@mui/material/Divider';
 import { ResetButton } from '../../../components/buttons';
 
@@ -270,7 +268,7 @@ const Product_browser = () => {
               />
         </Paper>
         {/* Reset search button */}
-        <ResetButton style={{ maxWidth: '130px', marginLeft: '5px' }}  onClick={handleReset}>Reset Search</ResetButton>
+        <ResetButton   onClick={handleReset}>Reset Search</ResetButton>
       </div>
       <div>
       {[idSearchTerm, storeNameSearchTerm, sourceNameSearchTerm, siteNameSearchTerm, categorySearchTerm].some(term => term !== '') && (
