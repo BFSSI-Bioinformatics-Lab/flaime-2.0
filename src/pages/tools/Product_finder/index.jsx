@@ -10,6 +10,7 @@ import SourceSelector from '../../../components/inputs/SourceSelector';
 import RegionSelector from '../../../components/inputs/RegionSelector';
 import SingleDatePicker from '../../../components/inputs/SingleDatePicker';
 import { useSearchFilters, buildFilterClauses, buildTextMustClauses, getFieldKey } from '../util';
+import { StyledTableCell } from './styles';
 
 const ProductFinder = () => {
   const initialFilters = {
@@ -219,7 +220,7 @@ return (
         <TableHead>
           <TableRow>
           {selectedColumns.map((column) => (
-            <TableCell key={column}>{column}</TableCell>
+            <StyledTableCell key={column}>{column}</StyledTableCell>
           ))}
             {/* <TableCell>ID</TableCell>
             <TableCell>Name</TableCell>

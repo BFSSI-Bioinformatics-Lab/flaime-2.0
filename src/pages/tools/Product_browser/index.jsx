@@ -7,6 +7,7 @@ import { Link } from 'react-router-dom';
 import { styled } from '@mui/system';
 import Button from '@mui/material/Button';
 import Divider from '@mui/material/Divider';
+import { ResetButton } from '../../../components/buttons';
 
 
 const Product_browser = () => {
@@ -189,10 +190,10 @@ const Product_browser = () => {
     event.preventDefault(); // Prevent form submission
   };
 
-  const ResetButton = styled(Button)(({ theme }) => ({
-    color: 'white',
-    backgroundColor: theme.palette.primary.dark,
-  }));
+  // const ResetButton = styled(Button)(({ theme }) => ({
+  //   color: 'white',
+  //   backgroundColor: theme.palette.primary.dark,
+  // }));
 
   return (
     <div style={{ width: '80vw', margin: '0 auto' }}>
