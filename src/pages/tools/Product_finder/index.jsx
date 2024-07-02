@@ -28,6 +28,7 @@ const ProductFinder = () => {
   const [searchInputs, handleInputChange] = useSearchFilters(initialFilters);
   const [searchResults, setSearchResults] = useState([]);
   const [searchResultsIsLoading, setSearchResultsIsLoading] = useState(false);
+  const [totalProducts, setTotalProducts] = useState(0);
   
 
   const [columnsVisibility, setColumnsVisibility] = useState({
@@ -57,8 +58,8 @@ const ProductFinder = () => {
     handleInputChange('EndDate', { value: dayjs().format('YYYY-MM-DD') });
     setSearchResults([]);
     setInputMode('Names');
-    
-};
+    setTotalProducts(0); // Reset totalProducts to 0
+  };
 
   // Handler for changing main input mode (radio buttons)
   const handleInputModeChange = (event) => {
@@ -140,6 +141,7 @@ const ProductFinder = () => {
         if (response.ok) {
             console.log("Search successful, hits:", data.hits.hits.length);
             setSearchResults(data.hits.hits);
+            setTotalProducts(data.hits.total.value);
         } else {
             console.error('Search API error:', data.error || data);
             setSearchResults([]);
@@ -206,6 +208,12 @@ return (
         </Button>
         <ResetButton  variant="contained" onClick={handleReset}>Reset Search</ResetButton>
       </div>
+
+      {totalProducts !== 0 && (
+        <Divider style={{ marginTop: '20px', color: '#424242', marginBottom: '15px' }}> 
+          Based on your search, there is a total of {totalProducts === 1 ? `${totalProducts} product.` : `${totalProducts === 10000 ? "over 10,000" : totalProducts} products.`}
+        </Divider>
+      )}
       
       <div style={{ marginTop: '20px' }}>
         <Select
