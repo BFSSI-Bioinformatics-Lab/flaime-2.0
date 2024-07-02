@@ -187,8 +187,8 @@ return (
         <StoreSelector onSelect={handleStoreChange} />
       </div>
       
-      <h2>Select a date range</h2>
-      <div>
+      <Typography variant="h5">Select a date range</Typography>
+      <div style={{ display: 'flex', justifyContent: 'space-around', margin: '15px 0', width: '45vw' }}>
         <SingleDatePicker 
             label="Start Date"
             initialDate="1900-01-01" // Very old date for start date
