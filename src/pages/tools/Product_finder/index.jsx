@@ -12,6 +12,7 @@ import SingleDatePicker from '../../../components/inputs/SingleDatePicker';
 import { useSearchFilters, buildFilterClauses, buildTextMustClauses, getFieldKey } from '../util';
 import { StyledTableCell } from './styles';
 import { ResetButton } from '../../../components/buttons';
+import { Link } from 'react-router-dom';
 
 const ProductFinder = () => {
   const initialFilters = {
@@ -240,7 +241,7 @@ return (
                 <TableRow key={index}>
                   {selectedColumns.map((column) => (
                     <TableCell key={column}>
-                      {column === 'id' && <span>{item._id}</span>}
+                      {column === 'id' && <Link to={`/tools/product-browser/${item._id}`} target="_blank">{item._id}</Link>}
                       {column === 'name' && <span>{item._source.site_name}</span>}
                       {column === 'price' && <span>{item._source.reading_price}</span>}
                       {column === 'source' && <span>{item._source.sources.name}</span>}
