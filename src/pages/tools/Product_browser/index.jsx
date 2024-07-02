@@ -268,7 +268,7 @@ const Product_browser = () => {
               />
         </Paper>
         {/* Reset search button */}
-        <ResetButton   onClick={handleReset}>Reset Search</ResetButton>
+        <ResetButton  variant="contained" onClick={handleReset}>Reset Search</ResetButton>
       </div>
       <div>
       {[idSearchTerm, storeNameSearchTerm, sourceNameSearchTerm, siteNameSearchTerm, categorySearchTerm].some(term => term !== '') && (
