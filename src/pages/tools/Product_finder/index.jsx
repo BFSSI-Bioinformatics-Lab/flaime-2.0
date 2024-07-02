@@ -27,8 +27,7 @@ const ProductFinder = () => {
   const [searchInputs, handleInputChange] = useSearchFilters(initialFilters);
   const [searchResults, setSearchResults] = useState([]);
   const [searchResultsIsLoading, setSearchResultsIsLoading] = useState(false);
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
+  
 
   const [columnsVisibility, setColumnsVisibility] = useState({
     id: true,
@@ -100,14 +99,6 @@ const ProductFinder = () => {
     handleInputChange('EndDate', { value: date });
   };
 
-  const handleChangePage = (event, newPage) => {
-    setPage(newPage);
-  };
-
-  const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
-  };
 
   const handleSearch = async () => {
     setSearchResultsIsLoading(true);
@@ -121,7 +112,7 @@ const ProductFinder = () => {
 
     const queryBody = {
         from: 0,
-        size: 100,
+        size: 10000,
         query: {
             bool: {
                 must: textQueries,
@@ -157,7 +148,8 @@ const ProductFinder = () => {
     }
     setSearchResultsIsLoading(false);
 };
-const displayedResults = searchResults.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+console.log(searchResults);
+
 
 return (
   <PageContainer>
@@ -233,62 +225,37 @@ return (
       {searchResultsIsLoading ? (
         <p>Loading...</p>
       ) : (
-        <>
-      <Table>
-        <TableHead>
-          <TableRow>
-          {selectedColumns.map((column) => (
-            <StyledTableCell key={column}>{column}</StyledTableCell>
-          ))}
-            {/* <TableCell>ID</TableCell>
-            <TableCell>Name</TableCell>
-            <TableCell>Price</TableCell>
-            <TableCell>Source</TableCell>
-            <TableCell>Store</TableCell>
-            <TableCell>Date</TableCell>
-            <TableCell>Region</TableCell>
-            <TableCell>Category</TableCell> */}
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {displayedResults.map((item, index) => (
-            <TableRow key={index}>
+        <div style={{ height: '500px', overflow: 'auto' }}>
+          <Table>
+            <TableHead>
+              <TableRow>
               {selectedColumns.map((column) => (
-                <TableCell key={column}>
-                  {column === 'id' && <span>{item._id}</span>}
-                  {column === 'name' && <span>{item._source.site_name}</span>}
-                  {column === 'price' && <span>{item._source.reading_price}</span>}
-                  {column === 'source' && <span>{item._source.sources.name}</span>}
-                  {column === 'store' && <span>{item._source.stores.name}</span>}
-                  {column === 'date' && <span>{item._source.scrape_batches.scrape_datetime}</span>}
-                  {column === 'region' && <span>{item._source.scrape_batches.region}</span>}
-                  {column === 'category' && <span>{item._source.categories ? item._source.categories.map(cat => cat.name).join(", ") : 'No category'}</span>}
-                </TableCell>
+                <StyledTableCell key={column}>{column}</StyledTableCell>
               ))}
-              {/* <TableCell>{item._id}</TableCell>
-              <TableCell>{item._source.site_name}</TableCell>
-              <TableCell>{item._source.reading_price}</TableCell>
-              <TableCell>{item._source.sources.name}</TableCell>
-              <TableCell>{item._source.stores.name}</TableCell>
-              <TableCell>{item._source.scrape_batches.scrape_datetime}</TableCell>
-              <TableCell>{item._source.scrape_batches.region}</TableCell>
-              <TableCell>
-                {item._source.categories ? item._source.categories.map(cat => cat.name).join(", ") : 'No category'}
-              </TableCell> */}
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-      <TablePagination
-        rowsPerPageOptions={[5, 10, 25]}
-        component="div"
-        count={searchResults.length}
-        rowsPerPage={rowsPerPage}
-        page={page}
-        onChangePage={handleChangePage}
-        onChangeRowsPerPage={handleChangeRowsPerPage}
-      />
-    </>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {searchResults.map((item, index) => (
+                <TableRow key={index}>
+                  {selectedColumns.map((column) => (
+                    <TableCell key={column}>
+                      {column === 'id' && <span>{item._id}</span>}
+                      {column === 'name' && <span>{item._source.site_name}</span>}
+                      {column === 'price' && <span>{item._source.reading_price}</span>}
+                      {column === 'source' && <span>{item._source.sources.name}</span>}
+                      {column === 'store' && <span>{item._source.stores.name}</span>}
+                      {column === 'date' && <span>{item._source.scrape_batches.scrape_datetime}</span>}
+                      {column === 'region' && <span>{item._source.scrape_batches.region}</span>}
+                      {column === 'category' && <span>{item._source.categories ? item._source.categories.map(cat => cat.name).join(", ") : 'No category'}</span>}
+                    </TableCell>
+                  ))}
+                  
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+      
+        </div>
         
       )}
     </div>
