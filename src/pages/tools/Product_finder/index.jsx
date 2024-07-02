@@ -52,9 +52,10 @@ const ProductFinder = () => {
     handleInputChange('Source', { value: null });
     handleInputChange('Store', { value: null });
     handleInputChange('Region', { value: null });
-    handleInputChange('StartDate', { value: null });
-    handleInputChange('EndDate', { value: null });
-    // setInputMode('Names');
+    handleInputChange('StartDate', { value: '1900-01-01' }); 
+    handleInputChange('EndDate', { value: dayjs().format('YYYY-MM-DD') });
+    setSearchResults([]);
+    setInputMode('Names');
     
 };
 
@@ -202,7 +203,7 @@ return (
         <Button variant="contained" onClick={handleSearch}>
           Search
         </Button>
-        <ResetButton   onClick={handleReset}>Reset Search</ResetButton>
+        <ResetButton  variant="contained" onClick={handleReset}>Reset Search</ResetButton>
       </div>
       
       <div style={{ marginTop: '20px' }}>
@@ -225,7 +226,7 @@ return (
       {searchResultsIsLoading ? (
         <p>Loading...</p>
       ) : (
-        <div style={{ height: '500px', overflow: 'auto' }}>
+        <div style={{ height: '500px', overflow: 'auto', marginTop: '20px' }}>
           <Table>
             <TableHead>
               <TableRow>
