@@ -24,7 +24,7 @@ const ProductFinder = () => {
     EndDate: { value: null }
   };
 
-  const [inputMode, setInputMode] = useState('Names');
+  const [inputMode, setInputMode] = useState('Name');
   const [searchInputs, handleInputChange] = useSearchFilters(initialFilters);
   const [searchResults, setSearchResults] = useState([]);
   const [searchResultsIsLoading, setSearchResultsIsLoading] = useState(false);
@@ -57,7 +57,7 @@ const ProductFinder = () => {
     handleInputChange('StartDate', { value: '1900-01-01' }); 
     handleInputChange('EndDate', { value: dayjs().format('YYYY-MM-DD') });
     setSearchResults([]);
-    setInputMode('Names');
+    setInputMode('Name');
     setTotalProducts(0); // Reset totalProducts to 0
   };
 
