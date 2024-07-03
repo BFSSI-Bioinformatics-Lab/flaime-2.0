@@ -188,10 +188,6 @@ const Product_browser = () => {
     event.preventDefault(); // Prevent form submission
   };
 
-  // const ResetButton = styled(Button)(({ theme }) => ({
-  //   color: 'white',
-  //   backgroundColor: theme.palette.primary.dark,
-  // }));
 
   return (
     <div style={{ width: '80vw', margin: '0 auto' }}>
