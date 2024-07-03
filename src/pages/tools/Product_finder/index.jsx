@@ -256,7 +256,11 @@ return (
                       {column === 'store' && <span>{item._source.stores.name}</span>}
                       {column === 'date' && <span>{item._source.scrape_batches.scrape_datetime}</span>}
                       {column === 'region' && <span>{item._source.scrape_batches.region}</span>}
-                      {column === 'category' && <span>{item._source.categories ? item._source.categories.map(cat => cat.name).join(", ") : 'No category'}</span>}
+                      {column === 'category' && (
+                        <span>
+                          {item._source.categories && item._source.categories[0] && item._source.categories[0].name ? item._source.categories.map(cat => cat.name).join(", ") : 'No category'}
+                        </span>
+                      )}
                     </TableCell>
                   ))}
                   
