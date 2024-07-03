@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import dayjs from 'dayjs';
-import { Button, FormControl, FormControlLabel, Radio, RadioGroup, Typography, Divider, Grid } from '@mui/material';
+import { Button, FormControl, FormControlLabel, Radio, RadioGroup, Typography, Divider, Grid, 
+  Table, TableHead, TableBody, TableRow, TableCell, TablePagination, Select, MenuItem, Checkbox, 
+  ListItemText } from '@mui/material';
 import PageContainer from '../../../components/page/PageContainer';
 import TextFileInput from '../../../components/inputs/TextFileInput';
 import StoreSelector from '../../../components/inputs/StoreSelector';
@@ -8,6 +10,9 @@ import SourceSelector from '../../../components/inputs/SourceSelector';
 import RegionSelector from '../../../components/inputs/RegionSelector';
 import SingleDatePicker from '../../../components/inputs/SingleDatePicker';
 import { useSearchFilters, buildFilterClauses, buildTextMustClauses, getFieldKey } from '../util';
+import { StyledTableCell } from './styles';
+import { ResetButton } from '../../../components/buttons';
+import { Link } from 'react-router-dom';
 
 const ProductFinder = () => {
   const initialFilters = {
@@ -19,10 +24,42 @@ const ProductFinder = () => {
     EndDate: { value: null }
   };
 
-  const [inputMode, setInputMode] = useState('Names');
+  const [inputMode, setInputMode] = useState('Name');
   const [searchInputs, handleInputChange] = useSearchFilters(initialFilters);
   const [searchResults, setSearchResults] = useState([]);
   const [searchResultsIsLoading, setSearchResultsIsLoading] = useState(false);
+  const [totalProducts, setTotalProducts] = useState(0);
+  
+
+  const [columnsVisibility, setColumnsVisibility] = useState({
+    id: true,
+    name: true,
+    price: true,
+    source: true,
+    store: true,
+    date: true,
+    region: true,
+    category: true,
+  });
+
+  const [selectedColumns, setSelectedColumns] = useState(Object.keys(columnsVisibility));
+
+  const handleColumnSelection = (event) => {
+    setSelectedColumns(event.target.value);
+  };
+
+  // Reset button 
+  const handleReset = () => {
+    handleInputChange('TextEntries', { value: [] });
+    handleInputChange('Source', { value: null });
+    handleInputChange('Store', { value: null });
+    handleInputChange('Region', { value: null });
+    handleInputChange('StartDate', { value: '1900-01-01' }); 
+    handleInputChange('EndDate', { value: dayjs().format('YYYY-MM-DD') });
+    setSearchResults([]);
+    setInputMode('Name');
+    setTotalProducts(0); // Reset totalProducts to 0
+  };
 
   // Handler for changing main input mode (radio buttons)
   const handleInputModeChange = (event) => {
@@ -65,6 +102,7 @@ const ProductFinder = () => {
     handleInputChange('EndDate', { value: date });
   };
 
+
   const handleSearch = async () => {
     setSearchResultsIsLoading(true);
 
@@ -77,7 +115,7 @@ const ProductFinder = () => {
 
     const queryBody = {
         from: 0,
-        size: 100,
+        size: 10000,
         query: {
             bool: {
                 must: textQueries,
@@ -103,6 +141,7 @@ const ProductFinder = () => {
         if (response.ok) {
             console.log("Search successful, hits:", data.hits.hits.length);
             setSearchResults(data.hits.hits);
+            setTotalProducts(data.hits.total.value);
         } else {
             console.error('Search API error:', data.error || data);
             setSearchResults([]);
@@ -113,6 +152,8 @@ const ProductFinder = () => {
     }
     setSearchResultsIsLoading(false);
 };
+console.log(searchResults);
+
 
 return (
   <PageContainer>
@@ -146,8 +187,8 @@ return (
         <StoreSelector onSelect={handleStoreChange} />
       </div>
       
-      <h2>Select a date range</h2>
-      <div>
+      <Typography variant="h5">Select a date range</Typography>
+      <div style={{ display: 'flex', justifyContent: 'space-around', margin: '15px 0', width: '45vw' }}>
         <SingleDatePicker 
             label="Start Date"
             initialDate="1900-01-01" // Very old date for start date
@@ -159,40 +200,77 @@ return (
             onChange={handleEndDateChange}
         />
       </div>
-      <Button variant="contained" onClick={handleSearch} style={{ marginTop: '20px' }}>
-        Search
-      </Button>
+
+      
+      <div style={{ marginTop: '20px' }}>
+        <Button variant="contained" onClick={handleSearch}>
+          Search
+        </Button>
+        <ResetButton  variant="contained" onClick={handleReset}>Reset Search</ResetButton>
+      </div>
+
+      {totalProducts !== 0 && (
+        <Divider style={{ marginTop: '20px', color: '#424242', marginBottom: '15px' }}> 
+          Based on your search, there is a total of {totalProducts === 1 ? `${totalProducts} product.` : `${totalProducts === 10000 ? "over 10,000" : totalProducts} products.`}
+        </Divider>
+      )}
+      
+      <div style={{ marginTop: '20px' }}>
+        <Select
+          multiple
+          value={selectedColumns}
+          onChange={handleColumnSelection}
+          renderValue={() => 'Select Visible Table Columns'}
+          
+        >
+          {Object.keys(columnsVisibility).map((column) => (
+            <MenuItem key={column} value={column}>
+              <Checkbox checked={selectedColumns.indexOf(column) > -1} />
+              <ListItemText primary={column} />
+            </MenuItem>
+          ))}
+        </Select>
+      </div>
+
       {searchResultsIsLoading ? (
         <p>Loading...</p>
       ) : (
-        <table>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Name</th>
-              <th>Price</th>
-              <th>Source</th>
-              <th>Store</th>
-              <th>Date</th>
-              <th>Region</th>
-              <th>Category</th>
-            </tr>
-          </thead>
-          <tbody>
-            {searchResults.map((item, index) => (
-              <tr key={index}>
-                <td>{item._id}</td>
-                <td>{item._source.site_name}</td>
-                <td>{item._source.reading_price}</td>
-                <td>{item._source.sources.name}</td>
-                <td>{item._source.stores.name}</td>
-                <td>{item._source.scrape_batches.scrape_datetime}</td>
-                <td>{item._source.scrape_batches.region}</td>
-                <td>{item._source.categories ? item._source.categories.map(cat => cat.name).join(", ") : 'No category'}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <div style={{ height: '500px', overflow: 'auto', marginTop: '20px' }}>
+          <Table>
+            <TableHead>
+              <TableRow>
+              {selectedColumns.map((column) => (
+                <StyledTableCell key={column}>{column}</StyledTableCell>
+              ))}
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {searchResults.map((item, index) => (
+                <TableRow key={index}>
+                  {selectedColumns.map((column) => (
+                    <TableCell key={column}>
+                      {column === 'id' && <Link to={`/tools/product-browser/${item._id}`} target="_blank">{item._id}</Link>}
+                      {column === 'name' && <span>{item._source.site_name}</span>}
+                      {column === 'price' && <span>{item._source.reading_price}</span>}
+                      {column === 'source' && <span>{item._source.sources.name}</span>}
+                      {column === 'store' && <span>{item._source.stores.name}</span>}
+                      {column === 'date' && <span>{item._source.scrape_batches.scrape_datetime}</span>}
+                      {column === 'region' && <span>{item._source.scrape_batches.region}</span>}
+                      {column === 'category' && (
+                        <span>
+                          {item._source.categories && item._source.categories[0] && item._source.categories[0].name ? item._source.categories.map(cat => cat.name).join(", ") : 'No category'}
+                        </span>
+                      )}
+                    </TableCell>
+                  ))}
+                  
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+      
+        </div>
+        
       )}
     </div>
     </PageContainer>
