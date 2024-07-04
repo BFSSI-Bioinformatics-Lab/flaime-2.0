@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
 import dayjs from 'dayjs';
-import { Button, FormControl, FormControlLabel, Radio, RadioGroup, Typography, Divider, Grid, 
-  Table, TableHead, TableBody, TableRow, TableCell, TablePagination, Select, MenuItem, Checkbox, 
-  ListItemText } from '@mui/material';
+import { Button, FormControl, FormControlLabel, Radio, RadioGroup, Typography, Divider } from '@mui/material';
 import PageContainer from '../../../components/page/PageContainer';
 import TextFileInput from '../../../components/inputs/TextFileInput';
 import StoreSelector from '../../../components/inputs/StoreSelector';
@@ -10,9 +8,9 @@ import SourceSelector from '../../../components/inputs/SourceSelector';
 import RegionSelector from '../../../components/inputs/RegionSelector';
 import SingleDatePicker from '../../../components/inputs/SingleDatePicker';
 import { useSearchFilters, buildFilterClauses, buildTextMustClauses, getFieldKey } from '../util';
-import { StyledTableCell } from './styles';
 import { ResetButton } from '../../../components/buttons';
-import { Link } from 'react-router-dom';
+import ColumnSelection  from '../../../components/table/ColumnSelection';
+import ToolTable  from '../../../components/table/ToolTable';
 
 const ProductFinder = () => {
   const initialFilters = {
@@ -215,63 +213,19 @@ return (
         </Divider>
       )}
       
-      <div style={{ marginTop: '20px' }}>
-        <Select
-          multiple
-          value={selectedColumns}
-          onChange={handleColumnSelection}
-          renderValue={() => 'Select Visible Table Columns'}
-          
-        >
-          {Object.keys(columnsVisibility).map((column) => (
-            <MenuItem key={column} value={column}>
-              <Checkbox checked={selectedColumns.indexOf(column) > -1} />
-              <ListItemText primary={column} />
-            </MenuItem>
-          ))}
-        </Select>
-      </div>
-
+      <>
+      <ColumnSelection
+        selectedColumns={selectedColumns}
+        setSelectedColumns={setSelectedColumns}
+        columnsVisibility={columnsVisibility}
+        handleColumnSelection={handleColumnSelection}
+      />
       {searchResultsIsLoading ? (
         <p>Loading...</p>
       ) : (
-        <div style={{ height: '500px', overflow: 'auto', marginTop: '20px' }}>
-          <Table>
-            <TableHead>
-              <TableRow>
-              {selectedColumns.map((column) => (
-                <StyledTableCell key={column}>{column}</StyledTableCell>
-              ))}
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {searchResults.map((item, index) => (
-                <TableRow key={index}>
-                  {selectedColumns.map((column) => (
-                    <TableCell key={column}>
-                      {column === 'id' && <Link to={`/tools/product-browser/${item._id}`} target="_blank">{item._id}</Link>}
-                      {column === 'name' && <span>{item._source.site_name}</span>}
-                      {column === 'price' && <span>{item._source.reading_price}</span>}
-                      {column === 'source' && <span>{item._source.sources.name}</span>}
-                      {column === 'store' && <span>{item._source.stores.name}</span>}
-                      {column === 'date' && <span>{item._source.scrape_batches.scrape_datetime}</span>}
-                      {column === 'region' && <span>{item._source.scrape_batches.region}</span>}
-                      {column === 'category' && (
-                        <span>
-                          {item._source.categories && item._source.categories[0] && item._source.categories[0].name ? item._source.categories.map(cat => cat.name).join(", ") : 'No category'}
-                        </span>
-                      )}
-                    </TableCell>
-                  ))}
-                  
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-      
-        </div>
-        
+        <ToolTable selectedColumns={selectedColumns} searchResults={searchResults} />
       )}
+    </>
     </div>
     </PageContainer>
   );
