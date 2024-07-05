@@ -31,6 +31,11 @@ const ToolTable = ({ selectedColumns, searchResults }) => {
                         {item._source.categories && item._source.categories[0] && item._source.categories[0].name ? item._source.categories.map(cat => cat.name).join(", ") : 'No category'}
                     </span>
                     )}
+                    {column === 'subcategory' && (
+                    <span>
+                        {item._source.subcategories && item._source.subcategories[0] && item._source.subcategories[0].name ? item._source.subcategories.map(cat => cat.name).join(", ") : 'No subcategory'}
+                    </span>
+                    )}
                 </TableCell>
               ))}
             </TableRow>
