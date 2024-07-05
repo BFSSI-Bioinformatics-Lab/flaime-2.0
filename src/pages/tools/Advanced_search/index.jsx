@@ -12,7 +12,7 @@ import NutritionFilter from '../../../components/inputs/NutritionFilter';
 import { useSearchFilters, buildTextMustClausesForAllFields } from '../util';
 import ColumnSelection  from '../../../components/table/ColumnSelection';
 import ToolTable  from '../../../components/table/ToolTable';
-
+import { ResetButton } from '../../../components/buttons';
 
 const AdvancedSearch = () => {
     const initialFilters = {
@@ -33,6 +33,7 @@ const AdvancedSearch = () => {
     const [searchResults, setSearchResults] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
+    const [totalProducts, setTotalProducts] = useState(0);
 
     const [columnsVisibility, setColumnsVisibility] = useState({
         id: true,
@@ -47,6 +48,21 @@ const AdvancedSearch = () => {
       });
     
       const [selectedColumns, setSelectedColumns] = useState(Object.keys(columnsVisibility));
+
+      const handleReset = () => {
+        handleInputChange('Names', '');
+        handleInputChange('IDs', '');
+        handleInputChange('UPCs', '');
+        handleInputChange('NielsenUPCs', '');
+        handleInputChange('Nutrition', {
+            nutrient: '',
+            minAmount: '',
+            maxAmount: ''
+        });
+        setSearchResults([]);
+        setIsLoading(false);
+        setTotalProducts(0);
+    };
     
       const handleColumnSelection = (event) => {
         setSelectedColumns(event.target.value);
@@ -156,6 +172,7 @@ const AdvancedSearch = () => {
             if (response.ok) {
                 console.log("Search successful, hits:", data.hits.hits.length);
                 setSearchResults(data.hits.hits);
+                setTotalProducts(data.hits.total.value);
             } else {
                 console.error('Search API error:', data.error || data);
                 setSearchResults([]);
@@ -262,24 +279,30 @@ const AdvancedSearch = () => {
                     </Grid>
                 </Grid>
                 
-                <div>
-                    <Button variant="contained" onClick={handleSearch} disabled={isLoading} style={{ marginTop: '20px' }}>
+                <div style={{ marginTop: '20px' }}>
+                    <Button variant="contained" onClick={handleSearch} disabled={isLoading} >
                         Search
                     </Button>
+                    <ResetButton  variant="contained" onClick={handleReset}>Reset Search</ResetButton>
                 </div>
+                {totalProducts !== 0 && (
+                    <Divider style={{ marginTop: '20px', color: '#424242', marginBottom: '15px' }}> 
+                    Based on your search, there is a total of {totalProducts === 1 ? `${totalProducts} product.` : `${totalProducts === 10000 ? "over 10,000" : totalProducts} products.`}
+                    </Divider>
+                )}
                 <>
-      <ColumnSelection
-        selectedColumns={selectedColumns}
-        setSelectedColumns={setSelectedColumns}
-        columnsVisibility={columnsVisibility}
-        handleColumnSelection={handleColumnSelection}
-      />
-      {isLoading ? (
-        <p>Loading...</p>
-      ) : (
-        <ToolTable selectedColumns={selectedColumns} searchResults={searchResults} />
-      )}
-    </>
+                    <ColumnSelection
+                        selectedColumns={selectedColumns}
+                        setSelectedColumns={setSelectedColumns}
+                        columnsVisibility={columnsVisibility}
+                        handleColumnSelection={handleColumnSelection}
+                    />
+                    {isLoading ? (
+                        <p>Loading...</p>
+                    ) : (
+                        <ToolTable selectedColumns={selectedColumns} searchResults={searchResults} />
+                    )}
+                </>
             </div>
         </PageContainer>
     );
