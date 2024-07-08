@@ -10,7 +10,9 @@ import SingleDatePicker from '../../../components/inputs/SingleDatePicker';
 import CategorySelector from '../../../components/inputs/CategorySelector';
 import NutritionFilter from '../../../components/inputs/NutritionFilter';
 import { useSearchFilters, buildTextMustClausesForAllFields } from '../util';
-
+import ColumnSelection  from '../../../components/table/ColumnSelection';
+import ToolTable  from '../../../components/table/ToolTable';
+import { ResetButton } from '../../../components/buttons';
 
 const AdvancedSearch = () => {
     const initialFilters = {
@@ -31,6 +33,40 @@ const AdvancedSearch = () => {
     const [searchResults, setSearchResults] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
+    const [totalProducts, setTotalProducts] = useState(0);
+
+    const [columnsVisibility, setColumnsVisibility] = useState({
+        id: true,
+        name: true,
+        price: true,
+        source: true,
+        store: true,
+        date: true,
+        region: true,
+        category: true,
+        subcategory: true,
+      });
+    
+      const [selectedColumns, setSelectedColumns] = useState(Object.keys(columnsVisibility));
+
+      const handleReset = () => {
+        handleInputChange('Names', '');
+        handleInputChange('IDs', '');
+        handleInputChange('UPCs', '');
+        handleInputChange('NielsenUPCs', '');
+        handleInputChange('Nutrition', {
+            nutrient: '',
+            minAmount: '',
+            maxAmount: ''
+        });
+        setSearchResults([]);
+        setIsLoading(false);
+        setTotalProducts(0);
+    };
+    
+      const handleColumnSelection = (event) => {
+        setSelectedColumns(event.target.value);
+      };
 
 
     const handleTextFieldChange = (field) => (event) => {
@@ -136,6 +172,7 @@ const AdvancedSearch = () => {
             if (response.ok) {
                 console.log("Search successful, hits:", data.hits.hits.length);
                 setSearchResults(data.hits.hits);
+                setTotalProducts(data.hits.total.value);
             } else {
                 console.error('Search API error:', data.error || data);
                 setSearchResults([]);
@@ -242,61 +279,30 @@ const AdvancedSearch = () => {
                     </Grid>
                 </Grid>
                 
-                <div>
-                    <Button variant="contained" onClick={handleSearch} disabled={isLoading} style={{ marginTop: '20px' }}>
+                <div style={{ marginTop: '20px' }}>
+                    <Button variant="contained" onClick={handleSearch} disabled={isLoading} >
                         Search
                     </Button>
+                    <ResetButton  variant="contained" onClick={handleReset}>Reset Search</ResetButton>
                 </div>
-                {isLoading ? <p>Loading...</p> : (
-                    <div>
-                        <table>
-                        <thead>
-                            <tr>
-                            <th>ID</th>
-                            <th>Name</th>
-                            <th>Price</th>
-                            <th>Source</th>
-                            <th>Store</th>
-                            <th>Date</th>
-                            <th>Region</th>
-                            <th>Category</th>
-                            <th>Subcategory</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {searchResults.map((item, index) => (
-                            <tr key={index}>
-                                <td>{item._id}</td>
-                                <td>{item._source.site_name}</td>
-                                <td>{item._source.reading_price}</td>
-                                <td>{item._source.sources.name}</td>
-                                <td>{item._source.stores.name}</td>
-                                <td>{item._source.scrape_batches.scrape_datetime}</td>
-                                <td>{item._source.scrape_batches.region}</td>
-                                <td>
-                                {item && item._source && item._source.categories && Array.isArray(item._source.categories)
-                                    ? item._source.categories
-                                        .map(cat => cat ? cat.name : undefined) 
-                                        .filter(name => name)
-                                        .join(", ") || 'No category'
-                                    : 'No category'
-                                }
-                                </td>
-                                <td>
-                                {item && item._source && item._source.subcategories && Array.isArray(item._source.subcategories)
-                                    ? item._source.subcategories
-                                        .map(subcat => subcat ? subcat.name : undefined) 
-                                        .filter(name => name)
-                                        .join(", ") || 'No subcategory'
-                                    : 'No subcategory'
-                                }
-                                </td>
-                            </tr>
-                            ))}
-                        </tbody>
-                        </table>
-                    </div>
+                {totalProducts !== 0 && (
+                    <Divider style={{ marginTop: '20px', color: '#424242', marginBottom: '15px' }}> 
+                    Based on your search, there is a total of {totalProducts === 1 ? `${totalProducts} product.` : `${totalProducts === 10000 ? "over 10,000" : totalProducts} products.`}
+                    </Divider>
                 )}
+                <>
+                    <ColumnSelection
+                        selectedColumns={selectedColumns}
+                        setSelectedColumns={setSelectedColumns}
+                        columnsVisibility={columnsVisibility}
+                        handleColumnSelection={handleColumnSelection}
+                    />
+                    {isLoading ? (
+                        <p>Loading...</p>
+                    ) : (
+                        <ToolTable selectedColumns={selectedColumns} searchResults={searchResults} />
+                    )}
+                </>
             </div>
         </PageContainer>
     );
