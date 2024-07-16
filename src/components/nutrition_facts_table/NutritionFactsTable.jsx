@@ -1,61 +1,61 @@
 import React from 'react';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography } from '@mui/material';
-import Divider from '@mui/material/Divider';
+import { 
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, 
+  Paper, Typography, Divider 
+} from '@mui/material';
 
-// Assuming nft_order and nutrientMatches are imported from your configuration file
 import { nft_order, nutrientMatches } from './nft_flaime_nutrients';
 
-// list of possible energy values
-const energy = ['ENERGY (KILOCALORIES)', 'ENERGY (KILOJOULES)'];
+const paddingStyle = { padding: '10px' };
+const cellPaddingStyle = { padding: '0px' };
+const smallFontSizeStyle = { textTransform: 'capitalize', fontSize: 'smaller' };
 
-
+const getLocalizedNutrients = (nutritionDetails) => nutritionDetails
+  .filter(nutritionFact => nutritionFact.nutrient_name !== "ENERGY (KILOCALORIES)")
+  .map(nutritionFact => ({
+    ...nutritionFact,
+    localizedKey: Object.keys(nutrientMatches).find(key =>
+      nutrientMatches[key].includes(nutritionFact.nutrient_name)
+    ) || nutritionFact.nutrient_name
+  }))
+  .sort((a, b) => {
+    const aOrder = nft_order[a.localizedKey] || 9999;
+    const bOrder = nft_order[b.localizedKey] || 9999;
+    return aOrder - bOrder;
+  });
 
 const NutritionFactsTable = ({ product }) => (
   <TableContainer component={Paper}>
-    <Typography variant="h6" style={{ padding: '10px' }}>Nutrition Facts</Typography>
-    <Typography variant="body2" style={{ padding: '10px' }}>
+    <Typography variant="h6" style={paddingStyle}>Nutrition Facts</Typography>
+    <Typography variant="body2" style={paddingStyle}>
       Serving Size: {product.servingSize ? `${product.servingSize} ${product.servingSizeUnitEntity?.name ?? ""}` : 
       (product.raw_serving_size ? `${product.raw_serving_size}` : "Not specified")}
-      <br></br>
+      <br />
       Total size: {product.total_size ?? "Not specified"}
     </Typography>
-    {product.store_product_nutrition_facts && product.store_product_nutrition_facts[0] && (
-    <Typography variant="body2" style={{ padding: '10px' }}>
-        {product.store_product_nutrition_facts[0]
-            .filter((nutritionFact) => energy.includes(nutritionFact.nutrients.name))
-            .map((nutritionFact) => (
-                `Calories : ${nutritionFact.amount}`
-            ))}
-    </Typography>
-    )}
+      {product.nutrition_details && (
+        <Typography variant="body2" style={paddingStyle}>
+          {product.nutrition_details
+            .filter(nutritionFact => nutritionFact.nutrient_name === "ENERGY (KILOCALORIES)")
+            .map(nutritionFact => `Calories: ${nutritionFact.amount} ${nutritionFact.unit}`)
+            .join(', ')}
+        </Typography>
+      )}
     <Divider variant="middle" />
-    {product.store_product_nutrition_facts && product.store_product_nutrition_facts[0] && (
-      <Table size="small" aria-label="a dense table">
-        <TableHead>
-          <TableRow>
-            <TableCell >Nutrient</TableCell>
-            <TableCell style={{ padding: '0px' }}>Amount</TableCell>
-            <TableCell style={{ padding: '0px' }}>% Daily Value</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {product.store_product_nutrition_facts[0]
-            .filter((nutritionFact) => !energy.includes(nutritionFact.nutrients.name))
-            .map(nutritionFact => {
-              const localizedKey = Object.keys(nutrientMatches).find(key =>
-                nutrientMatches[key].includes(nutritionFact.nutrients.name)
-              ) || nutritionFact.nutrients.name;
-              return { ...nutritionFact, localizedKey };
-            })
-            .sort((a, b) => {
-              const aOrder = nft_order[a.localizedKey] || 9999;
-              const bOrder = nft_order[b.localizedKey] || 9999;
-              return aOrder - bOrder;
-            })
-            .map(({ id, unit, amount, daily_value, localizedKey }) => (
+      {product.nutrition_details && (
+        <Table size="small" aria-label="a dense table">
+          <TableHead>
+            <TableRow>
+              <TableCell>Nutrient</TableCell>
+              <TableCell style={cellPaddingStyle}>Amount</TableCell>
+              <TableCell style={cellPaddingStyle}>% Daily Value</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {getLocalizedNutrients(product.nutrition_details).map(({ id, unit, amount, daily_value, localizedKey }) => (
               <TableRow key={id}>
                 <TableCell>
-                  <span style={{ textTransform: 'capitalize', fontSize: 'smaller' }}>
+                  <span style={smallFontSizeStyle}>
                     {localizedKey}
                   </span>
                 </TableCell>
@@ -67,9 +67,9 @@ const NutritionFactsTable = ({ product }) => (
                 </TableCell>
               </TableRow>
             ))}
-        </TableBody>
-      </Table>
-    )}
+          </TableBody>
+        </Table>
+      )}
   </TableContainer>
 );
 

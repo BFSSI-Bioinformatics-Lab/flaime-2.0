@@ -88,7 +88,7 @@ const Download = () => {
           });
         }
   
-        const response = await axios.post('http://172.17.10.96:9200/data_v1/_search?scroll=1m', {
+        const response = await axios.post('http://172.17.10.96:9200//_search?scroll=1m', {
           query: queryObject,
           // from: (page - 1) * rowsPerPage,
           size: rowsPerPage

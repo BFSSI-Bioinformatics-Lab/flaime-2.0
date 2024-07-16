@@ -98,21 +98,21 @@ const Product_browser = () => {
         const response = await axios.post(`${elasticUrl}`, {
           query: queryObject,
           aggs: {
-            group_by_stores: {
+            group_by_store: {
               terms: {
-                field: "stores.name.keyword"
+                field: "store.name.keyword"
               },
               aggs: {
                 category_search_count: {
                   filter: {
                     term: {
-                      "categories.name": categorySearchTerm
+                      "category.name": categorySearchTerm
                     }
                   }
                 },
                 categories_names_count: {
                   terms: {
-                    field: "categories.name.keyword"
+                    field: "category.name.keyword"
                   }
                 },
                 site_name_search_count: {
@@ -281,7 +281,7 @@ const Product_browser = () => {
                 Based on your search, these are the number of products per store:
             </Divider> */}
             <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-evenly', maxWidth: '880px', margin: '0 auto' }}>
-              {aggregationResponse && aggregationResponse.group_by_stores.buckets.slice(0, 4).map((store, index) => (
+              {aggregationResponse && aggregationResponse.group_by_store.buckets.slice(0, 4).map((store, index) => (
                 <Card key={store.key} style={{ flex: '1 0 calc(25% - 10px)', maxWidth: '180px', boxSizing: 'border-box', textAlign: 'center', marginBottom: '10px' }}>
                   <CardContent>
                     <Typography variant="h6" component="h2" style={{ fontSize: '14px' }}>
@@ -294,7 +294,7 @@ const Product_browser = () => {
                 </Card>
               ))}
 
-              {aggregationResponse && aggregationResponse.group_by_stores.buckets.slice(4).map((store, index) => (
+              {aggregationResponse && aggregationResponse.group_by_store.buckets.slice(4).map((store, index) => (
                 <Card key={store.key} style={{ flex: '1 0 calc(25% - 10px)', maxWidth: '180px', boxSizing: 'border-box', textAlign: 'center', marginBottom: '10px' }}>
                   <CardContent>
                     <Typography variant="h6" component="h2" style={{ fontSize: '14px' }}>
@@ -327,8 +327,8 @@ const Product_browser = () => {
               <TableRow key={product.id} style={{ background: index % 2 === 0 ? '#f2f2f2' : 'white'}}>
                 <TableCell style={{ width: '80px', textAlign: 'center' }}>
                 <Link to={`/tools/product-browser/${product.id}`} target="_blank">{product.id}</Link></TableCell>
-                <TableCell style={{ textAlign: 'center' }}>{product.stores.name}</TableCell>
-                <TableCell style={{ width: '140px', textAlign: 'center' }}>{product.sources.name}</TableCell>
+                <TableCell style={{ textAlign: 'center' }}>{product.store.name}</TableCell>
+                <TableCell style={{ width: '140px', textAlign: 'center' }}>{product.source.name}</TableCell>
                 <TableCell style={{ width: '375px' }}>{product.site_name}</TableCell>
                 <TableCell style={{ textAlign: 'center' }}>
                 {product.categories && product.categories[0] && product.categories[0].name ? product.categories[0].name : ''}
