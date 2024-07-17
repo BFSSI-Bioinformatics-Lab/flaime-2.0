@@ -50,16 +50,16 @@ export const buildTextMustClausesForAllFields = (searchInputs) => {
         mustClauses.push({ term: { "nielsen_upc.keyword": searchInputs.NielsenUPCs } });
     }
     if (searchInputs.Source.value !== null) {
-        mustClauses.push({ term: { "sources.id": parseInt(searchInputs.Source.value, 10) } });
+        mustClauses.push({ term: { "source.id": parseInt(searchInputs.Source.value, 10) } });
     }
     if (searchInputs.Store.value !== null) {
-        mustClauses.push({ term: { "stores.id": parseInt(searchInputs.Store.value, 10) } });
+        mustClauses.push({ term: { "store.id": parseInt(searchInputs.Store.value, 10) } });
     }
     if (searchInputs.Region.value !== null) {
-        mustClauses.push({ term: { "scrape_batches.region.keyword": searchInputs.Region.value } });
+        mustClauses.push({ term: { "scrape_batche.region.keyword": searchInputs.Region.value } });
     }
     if (searchInputs.Subcategories.value && searchInputs.Subcategories.value.length > 0) {
-        mustClauses.push({ terms: { "subcategories.id": searchInputs.Subcategories.value } });
+        mustClauses.push({ terms: { "subcategorie.id": searchInputs.Subcategories.value } });
     }
     
     // handle Date filters
@@ -92,7 +92,7 @@ export const buildFilterClauses = (searchInputs) => {
     if (searchInputs.Source & searchInputs.Source.value !== null) {
         filters.push({
             term: {
-                "sources.id": parseInt(searchInputs.Source.value, 10)
+                "source.id": parseInt(searchInputs.Source.value, 10)
             }
         });
     }
@@ -101,7 +101,7 @@ export const buildFilterClauses = (searchInputs) => {
     if (searchInputs.Store & searchInputs.Store.value !== null) {
         filters.push({
             term: {
-                "stores.id": parseInt(searchInputs.Store.value, 10)
+                "store.id": parseInt(searchInputs.Store.value, 10)
             }
         });
     }
@@ -110,7 +110,7 @@ export const buildFilterClauses = (searchInputs) => {
     if (searchInputs.Region & searchInputs.Region.value !== null) {
         filters.push({
             term: {
-                "scrape_batches.region.keyword": searchInputs.Region.value
+                "scrape_batche.region.keyword": searchInputs.Region.value
             }
         });
     }
@@ -119,20 +119,20 @@ export const buildFilterClauses = (searchInputs) => {
     const dateFilter = {};
     if (searchInputs.StartDate & searchInputs.StartDate.value && searchInputs.EndDate & searchInputs.EndDate.value) {
         dateFilter.range = {
-            "scrape_batches.scrape_datetime": {
+            "scrape_batche.scrape_datetime": {
                 gte: searchInputs.StartDate.value,
                 lte: searchInputs.EndDate.value
             }
         };
     } else if (searchInputs.StartDate & searchInputs.StartDate.value) {
         dateFilter.range = {
-            "scrape_batches.scrape_datetime": {
+            "scrape_batche.scrape_datetime": {
                 gte: searchInputs.StartDate.value
             }
         };
     } else if (searchInputs.EndDate & searchInputs.EndDate.value) {
         dateFilter.range = {
-            "scrape_batches.scrape_datetime": {
+            "scrape_batche.scrape_datetime": {
                 lte: searchInputs.EndDate.value
             }
         };

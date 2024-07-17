@@ -92,13 +92,13 @@ const AdvancedSearch = () => {
             // This nested query is for matching the nutrient ID inside the nutrients nested structure
             nutrientQueries.push({
                 nested: {
-                    path: "store_product_nutrition_facts.nutrients",
+                    path: "nutrition_details.nutrients",
                     query: {
                         bool: {
                             must: [
                                 {
                                     match: {
-                                        "store_product_nutrition_facts.nutrients.id": searchInputs.Nutrition.nutrient
+                                        "nutrition_details.nutrients.id": searchInputs.Nutrition.nutrient
                                     }
                                 }
                             ]
@@ -112,7 +112,7 @@ const AdvancedSearch = () => {
         if (searchInputs.Nutrition.minAmount) {
             nutrientQueries.push({
                 range: {
-                    "store_product_nutrition_facts.amount": {
+                    "nutrition_details.amount": {
                         gte: parseFloat(searchInputs.Nutrition.minAmount) // Ensure input is treated as a number
                     }
                 }
@@ -122,7 +122,7 @@ const AdvancedSearch = () => {
         if (searchInputs.Nutrition.maxAmount) {
             nutrientQueries.push({
                 range: {
-                    "store_product_nutrition_facts.amount": {
+                    "nutrition_details.amount": {
                         lte: parseFloat(searchInputs.Nutrition.maxAmount) // Ensure input is treated as a number
                     }
                 }
@@ -139,7 +139,7 @@ const AdvancedSearch = () => {
                         ...textMustClauses,
                         {
                             nested: {
-                                path: "store_product_nutrition_facts",
+                                path: "nutrition_details",
                                 query: {
                                     bool: {
                                         must: nutrientQueries
