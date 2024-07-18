@@ -9,16 +9,29 @@ import NutritionFactsTable from '../../../components/nutrition_facts_table/Nutri
 import ProductImages from './ProductImages';
 
 const fetchData = async (productId, setProduct, setLoading) => {
+    setLoading(true);
     try {
-        const productData = await axios.get(`${process.env.REACT_APP_ELASTIC_URL}/_doc/${productId}`);
-        const imageData = await axios.get(`${process.env.REACT_APP_ELASTIC_IMG_URL}/_doc/${productId}`);
-        if (!productData.data._source || !imageData.data._source) throw new Error("Product data not found");
-        const productInfo = { ...productData.data._source, store_product_images: imageData.data._source.store_product_images };
+        const productResponse = await axios.get(`${process.env.REACT_APP_ELASTIC_URL}/_doc/${productId}`);
+        if (!productResponse.data._source) throw new Error("Product data not found");
+
+        let imageData = {};
+        try {
+            const imageResponse = await axios.get(`${process.env.REACT_APP_ELASTIC_IMG_URL}/_doc/${productId}`);
+            imageData = imageResponse.data._source;
+        } catch (imageError) {
+            imageData.store_product_images = [];
+        }
+
+        const productInfo = { 
+            ...productResponse.data._source, 
+            store_product_images: imageData.store_product_images || []
+        };
         setProduct(productInfo);
     } catch (error) {
         console.error('Fetching product failed:', error);
+    } finally {
+        setLoading(false);
     }
-    setLoading(false);
 };
 
 const ProductDetail = () => {
