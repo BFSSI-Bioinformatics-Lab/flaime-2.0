@@ -82,13 +82,13 @@ const ProductDetail = () => {
                             {productDescItems.map(item => (
                                 <DetailItem key={item.name}><b>{item.name}</b>: {item.value}</DetailItem>
                             ))}
-                            {product.ingredient_en && (
+                            {product.ingredients && product.ingredients.en && (
                                 <div>
                                     <ProductIngredientsHeadingContainer>
                                         <Divider> Ingredients </Divider>
                                     </ProductIngredientsHeadingContainer>
                                     <Typography variant="body2" style={{ padding: '10px', textTransform: 'capitalize' }}>
-                                        {product.ingredient_en.toLowerCase()}
+                                        {product.ingredients.en.toLowerCase()}
                                     </Typography>
                                 </div>
                             )}
