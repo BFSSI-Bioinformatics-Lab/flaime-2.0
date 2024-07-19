@@ -19,6 +19,10 @@ const ProductImages = ({ product }) => {
         return `${process.env.REACT_APP_IMG_SERVER_URL}/images/${imagePath}`;
     };
 
+    const handleImageError = (e) => {
+        e.target.style.display = 'none';
+    };
+
     return (
         <React.Fragment>
             {product.store_product_images && (
@@ -30,6 +34,7 @@ const ProductImages = ({ product }) => {
                                     src={imagePathToUrl(imagePath)}
                                     alt={product.site_name}
                                     style={{ width: '100%', height: 'auto' }}
+                                    onError={handleImageError}
                                 />
                             </Paper>
                         </Grid>
@@ -42,7 +47,12 @@ const ProductImages = ({ product }) => {
                         <DialogTitle>{product.site_name}</DialogTitle>
                         <DialogContent>
                             <Box display="flex" justifyContent="center">
-                                <img src={imagePathToUrl(selectedImage)} alt={product.site_name} style={{ maxWidth: '100%', maxHeight: '80vh' }} />
+                                <img
+                                    src={imagePathToUrl(selectedImage)}
+                                    alt={product.site_name}
+                                    style={{ maxWidth: '100%', maxHeight: '80vh' }} 
+                                    onError={handleImageError}
+                                />
                             </Box>
                         </DialogContent>
                     </React.Fragment>

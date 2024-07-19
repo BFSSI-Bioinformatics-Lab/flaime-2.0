@@ -22,18 +22,18 @@ const ToolTable = ({ selectedColumns, searchResults }) => {
                     {column === 'id' && <Link to={`/tools/product-browser/${item._id}`} target="_blank">{item._id}</Link>}
                     {column === 'name' && <span>{item._source.site_name}</span>}
                     {column === 'price' && <span>{item._source.reading_price}</span>}
-                    {column === 'source' && <span>{item._source.sources.name}</span>}
-                    {column === 'store' && <span>{item._source.stores.name}</span>}
-                    {column === 'date' && <span>{item._source.scrape_batches.scrape_datetime}</span>}
-                    {column === 'region' && <span>{item._source.scrape_batches.region}</span>}
+                    {column === 'source' && <span>{item._source.source.name}</span>}
+                    {column === 'store' && <span>{item._source.store.name}</span>}
+                    {column === 'date' && <span>{item._source.scrape_batch.datetime}</span>}
+                    {column === 'region' && <span>{item._source.scrape_batch.region}</span>}
                     {column === 'category' && (
                     <span>
-                        {item._source.categories && item._source.categories[0] && item._source.categories[0].name ? item._source.categories.map(cat => cat.name).join(", ") : 'No category'}
+                        {item._source.category && item._source.category.name ? item._source.category.name : 'No category'}
                     </span>
                     )}
                     {column === 'subcategory' && (
                     <span>
-                        {item._source.subcategories && item._source.subcategories[0] && item._source.subcategories[0].name ? item._source.subcategories.map(cat => cat.name).join(", ") : 'No subcategory'}
+                        {item._source.subcategory && item._source.subcategory.name ? item._source.subcategory.name : 'No subcategory'}
                     </span>
                     )}
                 </TableCell>
