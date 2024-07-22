@@ -331,7 +331,7 @@ const Product_browser = () => {
                 <TableCell style={{ width: '140px', textAlign: 'center' }}>{product.source.name}</TableCell>
                 <TableCell style={{ width: '375px' }}>{product.site_name}</TableCell>
                 <TableCell style={{ textAlign: 'center' }}>
-                {product.categories && product.categories[0] && product.categories[0].name ? product.categories[0].name : ''}
+                  {product.category && product.category.name ? product.category.name : 'No category'}
                 </TableCell>
               </TableRow>
             ))}
