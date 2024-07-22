@@ -51,7 +51,7 @@ const Product_browser = () => {
         if (storeNameSearchTerm) {
           queryObject.bool.must.push({
             match: {
-              "stores.name": {
+              "store.name": {
                 query: storeNameSearchTerm,
                 operator: "and"
               }
@@ -62,7 +62,7 @@ const Product_browser = () => {
         if (sourceNameSearchTerm) {
           queryObject.bool.must.push({
             match: {
-              "sources.name": {
+              "source.name": {
                 query: sourceNameSearchTerm,
                 operator: "and"
               }
@@ -84,7 +84,7 @@ const Product_browser = () => {
         if (categorySearchTerm) {
           queryObject.bool.must.push({
             match: {
-              "categories.name": {
+              "category.name": {
                 query: categorySearchTerm,
                 operator: "and"
               }
