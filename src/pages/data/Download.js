@@ -248,8 +248,8 @@ const Download = () => {
                 {products.map(product => (
                   <TableRow key={product.id}>
                     <TableCell>{product.id}</TableCell>
-                    <TableCell>{product.stores.name}</TableCell>
-                    <TableCell>{product.sources.name}</TableCell>
+                    <TableCell>{product.store.name}</TableCell>
+                    <TableCell>{product.source.name}</TableCell>
                     <TableCell>{product.site_name}</TableCell>
                   </TableRow>
                 ))}

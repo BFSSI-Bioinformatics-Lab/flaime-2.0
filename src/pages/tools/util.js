@@ -56,26 +56,26 @@ export const buildTextMustClausesForAllFields = (searchInputs) => {
         mustClauses.push({ term: { "store.id": parseInt(searchInputs.Store.value, 10) } });
     }
     if (searchInputs.Region.value !== null) {
-        mustClauses.push({ term: { "scrape_batche.region.keyword": searchInputs.Region.value } });
+        mustClauses.push({ term: { "scrape_batch.region.keyword": searchInputs.Region.value } });
     }
     if (searchInputs.Subcategories.value && searchInputs.Subcategories.value.length > 0) {
-        mustClauses.push({ terms: { "subcategorie.id": searchInputs.Subcategories.value } });
+        mustClauses.push({ terms: { "subcategory.id": searchInputs.Subcategories.value } });
     }
     
     // handle Date filters
     if (searchInputs.StartDate.value && searchInputs.EndDate.value) {
         mustClauses.push({
             range: {
-                "scrape_batches.scrape_datetime": {
+                "scrape_batch.datetime": {
                     gte: searchInputs.StartDate.value,
                     lte: searchInputs.EndDate.value
                 }
             }
         });
     } else if (searchInputs.StartDate.value) {
-        mustClauses.push({ range: { "scrape_batches.scrape_datetime": { gte: searchInputs.StartDate.value } } });
+        mustClauses.push({ range: { "scrape_batch.datetime": { gte: searchInputs.StartDate.value } } });
     } else if (searchInputs.EndDate.value) {
-        mustClauses.push({ range: { "scrape_batches.scrape_datetime": { lte: searchInputs.EndDate.value } } });
+        mustClauses.push({ range: { "scrape_batch.datetime": { lte: searchInputs.EndDate.value } } });
     }
     
     return mustClauses;
@@ -119,20 +119,20 @@ export const buildFilterClauses = (searchInputs) => {
     const dateFilter = {};
     if (searchInputs.StartDate & searchInputs.StartDate.value && searchInputs.EndDate & searchInputs.EndDate.value) {
         dateFilter.range = {
-            "scrape_batche.scrape_datetime": {
+            "scrape_batch.datetime": {
                 gte: searchInputs.StartDate.value,
                 lte: searchInputs.EndDate.value
             }
         };
     } else if (searchInputs.StartDate & searchInputs.StartDate.value) {
         dateFilter.range = {
-            "scrape_batche.scrape_datetime": {
+            "scrape_batch.datetime": {
                 gte: searchInputs.StartDate.value
             }
         };
     } else if (searchInputs.EndDate & searchInputs.EndDate.value) {
         dateFilter.range = {
-            "scrape_batche.scrape_datetime": {
+            "scrape_batch.datetime": {
                 lte: searchInputs.EndDate.value
             }
         };
