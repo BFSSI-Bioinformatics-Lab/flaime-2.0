@@ -75,116 +75,93 @@ const AdvancedSearch = () => {
     };
     
     const handleSearch = async () => {
-        // make them enter something, anything
-        // if (!searchInputs.Names && !searchInputs.IDs && !searchInputs.UPCs && !searchInputs.NielsenUPCs) {
-        //     setErrorMessage('Please enter at least one search criterion in the text fields.');
-        //     return;
-        // }
         setIsLoading(true);
-
+        
         // Collecting base queries that aren't related to nutrients
         const textMustClauses = buildTextMustClausesForAllFields(searchInputs);
-
-        // Initialize an array to hold all parts of the nutrient query
-        let nutrientQueries = [];
-    
+        
+        // Initialize the nutrient query
+        let nutrientQuery = {
+            nested: {
+            path: "nutrition_details",
+            query: {
+                bool: {
+                must: []
+                }
+            }
+            }
+        };
+        
+        // Add nutrient ID condition if specified
         if (searchInputs.Nutrition.nutrient) {
-            // This nested query is for matching the nutrient ID inside the nutrients nested structure
-            nutrientQueries.push({
-                nested: {
-                    path: "nutrition_details.nutrients",
-                    query: {
-                        bool: {
-                            must: [
-                                {
-                                    match: {
-                                        "nutrition_details.nutrients.id": searchInputs.Nutrition.nutrient
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
+            nutrientQuery.nested.query.bool.must.push({
+            term: {
+                "nutrition_details.nutrient_id": searchInputs.Nutrition.nutrient
+            }
             });
         }
-    
-        // Conditionally adding range queries for nutrient amounts if specified
+        
+        // Add range conditions for amount if specified
+        let amountRange = {};
         if (searchInputs.Nutrition.minAmount) {
-            nutrientQueries.push({
-                range: {
-                    "nutrition_details.amount": {
-                        gte: parseFloat(searchInputs.Nutrition.minAmount) // Ensure input is treated as a number
-                    }
-                }
-            });
+            amountRange.gte = parseFloat(searchInputs.Nutrition.minAmount);
         }
-    
         if (searchInputs.Nutrition.maxAmount) {
-            nutrientQueries.push({
-                range: {
-                    "nutrition_details.amount": {
-                        lte: parseFloat(searchInputs.Nutrition.maxAmount) // Ensure input is treated as a number
-                    }
-                }
+            amountRange.lte = parseFloat(searchInputs.Nutrition.maxAmount);
+        }
+        
+        if (Object.keys(amountRange).length > 0) {
+            nutrientQuery.nested.query.bool.must.push({
+            range: {
+                "nutrition_details.amount": amountRange
+            }
             });
         }
-    
-        // Combining all must clauses including nutrient queries if any
+        
+        // Combining all must clauses including nutrient query if any conditions were added
         const finalQuery = {
             from: 0,
             size: 100,
             query: {
-                bool: {
-                    must: [
-                        ...textMustClauses,
-                        {
-                            nested: {
-                                path: "nutrition_details",
-                                query: {
-                                    bool: {
-                                        must: nutrientQueries
-                                    }
-                                }
-                            }
-                        }
-                    ]
-                }
+            bool: {
+                must: [
+                ...textMustClauses,
+                ...(nutrientQuery.nested.query.bool.must.length > 0 ? [nutrientQuery] : [])
+                ]
+            }
             }
         };
-    
+        
         console.log("Query Body:", JSON.stringify(finalQuery, null, 2));
-    
         
         const elastic_url = `${process.env.REACT_APP_ELASTIC_URL}/_search`;
-
-
+        
         try {
             const response = await fetch(elastic_url, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify(finalQuery)
             });
+            
             const data = await response.json();
-    
-            // Log response from Elasticsearch
             console.log("Elasticsearch response:", JSON.stringify(data, null, 2));
-    
+            
             if (response.ok) {
                 console.log("Search successful, hits:", data.hits.hits.length);
                 setSearchResults(data.hits.hits);
                 setTotalProducts(data.hits.total.value);
             } else {
                 console.error('Search API error:', data.error || data);
-                setSearchResults([]);
+                setSearchResults([]);   
             }
         } catch (error) {
             console.error('Search request failed:', error);
             setSearchResults([]);
         }
-
+        
         setIsLoading(false);
-    };
-    
+        };
+      
     const handleSelectorChange = (field) => (value) => {
         handleInputChange(field, { value: value === '-1' ? null : value });
     };
