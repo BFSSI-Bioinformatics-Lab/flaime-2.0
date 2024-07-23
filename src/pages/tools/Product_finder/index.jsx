@@ -114,7 +114,7 @@ const ProductFinder = () => {
 
     const queryBody = {
         from: 0,
-        size: 10000,
+        size: 100,
         query: {
             bool: {
                 must: textQueries,
@@ -123,6 +123,9 @@ const ProductFinder = () => {
         }
     };
     
+    console.log("filters:", filters);
+    console.log("fieldKey:", fieldKey);
+    console.log("textQueries:", JSON.stringify(textQueries, null, 2));
     console.log("Elasticsearch query body:", JSON.stringify(queryBody, null, 2));
 
     const elastic_url = `${process.env.REACT_APP_ELASTIC_URL}/_search`;
