@@ -1,7 +1,7 @@
 import React from 'react'
 import { Image } from 'mui-image'
 import landing from "../../static/images/landing.jpg"
-import { Typography } from '@mui/material'
+import { CardContent, Typography, Button, CardActions, Divider } from '@mui/material'
 import Grid from '@mui/material/Grid';
 import SearchBar from "../../components/inputs/SearchBar";
 import {
@@ -13,7 +13,9 @@ import {
   PageTitleTypography,
   PageDescriptionTypography,
   SearchBarContainer,
-  ExploreHeadingContainer,
+  DataSourceContainer,
+  DataCard,
+  HeadingContainer,
   ExploreSectionContainer,
   ExploreSectionBox,
   ExploreItemTitleTypography,
@@ -57,15 +59,63 @@ const Home = () => {
         
         <PageTitleTypography variant="h2">FLAIME</PageTitleTypography>
         <PageDescriptionTypography>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Nibh nisl condimentum id venenatis a condimentum vitae. Non pulvinar neque laoreet suspendisse interdum.
+        The Food Label AI for Monitoring the food Environment (FLAIME) is a tool created to collect, organize, harmonize and simplify exploration of various food label datasets. Here you will find multiple ways to explore, query and export information related to the Canadian food supply. Customized reports, visualizations and dashboards are also available to offer informative insights on FND priorities such as the Sodium Reduction Strategy, Front of Pack Labelling, Supplemented Foods and Marketing to Kids.
         </PageDescriptionTypography>
+      </div>
+      <div>
+      <HeadingContainer maxWidth="sm">
+        <Typography variant="h3" color="primary.dark" align="center">Data Sources</Typography>
+      </HeadingContainer>
+        <DataSourceContainer>
+          <DataCard>
+            <CardContent style={{ paddingBottom: '0px' }}>
+              <Typography variant='h5'>
+                FLIP Data
+              </Typography>
+              <Typography variant='body1'>
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+              </Typography>
+              <CardActions>
+              <Button >Learn More</Button>
+            </CardActions>
+            </CardContent>
+          </DataCard>
+          <Divider style={{ borderBottom: '1px solid #d8d8d8', width: '50%', margin: '10px' }} ></Divider>
+          <DataCard>
+            <CardContent style={{ paddingBottom: '0px' }}>
+              <Typography variant='h5'>
+                Nielsen Data
+              </Typography>
+              <Typography variant='body1'>
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+              </Typography>
+              <CardActions>
+              <Button >Learn More</Button>
+            </CardActions>
+            </CardContent>
+          </DataCard>
+          <Divider style={{ borderBottom: '1px solid #d8d8d8', width: '50%', margin: '10px' }} ></Divider>
+          <DataCard>
+            <CardContent style={{ paddingBottom: '0px' }}>
+              <Typography variant='h5'>
+                Web Scrape Data
+              </Typography>
+              <Typography variant='body1'>
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+              </Typography>
+              <CardActions>
+              <Button >Learn More</Button>
+            </CardActions>
+            </CardContent>
+          </DataCard>
+        </DataSourceContainer>
       </div>
       <SearchBarContainer>
         <SearchBar placeholder="Quick Search" width="452px" height="75px" />
       </SearchBarContainer>
-      <ExploreHeadingContainer maxWidth="sm">
-        <Typography variant="h2" color="primary.dark" align="center">Explore the FLAIME Database</Typography>
-      </ExploreHeadingContainer>
+      <HeadingContainer maxWidth="sm">
+        <Typography variant="h3" color="primary.dark" align="center">Explore the FLAIME Database</Typography>
+      </HeadingContainer>
       <ExploreSectionContainer>
         <ExploreSectionBox
           display="flex"
