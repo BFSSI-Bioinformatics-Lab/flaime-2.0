@@ -57,14 +57,14 @@ export const PageDescriptionTypography = styled(Typography)(() => ({
 }));
 
 export const SearchBarContainer = styled(Box)(() => ({
-    height: "335px", 
+    height: "375px", 
     backgroundImage:`url(${quickSearch})`, 
     backgroundRepeat: "no-repeat", 
     backgroundSize: "cover", 
     backgroundPosition: "80% 50%", 
     display: "flex", 
     alignItems: "center", 
-    justifyContent: "center"
+    justifyContent: "space-evenly"
 }))
 
 export const DataSourceContainer = styled(Box)(() => ({
@@ -73,21 +73,23 @@ export const DataSourceContainer = styled(Box)(() => ({
     flexDirection: "column", 
     alignItems: "center", 
     // justifyContent: "space-between",
-    marginBottom: "30px",
+    marginBottom: "35px",
     // marginTop: "15px"
 }))
 
 export const DataCard = styled(Card)(({ theme }) => ({
-    // height: "110px",
     backgroundColor: theme.palette.landing.main,
     boxShadow: "none",
     paddingBottom: "0px",
-    // width: "200px", 
-    // display: "flex", 
-    // flexDirection: "column", 
-    // alignItems: "center", 
-    // justifyContent: "space-evenly"
-}))     
+}))
+
+export const SearchCard = styled(Card)(({ theme }) => ({
+    backgroundColor: theme.palette.landing.main,
+    // boxShadow: "none",
+    width: "300px",
+    height: "225px",
+    // paddingBottom: "0px",
+}))
 
 export const HeadingContainer = styled(Container)(() => ({
     padding: "25px"

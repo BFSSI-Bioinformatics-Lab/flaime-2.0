@@ -4,6 +4,7 @@ import landing from "../../static/images/landing.jpg"
 import { CardContent, Typography, Button, CardActions, Divider } from '@mui/material'
 import Grid from '@mui/material/Grid';
 import SearchBar from "../../components/inputs/SearchBar";
+import SearchIcon from '@mui/icons-material/Search';
 import {
   ExploreItem,
   ArrowButtonLink,
@@ -15,6 +16,7 @@ import {
   SearchBarContainer,
   DataSourceContainer,
   DataCard,
+  SearchCard,
   HeadingContainer,
   ExploreSectionContainer,
   ExploreSectionBox,
@@ -63,9 +65,10 @@ const Home = () => {
         </PageDescriptionTypography>
       </div>
       <div>
-      <HeadingContainer maxWidth="sm">
-        <Typography variant="h3" color="primary.dark" align="center">Data Sources</Typography>
-      </HeadingContainer>
+        <HeadingContainer maxWidth="sm">
+          <Typography variant="h3" color="primary.dark" align="center">About the Data Sources</Typography>
+        </HeadingContainer>
+
         <DataSourceContainer>
           <DataCard>
             <CardContent style={{ paddingBottom: '0px' }}>
@@ -110,9 +113,51 @@ const Home = () => {
           </DataCard>
         </DataSourceContainer>
       </div>
+
       <SearchBarContainer>
-        <SearchBar placeholder="Quick Search" width="452px" height="75px" />
+        {/* <SearchBar placeholder="Quick Search" width="452px" height="75px" /> */}
+        <SearchCard>
+            <CardContent>
+              <Typography variant='h5'>
+                Quick Search
+              </Typography>
+              <Typography variant='body1' style={{ marginTop: '15px' }}>
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+              </Typography>
+              <CardActions>
+              <Button >Quick Search <SearchIcon fontSize="medium" style={{ marginLeft: '10px' }}/></Button>
+            </CardActions>
+            </CardContent>
+          </SearchCard>
+        <SearchCard>
+            <CardContent>
+              <Typography variant='h5'>
+                Advanced Search
+              </Typography>
+              <Typography variant='body1'style={{ marginTop: '15px' }}>
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+              </Typography>
+              <CardActions>
+              <Button >Advanced Search<SearchIcon fontSize="medium" style={{ marginLeft: '10px' }}/></Button>
+            </CardActions>
+            </CardContent>
+          </SearchCard>
+          
+          <SearchCard>
+            <CardContent>
+              <Typography variant='h5'>
+                Product Finder
+              </Typography>
+              <Typography variant='body1'style={{ marginTop: '15px' }}>
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+              </Typography>
+              <CardActions>
+              <Button >Search many products <SearchIcon fontSize="medium" style={{ marginLeft: '10px' }}/></Button>
+            </CardActions>
+            </CardContent>
+          </SearchCard>
       </SearchBarContainer>
+
       <HeadingContainer maxWidth="sm">
         <Typography variant="h3" color="primary.dark" align="center">Explore the FLAIME Database</Typography>
       </HeadingContainer>
