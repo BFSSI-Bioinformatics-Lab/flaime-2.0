@@ -77,7 +77,7 @@ const Home = () => {
                 FLIP Data
               </Typography>
               <Typography variant='body1'>
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+              University of Toronto FLIP database of prepackaged food labels. The 2017 collection includes pictures and food information off labels from Sobeys, Loblaws and Metro in Toronto.
               </Typography>
               <CardActions>
               <Button >Learn More</Button>
@@ -123,7 +123,7 @@ const Home = () => {
                 Quick Search
               </Typography>
               <Typography variant='body1' style={{ marginTop: '15px' }}>
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+              The Product Browser is a user-friendly search interface where users can quickly search for products, stores, etc.. within the database.
               </Typography>
               <CardActions>
               <Link to="/tools/product-browser">

@@ -68,7 +68,7 @@ export const SearchBarContainer = styled(Box)(() => ({
 }))
 
 export const DataSourceContainer = styled(Box)(() => ({
-    height: "370px", 
+    height: "450px", 
     display: "flex",
     flexDirection: "column", 
     alignItems: "center", 
@@ -81,6 +81,7 @@ export const DataCard = styled(Card)(({ theme }) => ({
     backgroundColor: theme.palette.landing.main,
     boxShadow: "none",
     paddingBottom: "0px",
+    width: "880px",
 }))
 
 export const SearchCard = styled(Card)(({ theme }) => ({

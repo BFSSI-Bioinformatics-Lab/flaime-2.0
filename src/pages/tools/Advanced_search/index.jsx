@@ -1,5 +1,5 @@
 // advanced_search.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import dayjs from 'dayjs';
 import { TextField, Button, Alert, Typography, Divider, Grid } from '@mui/material';
 import PageContainer from '../../../components/page/PageContainer';
@@ -15,6 +15,10 @@ import ToolTable  from '../../../components/table/ToolTable';
 import { ResetButton } from '../../../components/buttons';
 
 const AdvancedSearch = () => {
+    useEffect(() => {
+        window.scrollTo(0, 0); // Scroll to the top of the page when the component mounts
+    }, []);
+    
     const initialFilters = {
         Names: '',
         IDs: '',
