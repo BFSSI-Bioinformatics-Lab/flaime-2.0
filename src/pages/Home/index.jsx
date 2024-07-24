@@ -5,6 +5,7 @@ import { CardContent, Typography, Button, CardActions, Divider } from '@mui/mate
 import Grid from '@mui/material/Grid';
 import SearchBar from "../../components/inputs/SearchBar";
 import SearchIcon from '@mui/icons-material/Search';
+import { Link } from "react-router-dom";
 import {
   ExploreItem,
   ArrowButtonLink,
@@ -125,7 +126,9 @@ const Home = () => {
                 Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
               </Typography>
               <CardActions>
+              <Link to="/tools/product-browser">
               <Button >Quick Search <SearchIcon fontSize="medium" style={{ marginLeft: '10px' }}/></Button>
+              </Link>
             </CardActions>
             </CardContent>
           </SearchCard>
@@ -138,8 +141,10 @@ const Home = () => {
                 Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
               </Typography>
               <CardActions>
-              <Button >Advanced Search<SearchIcon fontSize="medium" style={{ marginLeft: '10px' }}/></Button>
-            </CardActions>
+              <Link to="/tools/advanced-search">
+                <Button >Advanced Search<SearchIcon fontSize="medium" style={{ marginLeft: '10px' }}/></Button>
+              </Link>
+              </CardActions>
             </CardContent>
           </SearchCard>
           
@@ -152,13 +157,15 @@ const Home = () => {
                 Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
               </Typography>
               <CardActions>
+              <Link to="/tools/product-finder">
               <Button >Search many products <SearchIcon fontSize="medium" style={{ marginLeft: '10px' }}/></Button>
+              </Link>
             </CardActions>
             </CardContent>
           </SearchCard>
       </SearchBarContainer>
 
-      <HeadingContainer maxWidth="sm">
+      {/* <HeadingContainer maxWidth="sm">
         <Typography variant="h3" color="primary.dark" align="center">Explore the FLAIME Database</Typography>
       </HeadingContainer>
       <ExploreSectionContainer>
@@ -199,7 +206,7 @@ const Home = () => {
           
           
         </ExploreSectionBox>  
-      </ExploreSectionContainer>
+      </ExploreSectionContainer> */}
       
     </HomePageContainer>
   )
