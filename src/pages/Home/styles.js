@@ -77,12 +77,6 @@ export const DataSourceContainer = styled(Box)(() => ({
     // marginTop: "15px"
 }))
 
-export const DataCard = styled(Card)(({ theme }) => ({
-    backgroundColor: theme.palette.landing.main,
-    boxShadow: "none",
-    paddingBottom: "0px",
-    width: "880px",
-}))
 
 export const SearchCard = styled(Card)(({ theme }) => ({
     backgroundColor: theme.palette.landing.main,

@@ -3,57 +3,22 @@ import { Image } from 'mui-image'
 import landing from "../../static/images/landing.jpg"
 import { CardContent, Typography, Button, CardActions, Divider } from '@mui/material'
 import Grid from '@mui/material/Grid';
-import SearchBar from "../../components/inputs/SearchBar";
+import DataSourceCard from "../../components/cards/DataSourceCard";
 import SearchIcon from '@mui/icons-material/Search';
 import { Link } from "react-router-dom";
 import {
-  ExploreItem,
-  ArrowButtonLink,
-  ArrowButton,
   ShoppingCartIcon,
   HomePageContainer,
   PageTitleTypography,
   PageDescriptionTypography,
   SearchBarContainer,
   DataSourceContainer,
-  DataCard,
   SearchCard,
-  HeadingContainer,
-  ExploreSectionContainer,
-  ExploreSectionBox,
-  ExploreItemTitleTypography,
-  ArrowCircleRightIcon
+  HeadingContainer
 } from "./styles";
 
 const Home = () => {
 
-  const exploreItems = [
-    {
-      title: "Get reports by Stores",
-      icon: <ShoppingCartIcon />,
-      link: "reports/store"
-    },
-    {
-      title: "Explore all products",
-      icon: <ShoppingCartIcon />,
-      link: "tools/product-browser"
-    },
-    {
-      title: "Get reports by Category",
-      icon: <ShoppingCartIcon />,
-      link: "reports/category"
-    },
-    {
-      title: "Explore all data and data history",
-      icon: <ShoppingCartIcon />,
-      link: "data/quality"
-    },
-    {
-      title: "Get reports by Nutrient",
-      icon: <ShoppingCartIcon />,
-      link: "reports/nutrient"
-    },
-  ]
 
   return (
     <HomePageContainer>
@@ -71,47 +36,21 @@ const Home = () => {
         </HeadingContainer>
 
         <DataSourceContainer>
-          <DataCard>
-            <CardContent style={{ paddingBottom: '0px' }}>
-              <Typography variant='h5'>
-                FLIP Data
-              </Typography>
-              <Typography variant='body1'>
-              University of Toronto FLIP database of prepackaged food labels. The 2017 collection includes pictures and food information off labels from Sobeys, Loblaws and Metro in Toronto.
-              </Typography>
-              <CardActions>
-              <Button >Learn More</Button>
-            </CardActions>
-            </CardContent>
-          </DataCard>
-          <Divider style={{ borderBottom: '1px solid #d8d8d8', width: '50%', margin: '10px' }} ></Divider>
-          <DataCard>
-            <CardContent style={{ paddingBottom: '0px' }}>
-              <Typography variant='h5'>
-                Nielsen Data
-              </Typography>
-              <Typography variant='body1'>
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-              </Typography>
-              <CardActions>
-              <Button >Learn More</Button>
-            </CardActions>
-            </CardContent>
-          </DataCard>
-          <Divider style={{ borderBottom: '1px solid #d8d8d8', width: '50%', margin: '10px' }} ></Divider>
-          <DataCard>
-            <CardContent style={{ paddingBottom: '0px' }}>
-              <Typography variant='h5'>
-                Web Scrape Data
-              </Typography>
-              <Typography variant='body1'>
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-              </Typography>
-              <CardActions>
-              <Button >Learn More</Button>
-            </CardActions>
-            </CardContent>
-          </DataCard>
+          <DataSourceCard
+            title="Quick Search"
+            content="The Product Browser is a user-friendly search interface where users can quickly search for products, stores, etc.. within the database."
+            link="/tools/product-browser"
+          />
+          <DataSourceCard
+            title="Advanced Search"
+            content="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+            link="/tools/advanced-search"
+          />
+          <DataSourceCard
+            title="Product Finder"
+            content="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+            link="/tools/product-finder"
+          />
         </DataSourceContainer>
       </div>
 
