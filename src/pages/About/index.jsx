@@ -1,8 +1,13 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Typography, Divider } from '@mui/material'
 import { AboutPageContainer, InfoContainer, PageTitleTypography, SectionTitleTypography } from './styles'
 
 const About = () => {
+
+  useEffect(() => {
+    window.scrollTo(0, 0); // Scroll to the top of the page when the component mounts
+  }, []);
+
   return (
     <AboutPageContainer>
         

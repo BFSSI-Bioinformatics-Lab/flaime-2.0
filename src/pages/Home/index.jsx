@@ -6,13 +6,11 @@ import DataSourceCard from "../../components/cards/DataSourceCard";
 import SearchCard from "../../components/cards/SearchCard";
 
 import {
-  ShoppingCartIcon,
   HomePageContainer,
   PageTitleTypography,
   PageDescriptionTypography,
   SearchBarContainer,
   DataSourceContainer,
-  
   HeadingContainer
 } from "./styles";
 
