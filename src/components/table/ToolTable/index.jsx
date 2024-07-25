@@ -1,47 +1,65 @@
 import React from 'react';
-import { Table, TableHead, TableBody, TableRow, TableCell, TableContainer, Paper } from '@mui/material';
+import { Table, TableHead, TableBody, TableRow, TableCell, TableContainer, Paper, TablePagination } from '@mui/material';
 import { StyledTableCell } from './styles';
 import { Link } from 'react-router-dom';
 
-const ToolTable = ({ selectedColumns, searchResults }) => {
+const ToolTable = ({ columns, data, totalCount, page, rowsPerPage, onPageChange, onRowsPerPageChange }) => {
+  const renderCell = (column, item) => {
+    switch (column) {
+      case 'id':
+        return <Link to={`/tools/product-browser/${item._id}`} target="_blank">{item._id}</Link>;
+      case 'name':
+        return item._source.site_name;
+      case 'price':
+        return item._source.reading_price;
+      case 'source':
+        return item._source.source.name;
+      case 'store':
+        return item._source.store.name;
+      case 'date':
+        return item._source.scrape_batch.datetime;
+      case 'region':
+        return item._source.scrape_batch.region;
+      case 'category':
+        return item._source.category && item._source.category.name ? item._source.category.name : 'No category';
+      case 'subcategory':
+        return item._source.subcategory && item._source.subcategory.name ? item._source.subcategory.name : 'No subcategory';
+      default:
+        return item._source[column] || '';
+    }
+  };
+
   return (
     <TableContainer component={Paper}>
       <Table>
         <TableHead>
           <TableRow>
-            {selectedColumns.map((column) => (
+            {columns.map((column) => (
               <StyledTableCell key={column}>{column}</StyledTableCell>
             ))}
           </TableRow>
         </TableHead>
         <TableBody>
-          {searchResults.map((item, index) => (
+          {data.map((item, index) => (
             <TableRow key={index}>
-              {selectedColumns.map((column) => (
+              {columns.map((column) => (
                 <TableCell key={column}>
-                  {column === 'id' && <Link to={`/tools/product-browser/${item._id}`} target="_blank">{item._id}</Link>}
-                  {column === 'name' && <span>{item._source.site_name}</span>}
-                  {column === 'price' && <span>{item._source.reading_price}</span>}
-                  {column === 'source' && <span>{item._source.source.name}</span>}
-                  {column === 'store' && <span>{item._source.store.name}</span>}
-                  {column === 'date' && <span>{item._source.scrape_batch.datetime}</span>}
-                  {column === 'region' && <span>{item._source.scrape_batch.region}</span>}
-                  {column === 'category' && (
-                    <span>
-                      {item._source.category && item._source.category.name ? item._source.category.name : 'No category'}
-                    </span>
-                  )}
-                  {column === 'subcategory' && (
-                    <span>
-                      {item._source.subcategory && item._source.subcategory.name ? item._source.subcategory.name : 'No subcategory'}
-                    </span>
-                  )}
+                  {renderCell(column, item)}
                 </TableCell>
               ))}
             </TableRow>
           ))}
         </TableBody>
       </Table>
+      <TablePagination
+        component="div"
+        count={totalCount}
+        page={page}
+        onPageChange={onPageChange}
+        rowsPerPage={rowsPerPage}
+        onRowsPerPageChange={onRowsPerPageChange}
+        rowsPerPageOptions={[10, 25, 50, 100]}
+      />
     </TableContainer>
   );
 };

@@ -111,6 +111,14 @@ const ProductFinder = () => {
     setPage(newPage);
     handleSearch(newPage + 1, rowsPerPage);  // Add 1 because Elasticsearch uses 1-indexed pages
   };
+
+  const handleRowsPerPageChange = (event) => {
+    const newRowsPerPage = parseInt(event.target.value, 10);
+    setRowsPerPage(newRowsPerPage);
+    setPage(0);
+    handleSearch(0, newRowsPerPage);
+};
+
   
   const handleSearch = async (newPage = 1) => {
     setSearchResultsIsLoading(true);
@@ -241,19 +249,14 @@ return (
           <p>Loading...</p>
         ) : (
           <>
-            <ToolTable selectedColumns={selectedColumns} searchResults={searchResults} />
-            <TablePagination
-              component="div"
-              count={totalProducts}
+            <ToolTable 
+              columns={selectedColumns}
+              data={searchResults}
+              totalCount={totalProducts}
               page={page}
-              onPageChange={(event, newPage) => handleSearch(newPage + 1)}
               rowsPerPage={rowsPerPage}
-              onRowsPerPageChange={(event) => {
-                const newRowsPerPage = parseInt(event.target.value, 10);
-                setRowsPerPage(newRowsPerPage);
-                handleSearch(1);  // Reset to first page when changing rows per page
-              }}
-              rowsPerPageOptions={[10, 25, 50, 100]}
+              onPageChange={handlePageChange}
+              onRowsPerPageChange={handleRowsPerPageChange}
             />
           </>
         )}
