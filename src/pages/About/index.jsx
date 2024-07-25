@@ -33,12 +33,18 @@ const About = () => {
         </InfoContainer>
       </div>
       <Divider style={{ width: '50%', margin: '30px auto 0 auto' }} />
-      <div>
+      <div style={{paddingBottom: "5%"}}>
         <SectionTitleTypography variant='h4' >About the Team</SectionTitleTypography>
         <InfoContainer>
           <Typography variant='body1'>
-          Qui quidem itaque et provident sunt sit placeat sequi ex quia ipsum et accusamus reprehenderit non reiciendis expedita nam dignissimos incidunt. Eos esse unde et nostrum repellendus 33 ipsa dolor eos earum dolor eum error libero eos commodi sequi.Sed asperiores molestiae est doloribus reiciendis et possimus omnis qui consequatur magnam aut libero quam. Eum nisi eius qui ipsum repellendus qui aperiam enim sed veritatis fugiat ut dolorem impedit. Nam beatae laborum qui saepe eveniet aut soluta natus ut praesentium corporis qui pariatur sunt et minima totam! Et quia ducimus qui dolore libero sed ducimus cupiditate id laudantium facilis.
+          Bioinformatics and Data Science is a division of the Bureau of Data, Science and Knowledge Integration within Health Canada’s Food and Nutrition Directorate (FND). Initially set up to provide a bridge between biology and computer science, the Division has developed into a multidisciplinary team that harnesses the power of computer science to support the research needs of FND – effectively translating raw science data into more digestible forms.
           </Typography>
+          <div  style={{marginTop: "20px"}}>
+            <Typography variant='h5'>What services do we provide?</Typography>
+            <Typography variant='body1'>
+            The Bioinformatics and Data Science Division provides a wide range of services to support the complex needs of individual research teams within FND. These research teams often face unique challenges in analysing and processing the raw data provided by both government and academic sources. By leveraging a strong knowledge of both biological and computer sciences, members of the Division are able to assist research teams in more efficiently accessing and understanding their data - providing the analytical “grease” to keep the research wheels moving.
+            </Typography>
+          </div>
         </InfoContainer>
         
       </div>
