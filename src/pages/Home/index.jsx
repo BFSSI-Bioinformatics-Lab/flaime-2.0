@@ -2,53 +2,20 @@ import React from 'react'
 import { Image } from 'mui-image'
 import landing from "../../static/images/landing.jpg"
 import { Typography } from '@mui/material'
-import Grid from '@mui/material/Grid';
-import SearchBar from "../../components/inputs/SearchBar";
+import DataSourceCard from "../../components/cards/DataSourceCard";
+import SearchCard from "../../components/cards/SearchCard";
+
 import {
-  ExploreItem,
-  ArrowButtonLink,
-  ArrowButton,
-  ShoppingCartIcon,
   HomePageContainer,
   PageTitleTypography,
   PageDescriptionTypography,
   SearchBarContainer,
-  ExploreHeadingContainer,
-  ExploreSectionContainer,
-  ExploreSectionBox,
-  ExploreItemTitleTypography,
-  ArrowCircleRightIcon
+  DataSourceContainer,
+  HeadingContainer
 } from "./styles";
 
 const Home = () => {
 
-  const exploreItems = [
-    {
-      title: "Get reports by Stores",
-      icon: <ShoppingCartIcon />,
-      link: "reports/store"
-    },
-    {
-      title: "Explore all products",
-      icon: <ShoppingCartIcon />,
-      link: "tools/product-browser"
-    },
-    {
-      title: "Get reports by Category",
-      icon: <ShoppingCartIcon />,
-      link: "reports/category"
-    },
-    {
-      title: "Explore all data and data history",
-      icon: <ShoppingCartIcon />,
-      link: "data/quality"
-    },
-    {
-      title: "Get reports by Nutrient",
-      icon: <ShoppingCartIcon />,
-      link: "reports/nutrient"
-    },
-  ]
 
   return (
     <HomePageContainer>
@@ -57,54 +24,51 @@ const Home = () => {
         
         <PageTitleTypography variant="h2">FLAIME</PageTitleTypography>
         <PageDescriptionTypography>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Nibh nisl condimentum id venenatis a condimentum vitae. Non pulvinar neque laoreet suspendisse interdum.
+        The Food Label AI for Monitoring the food Environment (FLAIME) is a tool created to collect, organize, harmonize and simplify exploration of various food label datasets. Here you will find multiple ways to explore, query and export information related to the Canadian food supply. Customized reports, visualizations and dashboards are also available to offer informative insights on FND priorities such as the Sodium Reduction Strategy, Front of Pack Labelling, Supplemented Foods and Marketing to Kids.
         </PageDescriptionTypography>
       </div>
       <SearchBarContainer>
-        <SearchBar placeholder="Quick Search" width="452px" height="75px" />
+      <SearchCard
+        title="Quick Search"
+        content="The Product Browser is a user-friendly interface for rapid product, store, and general database queries."
+        link="/tools/product-browser"
+      />
+      <SearchCard
+        title="Advanced Search"
+        content="An in-depth search tool with extended filtering options, including categories and nutrient content."
+        link="/tools/advanced-search"
+      />
+      <SearchCard
+        title="Product Finder"
+        content="Specialised search for product lists using names, UPCs, or IDs. Supports file upload and filtering by date, store, and region."
+        link="/tools/product-finder"
+      />
       </SearchBarContainer>
-      <ExploreHeadingContainer maxWidth="sm">
-        <Typography variant="h2" color="primary.dark" align="center">Explore the FLAIME Database</Typography>
-      </ExploreHeadingContainer>
-      <ExploreSectionContainer>
-        <ExploreSectionBox
-          display="flex"
-          justifyContent="center"
-          alignItems="center"
-        >
-          
-            <Grid container 
-              rowSpacing={{xs: 1, sm: 2, md: 6}} 
-              columnSpacing={{ xs: 1, sm: 2, md: 6 }}
-              direction="row"
-              alignItems="center"
-              justifyContent="space-evenly"
-            >
-              {exploreItems.map((item) => 
-                  <Grid item key={item.title}
-                    xs={12} 
-                    sm={12} 
-                    md={6} 
-                    lg={4}
-                    align="center"
-                  >
-                    <ExploreItem>
-                      <Typography color="primary">{item.icon}</Typography>
-                      <ExploreItemTitleTypography variant="subtitle" align="left">{item.title}</ExploreItemTitleTypography>
-                      <ArrowButton>
-                        <ArrowButtonLink to={item.link}>
-                          <ArrowCircleRightIcon />
-                        </ArrowButtonLink>
-                      </ArrowButton>
-                    </ExploreItem>
-                  </Grid>
-                )
-              }
-            </Grid> 
-          
-          
-        </ExploreSectionBox>  
-      </ExploreSectionContainer>
+      <div>
+        <HeadingContainer maxWidth="sm">
+          <Typography variant="h3" color="primary.dark" align="center">About the Data Sources</Typography>
+        </HeadingContainer>
+
+        <DataSourceContainer>
+          <DataSourceCard
+            title="FLIP Data"
+            content="University of Toronto FLIP database of prepackaged food labels. The 2017 collection includes pictures and food information off labels from Sobeys, Loblaws and Metro in Toronto."
+            link="about"
+          />
+          <DataSourceCard
+            title="Nielsen Data"
+            content="NielsenIQ label data. Presently only the 2017 Sodium collection is present. This includes barcode information, images with all sides of packaging as well as all food label data."
+            link="about"
+          />
+          <DataSourceCard
+            title="Web Scrape Data"
+            content="Includes data collected from Canadian grocery store websites since 2019. The last web scrape was from 2023 and was a collaboration between FND and University of Toronto FLIP team."
+            link="about"
+          />
+        </DataSourceContainer>
+      </div>
+
+      
       
     </HomePageContainer>
   )

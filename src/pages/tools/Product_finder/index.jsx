@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import dayjs from 'dayjs';
 import { Button, FormControl, FormControlLabel, Radio, RadioGroup, Typography, Divider } from '@mui/material';
 import PageContainer from '../../../components/page/PageContainer';
@@ -13,6 +13,11 @@ import ColumnSelection  from '../../../components/table/ColumnSelection';
 import ToolTable  from '../../../components/table/ToolTable';
 
 const ProductFinder = () => {
+
+  useEffect(() => {
+    window.scrollTo(0, 0); // Scroll to the top of the page when the component mounts
+}, []);
+
   const initialFilters = {
     TextEntries: { value: [] },
     Source: { value: null },
