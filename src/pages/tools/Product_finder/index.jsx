@@ -11,6 +11,7 @@ import { useSearchFilters, buildFilterClauses, buildTextMustClauses, getFieldKey
 import { ResetButton } from '../../../components/buttons';
 import ColumnSelection  from '../../../components/table/ColumnSelection';
 import ToolTable  from '../../../components/table/ToolTable';
+import SearchResultSummary from '../../../components/misc/SearchResultSummary';
 
 
 const ProductFinder = () => {
@@ -233,11 +234,7 @@ return (
         </Button>
         <ResetButton variant="contained" onClick={handleReset}>Reset Search</ResetButton>
       </div>
-      {totalProducts !== 0 && (
-        <Divider style={{ marginTop: '20px', color: '#424242', marginBottom: '15px' }}>
-          Based on your search, there is a total of {totalProducts === 1 ? `${totalProducts} product.` : `${totalProducts === 10000 ? "over 10,000" : totalProducts} products.`}
-        </Divider>
-      )}
+      <SearchResultSummary totalProducts={totalProducts} />
       <>
         <ColumnSelection
           selectedColumns={selectedColumns}

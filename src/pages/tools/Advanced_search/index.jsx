@@ -12,6 +12,7 @@ import NutritionFilter from '../../../components/inputs/NutritionFilter';
 import { useSearchFilters, buildTextMustClausesForAllFields } from '../util';
 import ColumnSelection  from '../../../components/table/ColumnSelection';
 import ToolTable  from '../../../components/table/ToolTable';
+import SearchResultSummary from '../../../components/misc/SearchResultSummary';
 import { ResetButton } from '../../../components/buttons';
 
 const AdvancedSearch = () => {
@@ -277,11 +278,7 @@ const AdvancedSearch = () => {
                     </Button>
                     <ResetButton  variant="contained" onClick={handleReset}>Reset Search</ResetButton>
                 </div>
-                {totalProducts !== 0 && (
-                    <Divider style={{ marginTop: '20px', color: '#424242', marginBottom: '15px' }}> 
-                    Based on your search, there is a total of {totalProducts === 1 ? `${totalProducts} product.` : `${totalProducts === 10000 ? "over 10,000" : totalProducts} products.`}
-                    </Divider>
-                )}
+                <SearchResultSummary totalProducts={totalProducts} />
                 <>
                     <ColumnSelection
                         selectedColumns={selectedColumns}
@@ -300,7 +297,8 @@ const AdvancedSearch = () => {
                         rowsPerPage={rowsPerPage}
                         onPageChange={handlePageChange}
                         onRowsPerPageChange={handleRowsPerPageChange}
-                      />                    )}
+                      />
+                    )}
                 </>
             </div>
         </PageContainer>
