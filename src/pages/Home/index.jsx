@@ -37,18 +37,18 @@ const Home = () => {
         <DataSourceContainer>
           <DataSourceCard
             title="FLIP Data"
-            content="University of Toronto FLIP* database of prepackaged food labels. The 2017 collection includes pictures and food information off labels from Sobeys, Loblaws and Metro in Toronto."
-            link="/tools/product-browser"
+            content="University of Toronto FLIP database of prepackaged food labels. The 2017 collection includes pictures and food information off labels from Sobeys, Loblaws and Metro in Toronto."
+            link="about"
           />
           <DataSourceCard
             title="Nielsen Data"
             content="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
-            link="/tools/advanced-search"
+            link="about"
           />
           <DataSourceCard
             title="Web Scrape Data"
             content="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
-            link="/tools/product-finder"
+            link="about"
           />
         </DataSourceContainer>
       </div>

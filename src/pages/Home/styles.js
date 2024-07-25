@@ -68,12 +68,12 @@ export const SearchBarContainer = styled(Box)(() => ({
 }))
 
 export const DataSourceContainer = styled(Box)(() => ({
-    height: "450px", 
+    // height: "450px", 
     display: "flex",
     flexDirection: "column", 
     alignItems: "center", 
     // justifyContent: "space-between",
-    marginBottom: "35px",
+    // marginBottom: "35px",
     // marginTop: "15px"
 }))
 
