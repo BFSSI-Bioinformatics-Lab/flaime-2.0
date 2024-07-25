@@ -14,12 +14,13 @@ export const PageTitleTypography = styled(Typography)(() => ({
     textAlign: "center",
 }));
 
-export const DataInfoContainer = styled(Box)(() => ({
+export const SectionTitleTypography = styled(Typography)(({theme}) => ({
+    marginLeft: "5%",
+    padding: "20px",
+    color: theme.palette.primary.dark,
+}));
+
+export const InfoContainer = styled(Box)(() => ({
     padding: "0 10%", 
-    display: "flex",
-    flexDirection: "column", 
     alignItems: "right", 
-    // justifyContent: "space-between",
-    // marginBottom: "35px",
-    // marginTop: "15px"
 }))
