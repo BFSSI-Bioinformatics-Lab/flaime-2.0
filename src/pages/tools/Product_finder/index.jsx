@@ -215,7 +215,7 @@ return (
       </div>
       <Divider style={{ width: '60vw', margin: '15px auto 5px auto' }}/>
       <div style={{ display: 'flex', justifyContent: 'space-around', paddingBottom: '25px' }}>
-        <SourceSelector onSelect={handleSourceChange} />
+        <SourceSelector onSelect={handleSourceChange} showTitle={true} label="Select a source"/>
         <RegionSelector onSelect={handleRegionChange} />
         <StoreSelector onSelect={handleStoreChange} />
       </div>
