@@ -87,61 +87,67 @@ export const buildTextMustClausesForAllFields = (searchInputs) => {
 
 export const buildFilterClauses = (searchInputs) => {
     const filters = [];
+
+    console.log('Building filters with inputs:', searchInputs);
     
-    // Filter by source ID, only if source is not null
-    if (searchInputs.Source & searchInputs.Source.value !== null) {
-        filters.push({
-            term: {
-                "source.id": parseInt(searchInputs.Source.value, 10)
-            }
-        });
+    try{
+        // Filter by source ID, only if source is not null
+        if (searchInputs.Source && searchInputs.Source.value !== null) {
+            filters.push({
+                term: {
+                    "source.id": parseInt(searchInputs.Source.value, 10)
+                }
+            });
+        }
+        
+        // Filter by store ID, only if store is not null
+        if (searchInputs.Store && searchInputs.Store.value !== null) {
+            filters.push({
+                term: {
+                    "store.id": parseInt(searchInputs.Store.value, 10)
+                }
+            });
+        }
+        
+        // Filter by region keyword, only if region is not null
+        if (searchInputs.Region && searchInputs.Region.value !== null) {
+            filters.push({
+                term: {
+                    "scrape_batch.region.keyword": searchInputs.Region.value
+                }
+            });
+        }
+        
+        // Handle date range filters
+        const dateFilter = {};
+        if (searchInputs.StartDate && searchInputs.StartDate.value && searchInputs.EndDate & searchInputs.EndDate.value) {
+            dateFilter.range = {
+                "scrape_batch.datetime": {
+                    gte: searchInputs.StartDate.value,
+                    lte: searchInputs.EndDate.value
+                }
+            };
+        } else if (searchInputs.StartDate && searchInputs.StartDate.value) {
+            dateFilter.range = {
+                "scrape_batch.datetime": {
+                    gte: searchInputs.StartDate.value
+                }
+            };
+        } else if (searchInputs.EndDate && searchInputs.EndDate.value) {
+            dateFilter.range = {
+                "scrape_batch.datetime": {
+                    lte: searchInputs.EndDate.value
+                }
+            };
+        }
+        
+        if (Object.keys(dateFilter).length !== 0) {
+            filters.push(dateFilter);
+        }
+    } catch(error){
+        console.error('Error building filter clauses:', error);
     }
-    
-    // Filter by store ID, only if store is not null
-    if (searchInputs.Store & searchInputs.Store.value !== null) {
-        filters.push({
-            term: {
-                "store.id": parseInt(searchInputs.Store.value, 10)
-            }
-        });
-    }
-    
-    // Filter by region keyword, only if region is not null
-    if (searchInputs.Region & searchInputs.Region.value !== null) {
-        filters.push({
-            term: {
-                "scrape_batche.region.keyword": searchInputs.Region.value
-            }
-        });
-    }
-    
-    // Handle date range filters
-    const dateFilter = {};
-    if (searchInputs.StartDate & searchInputs.StartDate.value && searchInputs.EndDate & searchInputs.EndDate.value) {
-        dateFilter.range = {
-            "scrape_batch.datetime": {
-                gte: searchInputs.StartDate.value,
-                lte: searchInputs.EndDate.value
-            }
-        };
-    } else if (searchInputs.StartDate & searchInputs.StartDate.value) {
-        dateFilter.range = {
-            "scrape_batch.datetime": {
-                gte: searchInputs.StartDate.value
-            }
-        };
-    } else if (searchInputs.EndDate & searchInputs.EndDate.value) {
-        dateFilter.range = {
-            "scrape_batch.datetime": {
-                lte: searchInputs.EndDate.value
-            }
-        };
-    }
-    
-    if (Object.keys(dateFilter).length !== 0) {
-        filters.push(dateFilter);
-    }
-    
+    console.log('Built filters:', filters);
     return filters;
 };
 

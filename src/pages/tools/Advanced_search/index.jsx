@@ -12,6 +12,7 @@ import NutritionFilter from '../../../components/inputs/NutritionFilter';
 import { useSearchFilters, buildTextMustClausesForAllFields } from '../util';
 import ColumnSelection  from '../../../components/table/ColumnSelection';
 import ToolTable  from '../../../components/table/ToolTable';
+import SearchResultSummary from '../../../components/misc/SearchResultSummary';
 import { ResetButton } from '../../../components/buttons';
 
 const AdvancedSearch = () => {
@@ -38,6 +39,9 @@ const AdvancedSearch = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
     const [totalProducts, setTotalProducts] = useState(0);
+    // for pagination
+    const [page, setPage] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(25);
 
     const [columnsVisibility, setColumnsVisibility] = useState({
         id: true,
@@ -124,18 +128,18 @@ const AdvancedSearch = () => {
         
         // Combining all must clauses including nutrient query if any conditions were added
         const finalQuery = {
-            from: 0,
-            size: 100,
+            from: page * rowsPerPage,
+            size: rowsPerPage,
             query: {
-            bool: {
+              bool: {
                 must: [
-                ...textMustClauses,
-                ...(nutrientQuery.nested.query.bool.must.length > 0 ? [nutrientQuery] : [])
+                  ...textMustClauses,
+                  ...(nutrientQuery.nested.query.bool.must.length > 0 ? [nutrientQuery] : [])
                 ]
+              }
             }
-            }
-        };
-        
+          };
+              
         console.log("Query Body:", JSON.stringify(finalQuery, null, 2));
         
         const elastic_url = `${process.env.REACT_APP_ELASTIC_URL}/_search`;
@@ -176,6 +180,18 @@ const AdvancedSearch = () => {
 
     const handleNutritionChange = (nutrition) => {
         handleInputChange('Nutrition', nutrition);
+    };
+
+    const handlePageChange = (event, newPage) => {
+        setPage(newPage);
+        handleSearch(newPage);
+    };
+
+    const handleRowsPerPageChange = (event) => {
+        const newRowsPerPage = parseInt(event.target.value, 10);
+        setRowsPerPage(newRowsPerPage);
+        setPage(0);
+        handleSearch(0, newRowsPerPage);
     };
 
     return (
@@ -266,11 +282,7 @@ const AdvancedSearch = () => {
                     </Button>
                     <ResetButton  variant="contained" onClick={handleReset}>Reset Search</ResetButton>
                 </div>
-                {totalProducts !== 0 && (
-                    <Divider style={{ marginTop: '20px', color: '#424242', marginBottom: '15px' }}> 
-                    Based on your search, there is a total of {totalProducts === 1 ? `${totalProducts} product.` : `${totalProducts === 10000 ? "over 10,000" : totalProducts} products.`}
-                    </Divider>
-                )}
+                <SearchResultSummary totalProducts={totalProducts} />
                 <>
                     <ColumnSelection
                         selectedColumns={selectedColumns}
@@ -278,10 +290,18 @@ const AdvancedSearch = () => {
                         columnsVisibility={columnsVisibility}
                         handleColumnSelection={handleColumnSelection}
                     />
-                    {isLoading ? (
+                            {isLoading ? (
                         <p>Loading...</p>
                     ) : (
-                        <ToolTable selectedColumns={selectedColumns} searchResults={searchResults} />
+                        <ToolTable 
+                        columns={selectedColumns}
+                        data={searchResults}
+                        totalCount={totalProducts}
+                        page={page}
+                        rowsPerPage={rowsPerPage}
+                        onPageChange={handlePageChange}
+                        onRowsPerPageChange={handleRowsPerPageChange}
+                      />
                     )}
                 </>
             </div>

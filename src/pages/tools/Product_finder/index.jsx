@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import dayjs from 'dayjs';
-import { Button, FormControl, FormControlLabel, Radio, RadioGroup, Typography, Divider } from '@mui/material';
+import { Button, FormControl, FormControlLabel, Radio, RadioGroup, Typography, Divider, TablePagination } from '@mui/material';
 import PageContainer from '../../../components/page/PageContainer';
 import TextFileInput from '../../../components/inputs/TextFileInput';
 import StoreSelector from '../../../components/inputs/StoreSelector';
@@ -11,6 +11,8 @@ import { useSearchFilters, buildFilterClauses, buildTextMustClauses, getFieldKey
 import { ResetButton } from '../../../components/buttons';
 import ColumnSelection  from '../../../components/table/ColumnSelection';
 import ToolTable  from '../../../components/table/ToolTable';
+import SearchResultSummary from '../../../components/misc/SearchResultSummary';
+
 
 const ProductFinder = () => {
 
@@ -27,12 +29,16 @@ const ProductFinder = () => {
     EndDate: { value: null }
   };
 
+  
+
   const [inputMode, setInputMode] = useState('Name');
   const [searchInputs, handleInputChange] = useSearchFilters(initialFilters);
   const [searchResults, setSearchResults] = useState([]);
   const [searchResultsIsLoading, setSearchResultsIsLoading] = useState(false);
   const [totalProducts, setTotalProducts] = useState(0);
-  
+  // for pagination
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(25);
 
   const [columnsVisibility, setColumnsVisibility] = useState({
     id: true,
@@ -63,6 +69,7 @@ const ProductFinder = () => {
     setSearchResults([]);
     setInputMode('Name');
     setTotalProducts(0); // Reset totalProducts to 0
+    handlePageChange(0); // reset pagination
   };
 
   // Handler for changing main input mode (radio buttons)
@@ -106,10 +113,21 @@ const ProductFinder = () => {
     handleInputChange('EndDate', { value: date });
   };
 
+  const handlePageChange = (event, newPage) => {
+    setPage(newPage);
+    handleSearch(newPage + 1, rowsPerPage);  // Add 1 because Elasticsearch uses 1-indexed pages
+  };
 
-  const handleSearch = async () => {
+  const handleRowsPerPageChange = (event) => {
+    const newRowsPerPage = parseInt(event.target.value, 10);
+    setRowsPerPage(newRowsPerPage);
+    setPage(0);
+    handleSearch(0, newRowsPerPage);
+};
+
+  
+  const handleSearch = async (newPage = 1) => {
     setSearchResultsIsLoading(true);
-
     console.log("Starting search with input mode:", inputMode);
     console.log("Search filters:", searchInputs);
 
@@ -118,44 +136,55 @@ const ProductFinder = () => {
     const textQueries = buildTextMustClauses(searchInputs.TextEntries, fieldKey);
 
     const queryBody = {
-        from: 0,
-        size: 10000,
-        query: {
-            bool: {
-                must: textQueries,
-                filter: filters
-            }
+      from: (newPage - 1) * rowsPerPage,
+      size: rowsPerPage,
+      query: {
+        bool: {
+          must: textQueries,
+          filter: filters
         }
+      }
     };
     
+    console.log("filters:", filters);
+    console.log("fieldKey:", fieldKey);
+    console.log("textQueries:", JSON.stringify(textQueries, null, 2));
     console.log("Elasticsearch query body:", JSON.stringify(queryBody, null, 2));
-
+  
     const elastic_url = `${process.env.REACT_APP_ELASTIC_URL}/_search`;
+  
     try {
-        const response = await fetch(elastic_url, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify(queryBody)
-        });
-        const data = await response.json();
-
-        // Log response from Elasticsearch
-        console.log("Elasticsearch response:", JSON.stringify(data, null, 2));
-
+      const response = await fetch(elastic_url, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(queryBody)
+      });
+  
+      const data = await response.json();
+      console.log("Elasticsearch response:", JSON.stringify(data, null, 2));
+  
+      if (response.ok) {
+        console.log("Search successful, hits:", data.hits.total.value);
         if (response.ok) {
-            console.log("Search successful, hits:", data.hits.hits.length);
-            setSearchResults(data.hits.hits);
-            setTotalProducts(data.hits.total.value);
-        } else {
-            console.error('Search API error:', data.error || data);
-            setSearchResults([]);
+          setSearchResults(data.hits.hits);
+          setTotalProducts(data.hits.total.value);
+          setPage(newPage - 1);  // Subtract 1 to convert to 0-indexed for Material-UI
         }
-    } catch (error) {
-        console.error('Search request failed:', error);
+      } else {
+        console.error('Search API error:', data.error || data);
         setSearchResults([]);
+        setTotalProducts(0);
+        setPage(0);
+      }
+    } catch (error) {
+      console.error('Search request failed:', error);
+      setSearchResults([]);
+      setTotalProducts(0);
+      setPage(0);
     }
+  
     setSearchResultsIsLoading(false);
-};
+  };
 console.log(searchResults);
 
 
@@ -204,35 +233,37 @@ return (
             onChange={handleEndDateChange}
         />
       </div>
-
-      
       <div style={{ marginTop: '20px' }}>
-        <Button variant="contained" onClick={handleSearch}>
+        <Button variant="contained" onClick={() => handleSearch(1)}>
           Search
         </Button>
-        <ResetButton  variant="contained" onClick={handleReset}>Reset Search</ResetButton>
+        <ResetButton variant="contained" onClick={handleReset}>Reset Search</ResetButton>
       </div>
-
-      {totalProducts !== 0 && (
-        <Divider style={{ marginTop: '20px', color: '#424242', marginBottom: '15px' }}> 
-          Based on your search, there is a total of {totalProducts === 1 ? `${totalProducts} product.` : `${totalProducts === 10000 ? "over 10,000" : totalProducts} products.`}
-        </Divider>
-      )}
-      
+      <SearchResultSummary totalProducts={totalProducts} />
       <>
-      <ColumnSelection
-        selectedColumns={selectedColumns}
-        setSelectedColumns={setSelectedColumns}
-        columnsVisibility={columnsVisibility}
-        handleColumnSelection={handleColumnSelection}
-      />
-      {searchResultsIsLoading ? (
-        <p>Loading...</p>
-      ) : (
-        <ToolTable selectedColumns={selectedColumns} searchResults={searchResults} />
-      )}
-    </>
-    </div>
+        <ColumnSelection
+          selectedColumns={selectedColumns}
+          setSelectedColumns={setSelectedColumns}
+          columnsVisibility={columnsVisibility}
+          handleColumnSelection={handleColumnSelection}
+        />
+        {searchResultsIsLoading ? (
+          <p>Loading...</p>
+        ) : (
+          <>
+            <ToolTable 
+              columns={selectedColumns}
+              data={searchResults}
+              totalCount={totalProducts}
+              page={page}
+              rowsPerPage={rowsPerPage}
+              onPageChange={handlePageChange}
+              onRowsPerPageChange={handleRowsPerPageChange}
+            />
+          </>
+        )}
+      </>
+      </div>
     </PageContainer>
   );
 };
