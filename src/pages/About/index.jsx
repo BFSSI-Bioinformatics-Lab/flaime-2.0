@@ -14,7 +14,7 @@ const About = () => {
       <PageTitleTypography variant="h3">About FLAIME</PageTitleTypography>
 
       <div>
-        <Typography variant="h4" color="primary.dark" style={{padding: "20px", marginLeft: "20px"}}>Terms and Conditions of the data in the FLAIME database</Typography>
+        <SectionTitleTypography variant="h4">Terms and Conditions of the data in the FLAIME database</SectionTitleTypography>
         <InfoContainer>
           <div id='flip'>
             <Typography variant='h5'>FLIP Data</Typography>
