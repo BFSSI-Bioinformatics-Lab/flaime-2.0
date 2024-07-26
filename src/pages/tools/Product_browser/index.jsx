@@ -212,25 +212,23 @@ const Product_browser = () => {
       <Divider variant="middle"/>
       <div>
       {/* Top row of search bars */}
-      <div style={{ display: 'flex', justifyContent: 'space-evenly', margin: '20px 20px' }}>
-        <Paper component="form" className="search-form" style={{ flex: 1, marginRight: '5px', maxWidth: '300px' }} onSubmit={handleSearchFormSubmit}>
+      <div style={{ display: 'flex', justifyContent: 'space-evenly', margin: '20px 20px', alignItems: 'center' }}>
+        <Paper component="form" className="search-form" style={{ flex: 1, marginRight: '5px', maxWidth: '300px', boxShadow: 'none' }} onSubmit={handleSearchFormSubmit}>
           <TextField
             label="Search ID"
             variant="outlined"
             value={idSearchTerm}
             onChange={handleIdSearch}
             fullWidth
-            size="small"
           />
         </Paper>
-        <Paper component="form" className="search-form" style={{ flex: 1, marginRight: '5px', maxWidth: '300px' }} onSubmit={handleSearchFormSubmit}>
+        <Paper component="form" className="search-form" style={{ flex: 1, marginRight: '5px', maxWidth: '300px', boxShadow: 'none' }} onSubmit={handleSearchFormSubmit}>
           <TextField
             label="Search by Store Name"
             variant="outlined"
             value={storeNameSearchTerm}
             onChange={handleStoreNameSearch}
             fullWidth
-            size="small"
           />
         </Paper>
         <SourceSelector
@@ -247,24 +245,22 @@ const Product_browser = () => {
       {/* Bottom row of search bars */}
       <div style={{ display: 'flex', justifyContent: 'space-evenly', margin: '10px 20px' }}>
         <Paper component="form" className="search-form" 
-        style={{ flex: 1, marginRight: '5px', maxWidth: '480px'  }} onSubmit={handleSearchFormSubmit}>
+        style={{ flex: 1, marginRight: '5px', maxWidth: '480px', boxShadow: 'none'  }} onSubmit={handleSearchFormSubmit}>
           <TextField
             label="Search by Product Name"
             variant="outlined"
             value={siteNameSearchTerm}
             onChange={handleSiteNameSearch}
             fullWidth
-            size="small"
           />
         </Paper>
-        <Paper component="form" className="search-form" style={{ flex: 1, maxWidth: '480px'  }} onSubmit={handleSearchFormSubmit}>
+        <Paper component="form" className="search-form" style={{ flex: 1, maxWidth: '480px', boxShadow: 'none'  }} onSubmit={handleSearchFormSubmit}>
               <TextField
                 label="Search by category"
                 variant="outlined"
                 value={categorySearchTerm}
                 onChange={handleCategorySearch}
                 fullWidth
-                size="small"
               />
         </Paper>
         {/* Reset search button */}
@@ -280,7 +276,7 @@ const Product_browser = () => {
       )}
       </div>
       {/* card component for number of products per store */}
-      <div>
+      <div style={{marginTop: '20px'}}>
         {/* <Divider style={{ marginTop: '10px', color: '#424242', marginBottom: '10px' }} >
                 Based on your search, these are the number of products per store:
             </Divider> */}
