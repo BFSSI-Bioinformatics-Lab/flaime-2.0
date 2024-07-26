@@ -164,10 +164,13 @@ const Product_browser = () => {
   };
 
   const handleSourceNameSearch = (selectedSource) => {
-    setSourceNameSearchTerm(selectedSource);
-    // if (selectedSource === '') { // if "Use all sources" is selected, clear the search
-    //   handleReset();
-    // }
+    // setSourceNameSearchTerm(selectedSource);
+    if (selectedSource === '-1') {
+      setSourceNameSearchTerm('');
+    } else {
+      setSourceNameSearchTerm(selectedSource);
+    }
+  
   };
   
   const handleSiteNameSearch = event => {
