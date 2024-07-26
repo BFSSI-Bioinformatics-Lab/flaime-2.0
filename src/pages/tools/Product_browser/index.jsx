@@ -141,7 +141,7 @@ const Product_browser = () => {
   
     fetchProducts();
   }, [page, rowsPerPage, idSearchTerm, storeNameSearchTerm, sourceNameSearchTerm, siteNameSearchTerm, categorySearchTerm]);
-  console.log(products);
+  
   const handleChangePage = (event, newPage) => {
     setPage(newPage + 1);
   };
