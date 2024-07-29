@@ -11,7 +11,7 @@ const SearchCard = ({ title, content, link }) => {
         <Typography variant='h5'>
           {title}
         </Typography>
-        <Typography variant='body1' style={{ marginTop: '15px' }}>
+        <Typography variant='body1' style={{ marginTop: '15px', minHeight: '96px' }}>
           {content}
         </Typography>
         <CardActions>

@@ -242,7 +242,7 @@ const AdvancedSearch = () => {
                 </div>
                 <Divider style={{ width: '60vw', margin: '10px auto' }}/>
                 <div style={{ display: 'flex', justifyContent: 'space-around', paddingBottom: '25px' }}>
-                    <SourceSelector onSelect={handleSelectorChange('Source')} />
+                    <SourceSelector onSelect={handleSelectorChange('Source') } showTitle={true} label="Select a source" />
                     <RegionSelector onSelect={handleSelectorChange('Region')} />
                     <StoreSelector onSelect={handleSelectorChange('Store')} />
                 </div>

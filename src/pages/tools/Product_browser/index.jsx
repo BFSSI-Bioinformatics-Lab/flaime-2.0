@@ -3,9 +3,11 @@ import axios from 'axios';
 import { useState, useEffect } from 'react';
 import { TableContainer, Table, TableHead, TableRow, TableCell, TableBody, Pagination, TextField, Paper, Typography, Card, CardContent } from '@mui/material';
 import PageContainer from '../../../components/page/PageContainer';
+import SourceSelector from '../../../components/inputs/SourceSelector';
 import { Link } from 'react-router-dom';
 import Divider from '@mui/material/Divider';
 import { ResetButton } from '../../../components/buttons';
+import { setsEqual } from 'chart.js/helpers';
 
 
 const Product_browser = () => {
@@ -20,6 +22,7 @@ const Product_browser = () => {
   const [sourceNameSearchTerm, setSourceNameSearchTerm] = useState('');
   const [siteNameSearchTerm, setSiteNameSearchTerm] = useState('');
   const [categorySearchTerm, setCategorySearchTerm] = useState('');
+  const [selectedSource, setSelectedSource] = React.useState('');
 
   const [aggregationResponse, setAggregationResponse] = useState(null);
 
@@ -61,11 +64,8 @@ const Product_browser = () => {
   
         if (sourceNameSearchTerm) {
           queryObject.bool.must.push({
-            match: {
-              "source.name": {
-                query: sourceNameSearchTerm,
-                operator: "and"
-              }
+            term: {
+              "source.id": sourceNameSearchTerm,
             }
           });
         }
@@ -141,7 +141,7 @@ const Product_browser = () => {
   
     fetchProducts();
   }, [page, rowsPerPage, idSearchTerm, storeNameSearchTerm, sourceNameSearchTerm, siteNameSearchTerm, categorySearchTerm]);
-
+  
   const handleChangePage = (event, newPage) => {
     setPage(newPage + 1);
   };
@@ -163,10 +163,16 @@ const Product_browser = () => {
     setStoreNameSearchTerm(event.target.value);
   };
 
-  const handleSourceNameSearch = event => {
-    setSourceNameSearchTerm(event.target.value);
+  const handleSourceNameSearch = (selectedSource) => {
+    // setSourceNameSearchTerm(selectedSource);
+    if (selectedSource === '-1') {
+      setSourceNameSearchTerm('');
+    } else {
+      setSourceNameSearchTerm(selectedSource);
+    }
+  
   };
-
+  
   const handleSiteNameSearch = event => {
     setSiteNameSearchTerm(event.target.value);
   };
@@ -174,6 +180,7 @@ const Product_browser = () => {
   const handleCategorySearch = event => {
     setCategorySearchTerm(event.target.value);
   };
+  
   // Reset search
   const handleReset = () => {
     setIdSearchTerm('');
@@ -182,7 +189,7 @@ const Product_browser = () => {
     setSiteNameSearchTerm('');
     setCategorySearchTerm('');
   };
-
+  console.log(sourceNameSearchTerm)
   // Search form submit - disables reset of table when enter is pressed
   const handleSearchFormSubmit = (event) => {
     event.preventDefault(); // Prevent form submission
@@ -205,37 +212,32 @@ const Product_browser = () => {
       <Divider variant="middle"/>
       <div>
       {/* Top row of search bars */}
-      <div style={{ display: 'flex', justifyContent: 'space-evenly', margin: '20px 20px' }}>
-        <Paper component="form" className="search-form" style={{ flex: 1, marginRight: '5px', maxWidth: '300px' }} onSubmit={handleSearchFormSubmit}>
+      <div style={{ display: 'flex', justifyContent: 'space-evenly', margin: '20px 20px', alignItems: 'center' }}>
+        <Paper component="form" className="search-form" style={{ flex: 1, marginRight: '5px', maxWidth: '300px', boxShadow: 'none' }} onSubmit={handleSearchFormSubmit}>
           <TextField
             label="Search ID"
             variant="outlined"
             value={idSearchTerm}
             onChange={handleIdSearch}
             fullWidth
-            size="small"
           />
         </Paper>
-        <Paper component="form" className="search-form" style={{ flex: 1, marginRight: '5px', maxWidth: '300px' }} onSubmit={handleSearchFormSubmit}>
+        <Paper component="form" className="search-form" style={{ flex: 1, marginRight: '5px', maxWidth: '300px', boxShadow: 'none' }} onSubmit={handleSearchFormSubmit}>
           <TextField
             label="Search by Store Name"
             variant="outlined"
             value={storeNameSearchTerm}
             onChange={handleStoreNameSearch}
             fullWidth
-            size="small"
           />
         </Paper>
-        <Paper component="form" className="search-form" style={{ flex: 1, marginRight: '5px', maxWidth: '300px' }} onSubmit={handleSearchFormSubmit}>
-          <TextField
-            label="Search by Data Source"
-            variant="outlined"
-            value={sourceNameSearchTerm}
-            onChange={handleSourceNameSearch}
-            fullWidth
-            size="small"
-          />
-        </Paper>
+        <SourceSelector
+        
+        onSelect={handleSourceNameSearch}
+        showTitle={false}
+        label="Search by Data Source"
+        value={sourceNameSearchTerm}
+      />
       </div>
       
 
@@ -243,24 +245,22 @@ const Product_browser = () => {
       {/* Bottom row of search bars */}
       <div style={{ display: 'flex', justifyContent: 'space-evenly', margin: '10px 20px' }}>
         <Paper component="form" className="search-form" 
-        style={{ flex: 1, marginRight: '5px', maxWidth: '480px'  }} onSubmit={handleSearchFormSubmit}>
+        style={{ flex: 1, marginRight: '5px', maxWidth: '480px', boxShadow: 'none'  }} onSubmit={handleSearchFormSubmit}>
           <TextField
             label="Search by Product Name"
             variant="outlined"
             value={siteNameSearchTerm}
             onChange={handleSiteNameSearch}
             fullWidth
-            size="small"
           />
         </Paper>
-        <Paper component="form" className="search-form" style={{ flex: 1, maxWidth: '480px'  }} onSubmit={handleSearchFormSubmit}>
+        <Paper component="form" className="search-form" style={{ flex: 1, maxWidth: '480px', boxShadow: 'none'  }} onSubmit={handleSearchFormSubmit}>
               <TextField
                 label="Search by category"
                 variant="outlined"
                 value={categorySearchTerm}
                 onChange={handleCategorySearch}
                 fullWidth
-                size="small"
               />
         </Paper>
         {/* Reset search button */}
@@ -276,7 +276,7 @@ const Product_browser = () => {
       )}
       </div>
       {/* card component for number of products per store */}
-      <div>
+      <div style={{marginTop: '20px'}}>
         {/* <Divider style={{ marginTop: '10px', color: '#424242', marginBottom: '10px' }} >
                 Based on your search, these are the number of products per store:
             </Divider> */}

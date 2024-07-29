@@ -4,7 +4,7 @@ import useSources from './useSources';
 import SelectInput from '../SelectInput';
 import { Typography } from '@mui/material';
 
-const SourceSelector = ({ onSelect }) => {
+const SourceSelector = ({ onSelect, showTitle, label }) => {
     const { sources, loading } = useSources();
     const [selectedSource, setSelectedSource] = React.useState('');
 
@@ -22,13 +22,13 @@ const SourceSelector = ({ onSelect }) => {
 
     return (
         <div style={{ maxWidth: '320px', minWidth: '280px' }}>
-            <Typography variant="h5" style={{ padding: '10px' }}>Select a Source</Typography>
+            {showTitle && <Typography variant="h5" style={{ padding: '10px' }}>{label}</Typography>}
             {loading ? <p>Loading...</p> : (
                 <SelectInput
                     options={sourcesWithDefault}
                     value={selectedSource}
                     onChange={handleSelectionChange}
-                    label="Select a Source"
+                    label={label}
                     InputProps={{ style: { minWidth: '280px', overflow: 'hidden' } }}
                 />
             )}
