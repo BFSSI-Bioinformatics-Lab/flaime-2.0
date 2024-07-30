@@ -10,12 +10,13 @@ const useNutrients = () => {
     const fetchNutrients = async () => {
         setLoading(true);
         try {
-            const { error, sources } = await GetAllNutrients();
-            if (error || !sources) {
+            const { error, nutrients } = await GetAllNutrients();
+            console.log(nutrients)
+            if (error || !nutrients) {
                 console.error('Error fetching nutrients:', error);
                 setNutrients([]);
             } else {
-                setNutrients(sources.map(nutrient => ({ label: nutrient.name, value: nutrient.id })));
+                setNutrients(nutrients.map(nutrient => ({ label: nutrient.name, value: nutrient.id })));
             }
         } catch (error) {
             console.error('Exception when fetching nutrients', error);

@@ -5,7 +5,6 @@ import { IndeterminateCheckbox } from './IndeterminateCheckbox';
 
 
 const categoryReducer = (state, action) => {
-  console.log(`Reducer action type: ${action.type}`);
   switch (action.type) {
     case 'FETCH_CATEGORIES':
       return {
@@ -23,7 +22,6 @@ const categoryReducer = (state, action) => {
         }),
       };
     case 'SELECT_CATEGORY':
-      console.log(`Selecting categories with payload: ${action.payload}`);
       return {
         ...state,
         selectedCategories: new Set(action.payload),
@@ -35,16 +33,11 @@ const categoryReducer = (state, action) => {
 
 const fetchData = async (dispatch, categoryScheme) => {
   try {
-    console.log(`Fetching categories and subcategories for scheme: ${categoryScheme}...`);
-
     const categoriesData = await GetAllCategories();
     const subcategoriesData = await GetAllSubcategories();
-    console.log("Categories loaded:", categoriesData);
-    console.log("Subcategories loaded:", subcategoriesData);
 
     // Filter categories based on the selected scheme
     const filteredCategories = categoriesData.categories.filter(cat => cat.scheme.toLowerCase() === categoryScheme.toLowerCase());
-    console.log(`Filtered categories based on scheme '${categoryScheme}': ${JSON.stringify(filteredCategories)}`);
 
     const categoriesWithSubcategories = filteredCategories.map(cat => ({
       ...cat,
@@ -52,7 +45,6 @@ const fetchData = async (dispatch, categoryScheme) => {
       isExpanded: false,
     }));
 
-    console.log("Categories with subcategories filtered:", categoriesWithSubcategories);
     dispatch({ type: 'FETCH_CATEGORIES', payload: categoriesWithSubcategories });
   } catch (error) {
     console.error("Failed to fetch data:", error);
@@ -107,7 +99,6 @@ const CategorySelector = ({ onChange }) => {
   }
 
   const toggleExpand = (category) => {
-    console.log(`Toggling expansion for category: ${category.id}`);
     dispatch({ type: 'TOGGLE_CATEGORY', payload: category.id });
   };
   
