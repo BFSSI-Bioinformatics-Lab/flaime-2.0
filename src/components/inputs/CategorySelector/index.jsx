@@ -48,7 +48,7 @@ const fetchData = async (dispatch, categoryScheme) => {
 
     const categoriesWithSubcategories = filteredCategories.map(cat => ({
       ...cat,
-      subcategories: subcategoriesData.subcategories.filter(sub => sub.categoryEntity.id === cat.id),
+      subcategories: subcategoriesData.subcategories.filter(sub => sub.category === cat.id),
       isExpanded: false,
     }));
 
@@ -61,7 +61,7 @@ const fetchData = async (dispatch, categoryScheme) => {
 };
 
 const CategorySelector = ({ onChange }) => {
-  const [categoryScheme, setCategoryScheme] = useState("ra");
+  const [categoryScheme, setCategoryScheme] = useState("reference amount");
 
   const [state, dispatch] = useReducer(categoryReducer, { categories: [], selectedCategories: new Set() });
 
@@ -115,11 +115,12 @@ const CategorySelector = ({ onChange }) => {
     <Card variant="outlined">
       <CardHeader title="Select Categories" />
       <CardContent style={{ paddingTop: '0' }}>
-        <p>Select the categories to filter by. Top level categories can be expanded to sub-categories. Note that the switch between RA and Sodium categories is currently non-functional.</p>
+        <p>Select the categories to filter by. Top level categories can be expanded to sub-categories.</p>
+        <p>Note that Nielsen data is categorized with the Sodium categories and most (but not all) of the web scraped data is categorized with the RA categories.</p>
         <Divider style={{ width: '300px', margin: ' 5px auto' }}/>
         <FormControl>
           <RadioGroup row value={categoryScheme} onChange={handleCategorySchemeChange} name="categoryScheme">
-            <FormControlLabel value="ra" control={<Radio />} label="Reference Amount" />
+            <FormControlLabel value="reference amount" control={<Radio />} label="Reference Amount" />
             <FormControlLabel value="sodium" control={<Radio />} label="Sodium" />
           </RadioGroup>
         </FormControl>
@@ -132,7 +133,7 @@ const CategorySelector = ({ onChange }) => {
                 checked={getSelectionState(category) === 'full'}
                 indeterminate={getSelectionState(category) === 'partial'}
                 onChange={() => handleCategorySelect(category)}
-                label={`${category.scheme} `}
+                label={``}
               />
               <span style={{ fontSize: '15px', margin: '0 4px'}}>
               {category.name}
