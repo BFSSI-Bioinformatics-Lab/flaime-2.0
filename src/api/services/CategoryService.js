@@ -1,24 +1,24 @@
 import { ApiQueryGet } from "../Api";
 
 const GetAllCategories = async () => {
-    const data = await ApiQueryGet("CategoryService/GetAllCategoriesAsync")
-    return { error: data.statusCode !== 200, categories: data.responseObjects }
-}
-
-const GetCategoriesByPagination = async ({ pageNumber, pageSize }) => {
-    const data = await ApiQueryGet(`CategoryService/GetCategoriesByPaginationAsync?pageNumber=${pageNumber}&pageSize=${pageSize}`)
-    return { error: data.statusCode !== 200, categories: data.responseObjects, pagination: data.pagination };
-}
+  try {
+    const data = await ApiQueryGet("categories/");
+    return { error: false, categories: data };
+  } catch (error) {
+    return { error: true, message: error.message };
+  }
+};
 
 const GetAllSubcategories = async () => {
-    const data = await ApiQueryGet("SubcategoryService/GetAllSubcategoriesAsync")
-    return { error: data.statusCode !== 200, subcategories: data.responseObjects }
-}
-
-
+  try {
+    const data = await ApiQueryGet("subcategories/");
+    return { error: false, subcategories: data };
+  } catch (error) {
+    return { error: true, message: error.message };
+  }
+};
 
 export {
-    GetAllCategories,
-    GetCategoriesByPagination,
-    GetAllSubcategories
-}
+  GetAllCategories,
+  GetAllSubcategories
+};

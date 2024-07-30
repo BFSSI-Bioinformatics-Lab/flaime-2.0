@@ -39,14 +39,12 @@ const fetchData = async (dispatch, categoryScheme) => {
 
     const categoriesData = await GetAllCategories();
     const subcategoriesData = await GetAllSubcategories();
+    console.log("Categories loaded:", categoriesData);
+    console.log("Subcategories loaded:", subcategoriesData);
 
-    // console.log(`Categories fetched: ${JSON.stringify(categoriesData.categories)}`);
-    // console.log(`Subcategories fetched: ${JSON.stringify(subcategoriesData.subcategories)}`);
-
-    // TODO: uncomment this once the schemes are loaded properly
-    const filteredCategories = categoriesData.categories;
-    // const filteredCategories = categoriesData.categories.filter(cat => cat.scheme === categoryScheme);
-    // console.log(`Filtered categories based on scheme '${categoryScheme}': ${JSON.stringify(filteredCategories)}`);
+    // Filter categories based on the selected scheme
+    const filteredCategories = categoriesData.categories.filter(cat => cat.scheme.toLowerCase() === categoryScheme.toLowerCase());
+    console.log(`Filtered categories based on scheme '${categoryScheme}': ${JSON.stringify(filteredCategories)}`);
 
     const categoriesWithSubcategories = filteredCategories.map(cat => ({
       ...cat,
@@ -54,7 +52,7 @@ const fetchData = async (dispatch, categoryScheme) => {
       isExpanded: false,
     }));
 
-    console.log("Categories with subcategories loaded:", categoriesWithSubcategories);
+    console.log("Categories with subcategories filtered:", categoriesWithSubcategories);
     dispatch({ type: 'FETCH_CATEGORIES', payload: categoriesWithSubcategories });
   } catch (error) {
     console.error("Failed to fetch data:", error);
@@ -63,7 +61,7 @@ const fetchData = async (dispatch, categoryScheme) => {
 };
 
 const CategorySelector = ({ onChange }) => {
-  const [categoryScheme, setCategoryScheme] = useState('RA');
+  const [categoryScheme, setCategoryScheme] = useState("ra");
 
   const [state, dispatch] = useReducer(categoryReducer, { categories: [], selectedCategories: new Set() });
 
@@ -80,8 +78,10 @@ const CategorySelector = ({ onChange }) => {
 
   const handleCategorySchemeChange = (event) => {
     setCategoryScheme(event.target.value);
+    dispatch({ type: 'SELECT_CATEGORY', payload: [] });
+    onChange([]);
   };
-  
+
   const handleCategorySelect = (category, isSubcategory = false) => {
     const newSelectedCategories = new Set(state.selectedCategories);
 
@@ -119,9 +119,8 @@ const CategorySelector = ({ onChange }) => {
         <Divider style={{ width: '300px', margin: ' 5px auto' }}/>
         <FormControl>
           <RadioGroup row value={categoryScheme} onChange={handleCategorySchemeChange} name="categoryScheme">
-            <FormControlLabel value="reference amount" control={<Radio />} label="Reference Amount" />
-            <FormControlLabel value="Sodium" control={<Radio />} label="Sodium" />
-            {/* <FormControlLabel value="nielsen" control={<Radio />} label="Nielsen" /> */}
+            <FormControlLabel value="ra" control={<Radio />} label="Reference Amount" />
+            <FormControlLabel value="sodium" control={<Radio />} label="Sodium" />
           </RadioGroup>
         </FormControl>
         <Divider />
