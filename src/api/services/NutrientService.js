@@ -1,17 +1,14 @@
 import { ApiQueryGet } from "../Api";
-import { addSignalController } from "../tools";
-
 
 const GetAllNutrients = async () => {
-    const data = await ApiQueryGet("NutrientService/GetAllNutrientsAsync");
-    return { error: data.statusCode !== 200, sources: data.responseObjects }
-}
-
-
-const GetAllNutrientsControlled = addSignalController(GetAllNutrients);
-
+  try {
+    const data = await ApiQueryGet("nutrients/");
+    return { error: false, nutrients: data };
+  } catch (error) {
+    return { error: true, message: error.message };
+  }
+};
 
 export {
     GetAllNutrients,
-    GetAllNutrientsControlled
-}
+};

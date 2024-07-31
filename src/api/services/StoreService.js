@@ -1,16 +1,14 @@
 import { ApiQueryGet } from "../Api";
-import { addSignalController } from "../tools";
-
 
 const GetAllStores = async () => {
-    const data = await ApiQueryGet("StoreService/GetAllStoresAsync")
-    return { error: data.statusCode !== 200, stores: data.responseObjects }
-}
-
-const GetAllStoresControlled = addSignalController(GetAllStores);
-
+  try {
+    const data = await ApiQueryGet("stores/");
+    return { error: false, stores: data };
+  } catch (error) {
+    return { error: true, message: error.message };
+  }
+};
 
 export {
     GetAllStores,
-    GetAllStoresControlled
-}
+};

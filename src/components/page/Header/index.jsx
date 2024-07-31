@@ -4,12 +4,8 @@ import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
-import IconButton from "@mui/material/IconButton";
-import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
-import Tooltip from '@mui/material/Tooltip';
-
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import PageContainer from '../PageContainer';
@@ -21,10 +17,7 @@ const Header = () => {
     const [anchorEl, setAnchorEl] = React.useState(null);
     const [anchorEl2, setAnchorEl2] = React.useState(null);
     const [anchorEl3, setAnchorEl3] = React.useState(null);
-    // const open = Boolean(anchorEl);
-    // const handleClick = (event) => {
-    //   setAnchorEl(event.currentTarget);
-    // };
+
     const handleClose = () => {
         setAnchorEl(null);
         setAnchorEl2(null);
@@ -34,11 +27,6 @@ const Header = () => {
     let navigate = useNavigate(); 
     const routeHome = () =>{ 
         let path = '/'; 
-        navigate(path);
-    }
-
-    const routeSignIn = () =>{ 
-        let path = '/signin'; 
         navigate(path);
     }
 
@@ -83,10 +71,6 @@ const Header = () => {
                         >
                             <MenuItem component={Link} to='/tools/product-browser'
                             onClick={handleClose}>Product Browser</MenuItem>
-                            <MenuItem component={Link} to='/tools/batch-browser'
-                            onClick={handleClose}>Batch Browser</MenuItem>
-                            <MenuItem component={Link} to='/tools/report-builder'
-                            onClick={handleClose}>Report Builder</MenuItem>
                             <MenuItem component={Link} to='/tools/product-finder'
                             onClick={handleClose}>Product Finder</MenuItem>
                             <MenuItem component={Link} to='/tools/advanced-search'
@@ -120,12 +104,6 @@ const Header = () => {
                                 },
                             }}}
                         >
-                            <MenuItem component={Link} to='/reports/store'
-                            onClick={handleClose}>By Store</MenuItem>
-                            <MenuItem component={Link} to='/reports/category'
-                            onClick={handleClose}>By Category</MenuItem>
-                            <MenuItem component={Link} to='/reports/nutrient'
-                            onClick={handleClose}>By Nutrient</MenuItem>
                         </Menu>
 
                         <Button
@@ -159,8 +137,6 @@ const Header = () => {
                             onClick={handleClose}>Quality</MenuItem>
                             <MenuItem component={Link} to='/data/download'
                             onClick={handleClose}>Download</MenuItem>
-                            <MenuItem component={Link} to='/data/visualizations'
-                            onClick={handleClose}>Visualizations</MenuItem>
                         </Menu>
 
                         <Button

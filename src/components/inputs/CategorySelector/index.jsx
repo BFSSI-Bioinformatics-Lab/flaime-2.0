@@ -5,7 +5,6 @@ import { IndeterminateCheckbox } from './IndeterminateCheckbox';
 
 
 const categoryReducer = (state, action) => {
-  console.log(`Reducer action type: ${action.type}`);
   switch (action.type) {
     case 'FETCH_CATEGORIES':
       return {
@@ -23,7 +22,6 @@ const categoryReducer = (state, action) => {
         }),
       };
     case 'SELECT_CATEGORY':
-      console.log(`Selecting categories with payload: ${action.payload}`);
       return {
         ...state,
         selectedCategories: new Set(action.payload),
@@ -35,26 +33,18 @@ const categoryReducer = (state, action) => {
 
 const fetchData = async (dispatch, categoryScheme) => {
   try {
-    console.log(`Fetching categories and subcategories for scheme: ${categoryScheme}...`);
-
     const categoriesData = await GetAllCategories();
     const subcategoriesData = await GetAllSubcategories();
 
-    // console.log(`Categories fetched: ${JSON.stringify(categoriesData.categories)}`);
-    // console.log(`Subcategories fetched: ${JSON.stringify(subcategoriesData.subcategories)}`);
-
-    // TODO: uncomment this once the schemes are loaded properly
-    const filteredCategories = categoriesData.categories;
-    // const filteredCategories = categoriesData.categories.filter(cat => cat.scheme === categoryScheme);
-    // console.log(`Filtered categories based on scheme '${categoryScheme}': ${JSON.stringify(filteredCategories)}`);
+    // Filter categories based on the selected scheme
+    const filteredCategories = categoriesData.categories.filter(cat => cat.scheme.toLowerCase() === categoryScheme.toLowerCase());
 
     const categoriesWithSubcategories = filteredCategories.map(cat => ({
       ...cat,
-      subcategories: subcategoriesData.subcategories.filter(sub => sub.categoryEntity.id === cat.id),
+      subcategories: subcategoriesData.subcategories.filter(sub => sub.category === cat.id),
       isExpanded: false,
     }));
 
-    console.log("Categories with subcategories loaded:", categoriesWithSubcategories);
     dispatch({ type: 'FETCH_CATEGORIES', payload: categoriesWithSubcategories });
   } catch (error) {
     console.error("Failed to fetch data:", error);
@@ -63,7 +53,7 @@ const fetchData = async (dispatch, categoryScheme) => {
 };
 
 const CategorySelector = ({ onChange }) => {
-  const [categoryScheme, setCategoryScheme] = useState('RA');
+  const [categoryScheme, setCategoryScheme] = useState("reference amount");
 
   const [state, dispatch] = useReducer(categoryReducer, { categories: [], selectedCategories: new Set() });
 
@@ -80,8 +70,10 @@ const CategorySelector = ({ onChange }) => {
 
   const handleCategorySchemeChange = (event) => {
     setCategoryScheme(event.target.value);
+    dispatch({ type: 'SELECT_CATEGORY', payload: [] });
+    onChange([]);
   };
-  
+
   const handleCategorySelect = (category, isSubcategory = false) => {
     const newSelectedCategories = new Set(state.selectedCategories);
 
@@ -107,7 +99,6 @@ const CategorySelector = ({ onChange }) => {
   }
 
   const toggleExpand = (category) => {
-    console.log(`Toggling expansion for category: ${category.id}`);
     dispatch({ type: 'TOGGLE_CATEGORY', payload: category.id });
   };
   
@@ -115,13 +106,13 @@ const CategorySelector = ({ onChange }) => {
     <Card variant="outlined">
       <CardHeader title="Select Categories" />
       <CardContent style={{ paddingTop: '0' }}>
-        <p>Select the categories to filter by. Top level categories can be expanded to sub-categories. Note that the switch between RA and Sodium categories is currently non-functional.</p>
+        <p>Select the categories to filter by. Top level categories can be expanded to sub-categories.</p>
+        <p>Note that Nielsen data is categorized with the Sodium categories and most (but not all) of the web scraped data is categorized with the RA categories.</p>
         <Divider style={{ width: '300px', margin: ' 5px auto' }}/>
         <FormControl>
           <RadioGroup row value={categoryScheme} onChange={handleCategorySchemeChange} name="categoryScheme">
             <FormControlLabel value="reference amount" control={<Radio />} label="Reference Amount" />
-            <FormControlLabel value="Sodium" control={<Radio />} label="Sodium" />
-            {/* <FormControlLabel value="nielsen" control={<Radio />} label="Nielsen" /> */}
+            <FormControlLabel value="sodium" control={<Radio />} label="Sodium" />
           </RadioGroup>
         </FormControl>
         <Divider />
@@ -133,7 +124,7 @@ const CategorySelector = ({ onChange }) => {
                 checked={getSelectionState(category) === 'full'}
                 indeterminate={getSelectionState(category) === 'partial'}
                 onChange={() => handleCategorySelect(category)}
-                label={`${category.scheme} `}
+                label={``}
               />
               <span style={{ fontSize: '15px', margin: '0 4px'}}>
               {category.name}
