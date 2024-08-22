@@ -21,9 +21,9 @@ const ToolTable = ({ columns, data, totalCount, page, rowsPerPage, onPageChange,
       case 'region':
         return item._source.scrape_batch.region;
       case 'category':
-        return item._source.category && item._source.category.name ? item._source.category.name : 'No category';
+        return item._source.category ? item._source.category : 'No category';
       case 'subcategory':
-        return item._source.subcategory && item._source.subcategory.name ? item._source.subcategory.name : 'No subcategory';
+        return item._source.subcategory ? item._source.subcategory : 'No subcategory';
       default:
         return item._source[column] || '';
     }
