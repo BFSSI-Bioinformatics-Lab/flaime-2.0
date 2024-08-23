@@ -21,7 +21,10 @@ const ProductDetail = () => {
 
         const fetchProductData = async () => {
             setLoading(true);
+            setError(null);
+            console.log("Fetching product data...");
             const result = await GetStoreProductByID(productId, controller);
+            console.log("API result:", result);
             if (result.error) {
                 setError(result.message);
             } else {
@@ -39,10 +42,13 @@ const ProductDetail = () => {
         return <Typography>Loading...</Typography>;
     }
 
+    if (error) {
+        return <Typography>Error: {error}</Typography>;
+    }
+
     if (!product) {
         return <Typography>Error: Product not found.</Typography>;
     }
-
 
     const productDescItems = [
         { name: "Product Name", value: product.site_name },

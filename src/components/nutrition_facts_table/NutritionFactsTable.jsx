@@ -62,7 +62,7 @@ const NutritionFactsTable = ({ product }) => (
                 {nutritionFact.amount !== null && `${nutritionFact.amount} ${nutritionFact.amount_unit.name}`}
               </TableCell>
               <TableCell>
-                {nutritionFact.daily_value !== null ? `${(nutritionFact.daily_value).toFixed(0)}%` : ""}
+                {nutritionFact.daily_value !== null ? `${nutritionFact.daily_value}%` : ""}
               </TableCell>
             </TableRow>
           ))}
