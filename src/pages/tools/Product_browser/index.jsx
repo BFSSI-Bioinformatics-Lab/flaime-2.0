@@ -21,10 +21,39 @@ const ProductBrowser = () => {
     category: ''
   });
   const [aggregationResponse, setAggregationResponse] = useState(null);
+  const [isSearching, setIsSearching] = useState(false);
 
   useEffect(() => {
-    fetchProducts();
-  }, [page, searchTerms]);
+    fetchInitialData();
+  }, []);
+
+  useEffect(() => {
+    if (isSearching) {
+      fetchProducts();
+    }
+  }, [page, searchTerms, isSearching]);
+
+  const fetchInitialData = async () => {
+    try {
+      const elasticUrl = `${process.env.REACT_APP_ELASTIC_URL}/_search`;
+      const response = await axios.post(elasticUrl, {
+        query: { match_all: {} },
+        aggs: {
+          group_by_store: {
+            terms: { field: "store.name.keyword" }
+          }
+        },
+        from: 0,
+        size: rowsPerPage
+      });
+      
+      setProducts(response.data.hits.hits.map(hit => hit._source));
+      setTotalProducts(response.data.hits.total.value);
+      setAggregationResponse(response.data.aggregations);
+    } catch (error) {
+      console.error('Error fetching initial data:', error);
+    }
+  };
 
   const fetchProducts = async () => {
     try {
@@ -89,20 +118,24 @@ const ProductBrowser = () => {
   const handleSearchChange = (field) => (event) => {
     setSearchTerms(prev => ({ ...prev, [field]: event.target.value }));
     setPage(1);
+    setIsSearching(true);
   };
 
   const handleSourceNameSearch = (selectedSource) => {
     setSearchTerms(prev => ({ ...prev, sourceName: selectedSource === '-1' ? '' : selectedSource }));
     setPage(1);
+    setIsSearching(true);
   };
 
   const handleReset = () => {
     setSearchTerms({ id: '', storeName: '', sourceName: '', siteName: '', category: '' });
     setPage(1);
+    setIsSearching(false);
+    fetchInitialData();
   };
 
   const handleChangePage = (event, newPage) => {
-    setPage(newPage + 1);
+    setPage(newPage);
   };
 
   return (
@@ -126,7 +159,7 @@ const ProductBrowser = () => {
 
       <StoreCards aggregationResponse={aggregationResponse} />
 
-      {Object.values(searchTerms).some(term => term !== '') && (
+      {isSearching && (
         <SearchResults totalProducts={totalProducts} />
       )}
 
