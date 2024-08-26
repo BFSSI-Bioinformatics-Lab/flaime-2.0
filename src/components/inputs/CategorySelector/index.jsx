@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useReducer, useCallback } from 'react';
-import { FormControl, FormControlLabel, Radio, RadioGroup, Card, CardContent, CardHeader, Divider, Button } from '@mui/material';
-import { GetAllCategories, GetAllSubcategories } from '../../../api/services/CategoryService';
+import { FormControl, FormControlLabel, Radio, RadioGroup, Card, CardContent, CardHeader, Divider, Button, CircularProgress } from '@mui/material';
+import { GetAllCategories } from '../../../api/services/CategoryService';
 import { IndeterminateCheckbox } from './IndeterminateCheckbox';
 
 
@@ -10,6 +10,7 @@ const categoryReducer = (state, action) => {
       return {
         ...state,
         categories: action.payload,
+        isLoading: false,
       };
     case 'TOGGLE_CATEGORY':
       return {
@@ -26,51 +27,65 @@ const categoryReducer = (state, action) => {
         ...state,
         selectedCategories: new Set(action.payload),
       };
+    case 'CLEAR_SELECTION':
+      return {
+        ...state,
+        selectedCategories: new Set(),
+      };
+    case 'SET_LOADING':
+      return {
+        ...state,
+        isLoading: true,
+      };
     default:
       return state;
   }
 };
 
-const fetchData = async (dispatch, categoryScheme) => {
+const fetchData = async (categoryScheme) => {
   try {
     const categoriesData = await GetAllCategories();
-    const subcategoriesData = await GetAllSubcategories();
-
-    // Filter categories based on the selected scheme
-    const filteredCategories = categoriesData.categories.filter(cat => cat.scheme.toLowerCase() === categoryScheme.toLowerCase());
-
-    const categoriesWithSubcategories = filteredCategories.map(cat => ({
-      ...cat,
-      subcategories: subcategoriesData.subcategories.filter(sub => sub.category === cat.id),
-      isExpanded: false,
-    }));
-
-    dispatch({ type: 'FETCH_CATEGORIES', payload: categoriesWithSubcategories });
+    const filteredCategories = categoriesData.categories.filter(cat => 
+      cat.scheme.toLowerCase() === categoryScheme.toLowerCase()
+    );
+    console.log('Fetched categories:', filteredCategories);
+    return filteredCategories;
   } catch (error) {
     console.error("Failed to fetch data:", error);
-    // TODO: dispatch an error state or show a message
+    return [];
   }
 };
 
 const CategorySelector = ({ onChange }) => {
   const [categoryScheme, setCategoryScheme] = useState("reference amount");
 
-  const [state, dispatch] = useReducer(categoryReducer, { categories: [], selectedCategories: new Set() });
+  const [state, dispatch] = useReducer(categoryReducer, { 
+    categories: [], 
+    selectedCategories: new Set(),
+    isLoading: true,
+  });
 
   const getSelectionState = useCallback((category) => {
-    const subcategoryIds = category.subcategories.map(sub => sub.id);
+    const subcategories = category.children || category.subcategories || [];
+    const subcategoryIds = subcategories.map(sub => sub.id);
     const selectedSubcategoryCount = subcategoryIds.filter(id => state.selectedCategories.has(id)).length;
     return selectedSubcategoryCount === 0 ? 'none' :
            selectedSubcategoryCount === subcategoryIds.length ? 'full' : 'partial';
   }, [state.selectedCategories]);
-
+  
   useEffect(() => {
-    fetchData(dispatch, categoryScheme);
-  }, [dispatch, categoryScheme]);
+    const loadCategories = async () => {
+      dispatch({ type: 'SET_LOADING' });
+      const categories = await fetchData(categoryScheme);
+      dispatch({ type: 'FETCH_CATEGORIES', payload: categories });
+    };
+    loadCategories();
+  }, [categoryScheme]);
 
   const handleCategorySchemeChange = (event) => {
-    setCategoryScheme(event.target.value);
-    dispatch({ type: 'SELECT_CATEGORY', payload: [] });
+    const newScheme = event.target.value;
+    setCategoryScheme(newScheme);
+    dispatch({ type: 'CLEAR_SELECTION' });
     onChange([]);
   };
 
@@ -78,10 +93,11 @@ const CategorySelector = ({ onChange }) => {
     const newSelectedCategories = new Set(state.selectedCategories);
 
     if (!isSubcategory) {
-      if (category.subcategories.every(sub => newSelectedCategories.has(sub.id))) {
-        category.subcategories.forEach(sub => newSelectedCategories.delete(sub.id));
+      const subcategories = category.children || category.subcategories || [];
+      if (subcategories.every(sub => newSelectedCategories.has(sub.id))) {
+        subcategories.forEach(sub => newSelectedCategories.delete(sub.id));
       } else {
-        category.subcategories.forEach(sub => newSelectedCategories.add(sub.id));
+        subcategories.forEach(sub => newSelectedCategories.add(sub.id));
       }
     } else {
       if (newSelectedCategories.has(category.id)) {
@@ -117,7 +133,13 @@ const CategorySelector = ({ onChange }) => {
         </FormControl>
         <Divider />
         <div style={{ height: '300px', overflowY: 'auto' }}>
-          {state.categories.map(category => (
+          {state.isLoading ? (
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+              <CircularProgress size={24} style={{ marginRight: '10px' }} />
+              <span>Loading...</span>
+            </div>
+          ) : (
+          state.categories.map(category => (
             <div key={category.id} style={{ margin: '5px 0' }}>
               <IndeterminateCheckbox
                 id={`category-${category.id}`}
@@ -130,15 +152,17 @@ const CategorySelector = ({ onChange }) => {
               {category.name}
               </span>
               
-              <Button variant='outlined' size='small' style={{ marginLeft: '5px', minWidth: '22px', padding: '0' }}
-                onClick={() => toggleExpand(category)}
-                aria-label={category.isExpanded ? `Collapse ${category.name}` : `Expand ${category.name}`}
-              >
-                {category.isExpanded ? '-' : '+'}
-              </Button>
-              {category.isExpanded && (
+              {(category.children || category.subcategories) && (
+                <Button variant='outlined' size='small' style={{ marginLeft: '5px', minWidth: '22px', padding: '0' }}
+                  onClick={() => toggleExpand(category)}
+                  aria-label={category.isExpanded ? `Collapse ${category.name}` : `Expand ${category.name}`}
+                >
+                  {category.isExpanded ? '-' : '+'}
+                </Button>
+              )}
+              {category.isExpanded && (category.children || category.subcategories) && (
                 <div style={{ marginLeft: '20px' }}>
-                  {category.subcategories.map(sub => (
+                  {(category.children || category.subcategories).map(sub => (
                     <div key={sub.id} style={{ display: 'block' }}>
                       <IndeterminateCheckbox
                         id={`subcategory-${sub.id}`}
@@ -153,7 +177,8 @@ const CategorySelector = ({ onChange }) => {
                 </div>
               )}
             </div>
-          ))}
+            ))
+          )}
         </div>
       </CardContent>
     </Card>
