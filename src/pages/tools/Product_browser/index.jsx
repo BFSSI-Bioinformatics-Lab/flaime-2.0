@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import {
   TableContainer, Table, TableHead, TableRow, TableCell, TableBody,
@@ -23,72 +23,18 @@ const ProductBrowser = () => {
   const [aggregationResponse, setAggregationResponse] = useState(null);
   const [isSearching, setIsSearching] = useState(false);
 
-  useEffect(() => {
-    fetchInitialData();
+  const fetchData = useCallback(async (url, body) => {
+    try {
+      const response = await axios.post(url, body);
+      setProducts(response.data.hits.hits.map(hit => hit._source));
+      setTotalProducts(response.data.hits.total.value);
+      setAggregationResponse(response.data.aggregations);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
   }, []);
 
-  useEffect(() => {
-    fetchProducts();
-  }, [page, searchTerms, isSearching]);
-
-  const fetchInitialData = async () => {
-    try {
-      const elasticUrl = `${process.env.REACT_APP_ELASTIC_URL}/_search`;
-      const response = await axios.post(elasticUrl, {
-        query: { 
-          bool: {
-            must: [{ match: { most_recent_flag: { query: true } } }]
-          }
-        },
-        aggs: {
-          group_by_store: {
-            filter: {
-              bool: {
-                must: [{ match: { most_recent_flag: { query: true } } }]
-              }
-            },
-            aggs: {
-              store_bucket: {
-                terms: { 
-                  field: "store.name.keyword",
-                  size: 25
-                }
-              }
-            }
-          }
-        },
-        from: 0,
-        size: rowsPerPage
-      });
-            
-      setProducts(response.data.hits.hits.map(hit => hit._source));
-      setTotalProducts(response.data.hits.total.value);
-      setAggregationResponse(response.data.aggregations);
-    } catch (error) {
-      console.error('Error fetching initial data:', error);
-    }
-  };
-  
-  const fetchProducts = async () => {
-    try {
-      const queryObject = buildQueryObject();
-      const elasticUrl = `${process.env.REACT_APP_ELASTIC_URL}/_search`;
-      const response = await axios.post(elasticUrl, {
-        query: queryObject,
-        aggs: buildAggregations(),
-        from: (page - 1) * rowsPerPage,
-        size: rowsPerPage
-      });
-            
-      setProducts(response.data.hits.hits.map(hit => hit._source));
-      setTotalProducts(response.data.hits.total.value);
-      setAggregationResponse(response.data.aggregations);
-    } catch (error) {
-      console.error('Error fetching products:', error);
-    }
-  };
-  
-  const buildQueryObject = () => {
+  const buildQueryObject = useCallback(() => {
     const queryObject = {
       bool: {
         must: [{ match: { most_recent_flag: { query: true } } }]
@@ -97,93 +43,82 @@ const ProductBrowser = () => {
 
     Object.entries(searchTerms).forEach(([key, value]) => {
       if (value) {
-        switch (key) {
-          case 'id':
-            queryObject.bool.must.push({ term: { id: value } });
-            break;
-          case 'storeName':
-            queryObject.bool.must.push({ match: { "store.name": { query: value, operator: "and" } } });
-            break;
-          case 'sourceName':
-            queryObject.bool.must.push({ term: { "source.id": value } });
-            break;
-          case 'siteName':
-          case 'category':
-            queryObject.bool.must.push({ match: { [key === 'siteName' ? 'site_name' : "category.name"]: { query: value, operator: "and" } } });
-            break;
-        }
+        const fieldMapping = {
+          id: { term: { id: value } },
+          storeName: { match: { "store.name": { query: value, operator: "and" } } },
+          sourceName: { term: { "source.id": value } },
+          siteName: { match: { site_name: { query: value, operator: "and" } } },
+          category: { match: { "category.name": { query: value, operator: "and" } } }
+        };
+        queryObject.bool.must.push(fieldMapping[key]);
       }
     });
 
     return queryObject;
-  };
+  }, [searchTerms]);
 
-  const buildAggregations = () => {
-    const filters = [];
-  
-    Object.entries(searchTerms).forEach(([key, value]) => {
-      if (value) {
-        switch (key) {
-          case 'id':
-            filters.push({ term: { id: value } });
-            break;
-          case 'storeName':
-            filters.push({ match: { "store.name": { query: value, operator: "and" } } });
-            break;
-          case 'sourceName':
-            filters.push({ term: { "source.id": value } });
-            break;
-          case 'siteName':
-            filters.push({ match: { site_name: { query: value, operator: "and" } } });
-            break;
-          case 'category':
-            filters.push({ match: { "category.name": { query: value, operator: "and" } } });
-            break;
-        }
-      }
-    });
-  
+  const buildAggregations = useCallback(() => {
+    const filters = Object.entries(searchTerms)
+      .filter(([, value]) => value)
+      .map(([key, value]) => {
+        const fieldMapping = {
+          id: { term: { id: value } },
+          storeName: { match: { "store.name": { query: value, operator: "and" } } },
+          sourceName: { term: { "source.id": value } },
+          siteName: { match: { site_name: { query: value, operator: "and" } } },
+          category: { match: { "category.name": { query: value, operator: "and" } } }
+        };
+        return fieldMapping[key];
+      });
+
     return {
       group_by_store: {
-        filter: {
-          bool: {
-            must: filters
-          }
-        },
+        filter: { bool: { must: filters } },
         aggs: {
           store_bucket: {
             terms: { 
               field: "store.name.keyword",
-              size: 100 // Adjust this value to ensure all stores are included
+              size: 100
             }
           }
         }
       }
     };
-  };
+  }, [searchTerms]);
 
-  const handleSearchChange = (field) => (event) => {
+  const fetchProducts = useCallback(() => {
+    const elasticUrl = `${process.env.REACT_APP_ELASTIC_URL}/_search`;
+    const body = {
+      query: buildQueryObject(),
+      aggs: buildAggregations(),
+      from: (page - 1) * rowsPerPage,
+      size: rowsPerPage
+    };
+    fetchData(elasticUrl, body);
+  }, [fetchData, buildQueryObject, buildAggregations, page, rowsPerPage]);
+
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
+
+  const handleSearchChange = useCallback((field) => (event) => {
     setSearchTerms(prev => ({ ...prev, [field]: event.target.value }));
     setPage(1);
     setIsSearching(true);
-  };
+  }, []);
 
-  const handleSourceNameSearch = (selectedSource) => {
+  const handleSourceNameSearch = useCallback((selectedSource) => {
     setSearchTerms(prev => ({ ...prev, sourceName: selectedSource === '-1' ? '' : selectedSource }));
     setPage(1);
     setIsSearching(true);
-  };
+  }, []);
 
-  const handleReset = () => {
+  const handleReset = useCallback(() => {
     setSearchTerms({ id: '', storeName: '', sourceName: '', siteName: '', category: '' });
     setPage(1);
     setIsSearching(false);
-    fetchInitialData();
-  };
-
-  const handleChangePage = (event, newPage) => {
-    setPage(newPage);
-  };
+    fetchProducts();
+  }, [fetchProducts]);
 
   return (
     <div style={{ width: '80vw', margin: '0 auto' }}>
@@ -215,14 +150,14 @@ const ProductBrowser = () => {
       <Pagination
         count={Math.ceil(totalProducts / rowsPerPage)}
         page={page}
-        onChange={handleChangePage}
+        onChange={(_, newPage) => setPage(newPage)}
         siblingCount={1}
       />
     </div>
   );
 };
 
-const SearchForm = ({ searchTerms, handleSearchChange, handleSourceNameSearch, handleReset }) => (
+const SearchForm = React.memo(({ searchTerms, handleSearchChange, handleSourceNameSearch, handleReset }) => (
   <div>
     <div style={{ display: 'flex', justifyContent: 'space-evenly', margin: '20px 20px', alignItems: 'center' }}>
       <SearchField label="Search ID" value={searchTerms.id} onChange={handleSearchChange('id')} />
@@ -240,9 +175,9 @@ const SearchForm = ({ searchTerms, handleSearchChange, handleSourceNameSearch, h
       <ResetButton variant="contained" onClick={handleReset}>Reset Search</ResetButton>
     </div>
   </div>
-);
+));
 
-const SearchField = ({ label, value, onChange, style = {} }) => (
+const SearchField = React.memo(({ label, value, onChange, style = {} }) => (
   <Paper component="form" className="search-form" style={{ flex: 1, marginRight: '5px', maxWidth: '300px', boxShadow: 'none', ...style }} onSubmit={(e) => e.preventDefault()}>
     <TextField
       label={label}
@@ -252,9 +187,9 @@ const SearchField = ({ label, value, onChange, style = {} }) => (
       fullWidth
     />
   </Paper>
-);
+));
 
-const StoreCards = ({ aggregationResponse }) => {
+const StoreCards = React.memo(({ aggregationResponse }) => {
   const stores = aggregationResponse?.group_by_store?.store_bucket?.buckets || [];
 
   return (
@@ -278,17 +213,17 @@ const StoreCards = ({ aggregationResponse }) => {
       </div>
     </div>
   );
-};
+});
 
-const SearchResults = ({ totalProducts }) => (
+const SearchResults = React.memo(({ totalProducts }) => (
   <div>
     <Divider style={{ marginTop: '20px', color: '#424242', marginBottom: '15px' }}>
       Based on your search, there is a total of {totalProducts === 10000 ? "over 10,000" : totalProducts} products.
     </Divider>
   </div>
-);
+));
 
-const ProductTable = ({ products }) => (
+const ProductTable = React.memo(({ products }) => (
   <TableContainer style={{ width: '80vw', margin: '0 auto' }}>
     <Table>
       <TableHead>
@@ -315,6 +250,6 @@ const ProductTable = ({ products }) => (
       </TableBody>
     </Table>
   </TableContainer>
-);
+));
 
 export default ProductBrowser;
