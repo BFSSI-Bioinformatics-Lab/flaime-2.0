@@ -28,9 +28,7 @@ const ProductBrowser = () => {
   }, []);
 
   useEffect(() => {
-    if (isSearching) {
-      fetchProducts();
-    }
+    fetchProducts();
   }, [page, searchTerms, isSearching]);
 
   const fetchInitialData = async () => {
