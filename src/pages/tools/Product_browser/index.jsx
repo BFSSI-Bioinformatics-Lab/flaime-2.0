@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { 
-  TableContainer, Table, TableHead, TableRow, TableCell, TableBody, 
-  Pagination, TextField, Paper, Typography, Card, CardContent, Divider 
+import {
+  TableContainer, Table, TableHead, TableRow, TableCell, TableBody,
+  Pagination, TextField, Paper, Typography, Card, CardContent, Divider
 } from '@mui/material';
 import { Link } from 'react-router-dom';
 import SourceSelector from '../../../components/inputs/SourceSelector';
@@ -35,16 +35,32 @@ const ProductBrowser = () => {
     try {
       const elasticUrl = `${process.env.REACT_APP_ELASTIC_URL}/_search`;
       const response = await axios.post(elasticUrl, {
-        query: { match_all: {} },
+        query: { 
+          bool: {
+            must: [{ match: { most_recent_flag: { query: true } } }]
+          }
+        },
         aggs: {
           group_by_store: {
-            terms: { field: "store.name.keyword" }
+            filter: {
+              bool: {
+                must: [{ match: { most_recent_flag: { query: true } } }]
+              }
+            },
+            aggs: {
+              store_bucket: {
+                terms: { 
+                  field: "store.name.keyword",
+                  size: 25
+                }
+              }
+            }
           }
         },
         from: 0,
         size: rowsPerPage
       });
-      
+            
       setProducts(response.data.hits.hits.map(hit => hit._source));
       setTotalProducts(response.data.hits.total.value);
       setAggregationResponse(response.data.aggregations);
@@ -52,7 +68,7 @@ const ProductBrowser = () => {
       console.error('Error fetching initial data:', error);
     }
   };
-
+  
   const fetchProducts = async () => {
     try {
       const queryObject = buildQueryObject();
@@ -63,7 +79,7 @@ const ProductBrowser = () => {
         from: (page - 1) * rowsPerPage,
         size: rowsPerPage
       });
-      
+            
       setProducts(response.data.hits.hits.map(hit => hit._source));
       setTotalProducts(response.data.hits.total.value);
       setAggregationResponse(response.data.aggregations);
@@ -71,7 +87,7 @@ const ProductBrowser = () => {
       console.error('Error fetching products:', error);
     }
   };
-
+  
   const buildQueryObject = () => {
     const queryObject = {
       bool: {
@@ -102,16 +118,49 @@ const ProductBrowser = () => {
     return queryObject;
   };
 
-  const buildAggregations = () => ({
-    group_by_store: {
-      terms: { field: "store.name.keyword" },
-      aggs: {
-        category_search_count: { filter: { term: { "category.name": searchTerms.category } } },
-        categories_names_count: { terms: { field: "category.name.keyword" } },
-        site_name_search_count: { filter: { term: { site_name: searchTerms.siteName } } }
+  const buildAggregations = () => {
+    const filters = [];
+  
+    Object.entries(searchTerms).forEach(([key, value]) => {
+      if (value) {
+        switch (key) {
+          case 'id':
+            filters.push({ term: { id: value } });
+            break;
+          case 'storeName':
+            filters.push({ match: { "store.name": { query: value, operator: "and" } } });
+            break;
+          case 'sourceName':
+            filters.push({ term: { "source.id": value } });
+            break;
+          case 'siteName':
+            filters.push({ match: { site_name: { query: value, operator: "and" } } });
+            break;
+          case 'category':
+            filters.push({ match: { "category.name": { query: value, operator: "and" } } });
+            break;
+        }
       }
-    }
-  });
+    });
+  
+    return {
+      group_by_store: {
+        filter: {
+          bool: {
+            must: filters
+          }
+        },
+        aggs: {
+          store_bucket: {
+            terms: { 
+              field: "store.name.keyword",
+              size: 100 // Adjust this value to ensure all stores are included
+            }
+          }
+        }
+      }
+    };
+  };
 
   const handleSearchChange = (field) => (event) => {
     setSearchTerms(prev => ({ ...prev, [field]: event.target.value }));
@@ -147,9 +196,9 @@ const ProductBrowser = () => {
         </ul>
       </Typography>
       <Divider variant="middle" />
-      
-      <SearchForm 
-        searchTerms={searchTerms} 
+
+      <SearchForm
+        searchTerms={searchTerms}
         handleSearchChange={handleSearchChange}
         handleSourceNameSearch={handleSourceNameSearch}
         handleReset={handleReset}
@@ -205,27 +254,31 @@ const SearchField = ({ label, value, onChange, style = {} }) => (
   </Paper>
 );
 
-const StoreCards = ({ aggregationResponse }) => (
-  <div>
-    <Divider style={{ marginTop: '20px', color: '#424242', marginBottom: '15px' }}>
-      Products per store:
-    </Divider>
-    <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-evenly', maxWidth: '880px', margin: '0 auto' }}>
-      {aggregationResponse && aggregationResponse.group_by_store.buckets.slice(0, 4).map((store, index) => (
-        <Card key={store.key} style={{ flex: '1 0 calc(25% - 10px)', maxWidth: '180px', boxSizing: 'border-box', textAlign: 'center', marginBottom: '10px' }}>
-          <CardContent>
-            <Typography variant="h6" component="h2" style={{ fontSize: '14px' }}>
-              {store.key}
-            </Typography>
-            <Typography color="textSecondary">
-              {store.doc_count}
-            </Typography>
-          </CardContent>
-        </Card>
-      ))}
+const StoreCards = ({ aggregationResponse }) => {
+  const stores = aggregationResponse?.group_by_store?.store_bucket?.buckets || [];
+
+  return (
+    <div>
+      <Divider style={{ marginTop: '20px', color: '#424242', marginBottom: '15px' }}>
+        Products per store:
+      </Divider>
+      <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-evenly', maxWidth: '880px', margin: '0 auto' }}>
+        {stores.map((store) => (
+          <Card key={store.key} style={{ flex: '1 0 calc(25% - 10px)', maxWidth: '180px', boxSizing: 'border-box', textAlign: 'center', marginBottom: '10px' }}>
+            <CardContent>
+              <Typography variant="h6" component="h2" style={{ fontSize: '14px' }}>
+                {store.key}
+              </Typography>
+              <Typography color="textSecondary">
+                {store.doc_count.toLocaleString()}
+              </Typography>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 const SearchResults = ({ totalProducts }) => (
   <div>
@@ -247,7 +300,7 @@ const ProductTable = ({ products }) => (
       </TableHead>
       <TableBody>
         {products.map((product, index) => (
-          <TableRow key={product.id} style={{ background: index % 2 === 0 ? '#f2f2f2' : 'white'}}>
+          <TableRow key={product.id} style={{ background: index % 2 === 0 ? '#f2f2f2' : 'white' }}>
             <TableCell style={{ width: '80px', textAlign: 'center' }}>
               <Link to={`/tools/product-browser/${product.id}`} target="_blank">{product.id}</Link>
             </TableCell>
