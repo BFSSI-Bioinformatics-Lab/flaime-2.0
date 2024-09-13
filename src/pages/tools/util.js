@@ -13,7 +13,6 @@ export const useSearchFilters = (initialFilters) => {
   return [searchInputs, handleInputChange];
 };
 
-
 export const buildTextMustClauses = (textEntries, fieldKey) => {
     return [{
         bool: {
@@ -26,7 +25,6 @@ export const buildTextMustClauses = (textEntries, fieldKey) => {
         }
     }];
 };
-
 
 export const buildTextMustClausesForAllFields = (searchInputs) => {
     const mustClauses = [];
@@ -58,8 +56,15 @@ export const buildTextMustClausesForAllFields = (searchInputs) => {
     if (searchInputs.Region.value !== null) {
         mustClauses.push({ term: { "scrape_batch.region.keyword": searchInputs.Region.value } });
     }
-    if (searchInputs.Subcategories.value && searchInputs.Subcategories.value.length > 0) {
-        mustClauses.push({ terms: { "subcategory.id": searchInputs.Subcategories.value } });
+    if (searchInputs.Categories.value && searchInputs.Categories.value.length > 0) {
+        mustClauses.push({
+            nested: {
+                path: "categories",
+                query: {
+                    terms: { "categories.id": searchInputs.Categories.value }
+                }
+            }
+        });
     }
     
     // handle Date filters
@@ -81,16 +86,12 @@ export const buildTextMustClausesForAllFields = (searchInputs) => {
     return mustClauses;
 };
 
-
-
-
-
 export const buildFilterClauses = (searchInputs) => {
     const filters = [];
 
     console.log('Building filters with inputs:', searchInputs);
     
-    try{
+    try {
         // Filter by source ID, only if source is not null
         if (searchInputs.Source && searchInputs.Source.value !== null) {
             filters.push({
@@ -117,10 +118,22 @@ export const buildFilterClauses = (searchInputs) => {
                 }
             });
         }
+
+        // Filter by categories
+        if (searchInputs.Categories && searchInputs.Categories.value && searchInputs.Categories.value.length > 0) {
+            filters.push({
+                nested: {
+                    path: "categories",
+                    query: {
+                        terms: { "categories.id": searchInputs.Categories.value }
+                    }
+                }
+            });
+        }
         
         // Handle date range filters
         const dateFilter = {};
-        if (searchInputs.StartDate && searchInputs.StartDate.value && searchInputs.EndDate & searchInputs.EndDate.value) {
+        if (searchInputs.StartDate && searchInputs.StartDate.value && searchInputs.EndDate && searchInputs.EndDate.value) {
             dateFilter.range = {
                 "scrape_batch.datetime": {
                     gte: searchInputs.StartDate.value,
@@ -144,7 +157,7 @@ export const buildFilterClauses = (searchInputs) => {
         if (Object.keys(dateFilter).length !== 0) {
             filters.push(dateFilter);
         }
-    } catch(error){
+    } catch(error) {
         console.error('Error building filter clauses:', error);
     }
     console.log('Built filters:', filters);

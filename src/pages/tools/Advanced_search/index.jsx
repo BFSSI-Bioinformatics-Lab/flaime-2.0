@@ -25,7 +25,7 @@ const AdvancedSearch = () => {
         IDs: '',
         UPCs: '',
         NielsenUPCs: '',
-        Subcategories: { value: [] },
+        Categories: { value: [] },
         Source: { value: null },
         Store: { value: null },
         Region: { value: null },
@@ -249,7 +249,7 @@ const AdvancedSearch = () => {
 
                 <Grid container spacing={1} direction="row" justifyContent="space-between" >
                     <Grid item xs={12} md={6}>
-                        <CategorySelector onChange={handleCategoryChange('Subcategories')} />
+                        <CategorySelector onChange={handleCategoryChange('Categories')} />
                     </Grid>
                     <Grid item xs={12} md={6}>
                         <Typography variant="h5" style={{ padding: '10px 20px 20px 20px' }}>Select a date range</Typography>
