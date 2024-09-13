@@ -1,23 +1,20 @@
-// components/inputs/RegionSelector/index.js
 import React from 'react';
 import SelectInput from '../SelectInput';
 import { Typography } from '@mui/material';
 
-const RegionSelector = ({ onSelect }) => {
-    //const { regions, loading } = useRegions();
-    const regions = [ "ottawa", "QC", "BC", "ON", "montreal", "vancouver" ];
+const RegionSelector = ({ value, onSelect }) => {
+    // const { regions, loading } = useRegions();
+    const regions = ["ottawa", "QC", "BC", "ON", "montreal", "vancouver"];
     const loading = false;
-    const [selectedRegion, setSelectedRegion] = React.useState('');
 
     const regionsWithDefault = [
         { label: 'Use all regions', value: '-1' },
         ...regions.map(region => ({ label: region, value: region }))
     ];
 
-    const handleSelectionChange = (value) => {
-        setSelectedRegion(value);
+    const handleSelectionChange = (newValue) => {
         if (onSelect) {
-            onSelect(value);
+            onSelect(newValue);
         }
     };
 
@@ -27,8 +24,8 @@ const RegionSelector = ({ onSelect }) => {
             {loading ? <p>Loading...</p> : (
                 <SelectInput
                     options={regionsWithDefault}
-                    value={selectedRegion}
-                    onChange={handleSelectionChange}
+                    value={value || '-1'}
+                    onChange={handleSelectionChange}    
                     label="Select a Region"
                     InputProps={{ style: { minWidth: '280px', overflow: 'hidden' } }}
                 />
@@ -36,7 +33,5 @@ const RegionSelector = ({ onSelect }) => {
         </div>
     );
 };
-
-
 
 export default RegionSelector;

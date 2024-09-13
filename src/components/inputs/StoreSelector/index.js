@@ -1,22 +1,19 @@
-// components/inputs/StoreSelector/index.js
 import React from 'react';
 import useStores from './useStores';
 import SelectInput from '../SelectInput';
 import { Typography } from '@mui/material';
 
-const StoreSelector = ({ onSelect }) => {
+const StoreSelector = ({ value, onSelect }) => {
     const { stores, loading } = useStores();
-    const [selectedStore, setSelectedStore] = React.useState('');
 
     const storesWithDefault = [
         { label: 'Use all stores', value: '-1' },
         ...stores
     ];
 
-    const handleSelectionChange = (value) => {
-        setSelectedStore(value);
+    const handleSelectionChange = (newValue) => {
         if (onSelect) {
-            onSelect(value);
+            onSelect(newValue);
         }
     };
 
@@ -26,7 +23,7 @@ const StoreSelector = ({ onSelect }) => {
             {loading ? <p>Loading...</p> : (
                 <SelectInput
                     options={storesWithDefault}
-                    value={selectedStore}
+                    value={value || '-1'}
                     onChange={handleSelectionChange}
                     label="Select a Store"
                     InputProps={{ style: { minWidth: '280px', overflow: 'hidden' } }}

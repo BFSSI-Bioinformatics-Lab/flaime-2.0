@@ -163,10 +163,10 @@ const SearchForm = React.memo(({ searchTerms, handleSearchChange, handleSourceNa
       <SearchField label="Search ID" value={searchTerms.id} onChange={handleSearchChange('id')} />
       <SearchField label="Search by Store Name" value={searchTerms.storeName} onChange={handleSearchChange('storeName')} />
       <SourceSelector
+        value={searchTerms.sourceName}
         onSelect={handleSourceNameSearch}
         showTitle={false}
         label="Search by Data Source"
-        value={searchTerms.sourceName}
       />
     </div>
     <div style={{ display: 'flex', justifyContent: 'space-evenly', margin: '10px 20px' }}>

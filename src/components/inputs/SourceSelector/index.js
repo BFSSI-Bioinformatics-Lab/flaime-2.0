@@ -1,22 +1,19 @@
-// components/inputs/SourceSelector/index.js
 import React from 'react';
 import useSources from './useSources';
 import SelectInput from '../SelectInput';
 import { Typography } from '@mui/material';
 
-const SourceSelector = ({ onSelect, showTitle, label }) => {
+const SourceSelector = ({ value, onSelect, showTitle, label }) => {
     const { sources, loading } = useSources();
-    const [selectedSource, setSelectedSource] = React.useState('');
 
     const sourcesWithDefault = [
         { label: 'Use all sources', value: '-1' },
         ...sources
     ];
 
-    const handleSelectionChange = (value) => {
-        setSelectedSource(value);
+    const handleSelectionChange = (newValue) => {
         if (onSelect) {
-            onSelect(value);
+            onSelect(newValue);
         }
     };
 
@@ -26,7 +23,7 @@ const SourceSelector = ({ onSelect, showTitle, label }) => {
             {loading ? <p>Loading...</p> : (
                 <SelectInput
                     options={sourcesWithDefault}
-                    value={selectedSource}
+                    value={value || '-1'}
                     onChange={handleSelectionChange}
                     label={label}
                     InputProps={{ style: { minWidth: '280px', overflow: 'hidden' } }}

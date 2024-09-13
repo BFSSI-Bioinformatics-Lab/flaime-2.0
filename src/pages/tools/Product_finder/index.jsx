@@ -68,10 +68,10 @@ const ProductFinder = () => {
     handleInputChange('EndDate', { value: dayjs().format('YYYY-MM-DD') });
     setSearchResults([]);
     setInputMode('Name');
-    setTotalProducts(0); // Reset totalProducts to 0
-    handlePageChange(0); // reset pagination
+    setTotalProducts(0);
+    setPage(0);
   };
-
+  
   // Handler for changing main input mode (radio buttons)
   const handleInputModeChange = (event) => {
     setInputMode(event.target.value);
@@ -84,25 +84,15 @@ const ProductFinder = () => {
 
   // Handlers for selectors
   const handleSourceChange = (selectedSource) => {
-      if (selectedSource === '-1') {
-          handleInputChange('Source', { value: null });
-      } else {
-          handleInputChange('Source', { value: selectedSource });
-      }
+    handleInputChange('Source', { value: selectedSource === '-1' ? null : selectedSource });
   };
+  
   const handleRegionChange = (selectedRegion) => {
-      if (selectedRegion === '-1') {
-          handleInputChange('Region', { value: null });
-      } else {
-          handleInputChange('Region', { value: selectedRegion });
-      }
+    handleInputChange('Region', { value: selectedRegion === '-1' ? null : selectedRegion });
   };
+  
   const handleStoreChange = (selectedStore) => {
-      if (selectedStore === '-1') {
-          handleInputChange('Store', { value: null });
-      } else {
-          handleInputChange('Store', { value: selectedStore });
-      }
+    handleInputChange('Store', { value: selectedStore === '-1' ? null : selectedStore });
   };
 
   // Handlers for date pickers
@@ -215,11 +205,21 @@ return (
       </div>
       <Divider style={{ width: '60vw', margin: '15px auto 5px auto' }}/>
       <div style={{ display: 'flex', justifyContent: 'space-around', paddingBottom: '25px' }}>
-        <SourceSelector onSelect={handleSourceChange} showTitle={true} label="Select a source"/>
-        <RegionSelector onSelect={handleRegionChange} />
-        <StoreSelector onSelect={handleStoreChange} />
-      </div>
-      
+        <SourceSelector 
+          value={searchInputs.Source.value} 
+          onSelect={handleSourceChange} 
+          showTitle={true} 
+          label="Select a source"
+        />
+        <RegionSelector 
+          value={searchInputs.Region.value} 
+          onSelect={handleRegionChange} 
+        />
+        <StoreSelector 
+          value={searchInputs.Store.value} 
+          onSelect={handleStoreChange} 
+        />
+      </div>      
       <Typography variant="h5">Select a date range</Typography>
       <div style={{ display: 'flex', justifyContent: 'space-around', margin: '15px 0', width: '45vw' }}>
         <SingleDatePicker 

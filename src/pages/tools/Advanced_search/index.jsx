@@ -58,20 +58,21 @@ const AdvancedSearch = () => {
       const [selectedColumns, setSelectedColumns] = useState(Object.keys(columnsVisibility));
 
       const handleReset = () => {
-        handleInputChange('Names', '');
-        handleInputChange('IDs', '');
-        handleInputChange('UPCs', '');
-        handleInputChange('NielsenUPCs', '');
-        handleInputChange('Nutrition', {
-            nutrient: '',
-            minAmount: '',
-            maxAmount: ''
+        // Reset all search inputs to their initial values
+        Object.keys(initialFilters).forEach(key => {
+          handleInputChange(key, initialFilters[key]);
         });
+      
+        // Reset other state variables
         setSearchResults([]);
         setIsLoading(false);
         setTotalProducts(0);
-    };
-    
+        setPage(0);
+        setRowsPerPage(25);
+        setErrorMessage('');
+      
+      };
+
       const handleColumnSelection = (event) => {
         setSelectedColumns(event.target.value);
       };
@@ -242,10 +243,21 @@ const AdvancedSearch = () => {
                 </div>
                 <Divider style={{ width: '60vw', margin: '10px auto' }}/>
                 <div style={{ display: 'flex', justifyContent: 'space-around', paddingBottom: '25px' }}>
-                    <SourceSelector onSelect={handleSelectorChange('Source') } showTitle={true} label="Select a source" />
-                    <RegionSelector onSelect={handleSelectorChange('Region')} />
-                    <StoreSelector onSelect={handleSelectorChange('Store')} />
-                </div>
+                    <SourceSelector 
+                        value={searchInputs.Source.value} 
+                        onSelect={handleSelectorChange('Source')} 
+                        showTitle={true} 
+                        label="Select a source" 
+                    />
+                    <RegionSelector 
+                        value={searchInputs.Region.value} 
+                        onSelect={handleSelectorChange('Region')} 
+                    />
+                    <StoreSelector 
+                        value={searchInputs.Store.value} 
+                        onSelect={handleSelectorChange('Store')} 
+                    />
+               </div>
 
                 <Grid container spacing={1} direction="row" justifyContent="space-between" >
                     <Grid item xs={12} md={6}>
