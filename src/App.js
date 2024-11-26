@@ -15,45 +15,39 @@ import About from "./pages/About";
 import ProductFinder from "./pages/tools/Product_finder";
 import AdvancedSearch from "./pages/tools/Advanced_search";
 import SignIn from "./pages/SignIn";
+import { AuthProvider } from './context/auth/AuthContext';
+import PrivateRoute from './context/auth/PrivateRoute';
 
 function App() {
-  
+
   useEffect(() => {
     document.title = process.env.REACT_APP_TITLE || 'Default App Title';
   }, []);
 
   return (
     <BrowserRouter>
-      <ThemeProvider theme={Theme}>
-        <div className="App">
-          <Header />
-          <Routes>
-            <Route path="/" element={<Home/>} />
-
-              <Route path="signin" element={<SignIn />} />
-
-            {/* Tools Dropdown */}
-            <Route path="tools/product-browser" element={<ProductBrowser />} />
-            <Route path="tools/product-finder" element={<ProductFinder />} />
-            <Route path="tools/advanced-search" element={<AdvancedSearch />} />
-            {/* Reports Dropdown */}
-            {/* Data Dropdown */}
-            <Route path="data/quality" element={<Quality />} />
-            <Route path="data/download" element={<Download />} />
-            <Route path="data/visualizations" element={<Visualizations />} />
-
-            <Route path="about" element={<About />} />
-
-            {/* Product Detail Page */}
-            <Route path="tools/product-browser/:productId" element={<ProductDetail />} />
-          </Routes>
-
-          <Footer />
-        </div>
-      </ThemeProvider>
+      <AuthProvider>
+        <ThemeProvider theme={Theme}>
+          <div className="App">
+            <Header />
+            <Routes>
+              <Route path="/signin" element={<SignIn />} />
+              {/* All other routes wrapped in PrivateRoute */}
+              <Route path="/" element={<PrivateRoute><Home /></PrivateRoute>} />
+              <Route path="tools/product-browser" element={<PrivateRoute><ProductBrowser /></PrivateRoute>} />
+              <Route path="tools/product-finder" element={<PrivateRoute><ProductFinder /></PrivateRoute>} />
+              <Route path="tools/advanced-search" element={<PrivateRoute><AdvancedSearch /></PrivateRoute>} />
+              <Route path="data/quality" element={<PrivateRoute><Quality /></PrivateRoute>} />
+              <Route path="data/download" element={<PrivateRoute><Download /></PrivateRoute>} />
+              <Route path="data/visualizations" element={<PrivateRoute><Visualizations /></PrivateRoute>} />
+              <Route path="about" element={<PrivateRoute><About /></PrivateRoute>} />
+              <Route path="tools/product-browser/:productId" element={<PrivateRoute><ProductDetail /></PrivateRoute>} />
+            </Routes>
+            <Footer />
+          </div>
+        </ThemeProvider>
+      </AuthProvider>
     </BrowserRouter>
-
   );
 }
-
 export default App;

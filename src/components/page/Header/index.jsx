@@ -8,12 +8,13 @@ import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from '../../../context/auth/AuthContext';
 import PageContainer from '../PageContainer';
 
 
 
 const Header = () => {
-
+    const { user, logout } = useAuth();
     const [anchorEl, setAnchorEl] = React.useState(null);
     const [anchorEl2, setAnchorEl2] = React.useState(null);
     const [anchorEl3, setAnchorEl3] = React.useState(null);
@@ -29,6 +30,11 @@ const Header = () => {
         let path = '/'; 
         navigate(path);
     }
+
+    const handleLogout = () => {
+        logout();
+    };
+
 
     return (
         // <div>Header</div>
@@ -51,7 +57,7 @@ const Header = () => {
                             color="inherit"
                             
                         >
-                            tools
+                            Tools
                         </Button>
                         <Menu
                             id="tools-menu"
@@ -152,17 +158,15 @@ const Header = () => {
                             About
                         </Button>
 
-                        {/* <Tooltip title="Account Login">
-                            <IconButton
-                                size="large"
-                                edge="start"
+                        {user && (
+                            <Button
                                 color="inherit"
-                                aria-label="login"
-                                onClick={routeSignIn}
+                                onClick={handleLogout}
+                                sx={{ ml: 2 }}
                             >
-                                <AccountCircleIcon />
-                            </IconButton>
-                        </Tooltip> */}
+                                Logout
+                            </Button>
+                        )}
                     </Toolbar>
                 </PageContainer>
             </AppBar>
