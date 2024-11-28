@@ -14,6 +14,7 @@ import ColumnSelection  from '../../../components/table/ColumnSelection';
 import ToolTable  from '../../../components/table/ToolTable';
 import SearchResultSummary from '../../../components/misc/SearchResultSummary';
 import { ResetButton } from '../../../components/buttons';
+import DataExportDialog from '../../../components/dialogs/DataExportDialog';
 
 const AdvancedSearch = () => {
     useEffect(() => {
@@ -195,6 +196,45 @@ const AdvancedSearch = () => {
         handleSearch(0, newRowsPerPage);
     };
 
+    const getExportFilters = () => {
+        const filters = {
+            names: searchInputs.Names,
+            ids: searchInputs.IDs,
+            upcs: searchInputs.UPCs,
+            nielsenUpcs: searchInputs.NielsenUPCs,
+            categories: searchInputs.Categories.value,
+            source: searchInputs.Source.value,
+            store: searchInputs.Store.value,
+            region: searchInputs.Region.value,
+            dateRange: {
+                start: searchInputs.StartDate.value,
+                end: searchInputs.EndDate.value
+            }
+        };
+
+        // Only add nutrition filter if it has values
+        if (searchInputs.Nutrition.nutrient || 
+            searchInputs.Nutrition.minAmount || 
+            searchInputs.Nutrition.maxAmount) {
+            filters.nutrition = {
+                nutrientId: searchInputs.Nutrition.nutrient,
+                minAmount: searchInputs.Nutrition.minAmount,
+                maxAmount: searchInputs.Nutrition.maxAmount
+            };
+        }
+
+        return filters;
+    };
+
+    // Get formatted column definitions for export
+    const getExportColumns = () => {
+        return selectedColumns.map(col => ({
+            field: col,
+            // You might want to map these to more user-friendly names
+            headerName: col.charAt(0).toUpperCase() + col.slice(1)
+        }));
+    };
+
     return (
         <PageContainer>
             <div>
@@ -293,6 +333,13 @@ const AdvancedSearch = () => {
                         Search
                     </Button>
                     <ResetButton  variant="contained" onClick={handleReset}>Reset Search</ResetButton>
+                    {totalProducts > 0 && (
+                        <DataExportDialog
+                            currentColumns={getExportColumns()}
+                            totalProducts={totalProducts}
+                            searchFilters={getExportFilters()}
+                        />
+                    )}
                 </div>
                 <SearchResultSummary totalProducts={totalProducts} />
                 <>
