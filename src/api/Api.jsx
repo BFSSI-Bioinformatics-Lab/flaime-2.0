@@ -1,31 +1,12 @@
-import axios from "axios";
+// Api.jsx
+import axios from 'axios';
 
-const ApiInstance = axios.create({ 
-  baseURL: process.env.REACT_APP_API_URL 
+export const ApiInstance = axios.create({
+  baseURL: process.env.REACT_APP_API_URL,
+  withCredentials: true
 });
 
-ApiInstance.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  }
-);
-
-ApiInstance.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem('token');
-      window.location.href = '/signin';
-    }
-    return Promise.reject(error);
-  }
-);
-
-const ApiQueryGet = async (url, controller, apiExt = "/api/") => {
+export const ApiQueryGet = async (url, controller, apiExt = "/api/") => {
   try {
     const res = await ApiInstance.get(`${apiExt}${url}`, {
       signal: controller ? controller.signal : null
@@ -36,6 +17,3 @@ const ApiQueryGet = async (url, controller, apiExt = "/api/") => {
     throw error;
   }
 };
-
-export default ApiInstance;
-export { ApiQueryGet };

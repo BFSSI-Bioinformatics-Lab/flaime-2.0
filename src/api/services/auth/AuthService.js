@@ -1,4 +1,4 @@
-import axios from 'axios';
+import { ApiInstance } from '../../Api';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
 const AUTH_ENDPOINTS = {
@@ -6,27 +6,23 @@ const AUTH_ENDPOINTS = {
     refresh: `${API_BASE_URL}/api/token/refresh/`,
 };
 
-const TOKEN_REFRESH_THRESHOLD = 5 * 60 * 1000; // 5 minutes in milliseconds
+const TOKEN_REFRESH_THRESHOLD = 5 * 60 * 1000;
 
 class AuthService {
     constructor() {
         this.refreshTimeout = null;
         this.isRefreshing = false;
         this.refreshSubscribers = [];
-
-        axios.defaults.baseURL = API_BASE_URL;
-        axios.defaults.withCredentials = true;
+        this.setupInterceptors();
     }
-
 
     setAuthHeader(token) {
         if (token) {
-            axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+            ApiInstance.defaults.headers.common['Authorization'] = `Bearer ${token}`;
         } else {
-            delete axios.defaults.headers.common['Authorization'];
+            delete ApiInstance.defaults.headers.common['Authorization'];
         }
     }
-
 
     parseJwt(token) {
         try {
@@ -36,10 +32,9 @@ class AuthService {
         }
     }
 
-
     async login(credentials) {
         try {
-            const response = await axios.post(AUTH_ENDPOINTS.login, credentials);
+            const response = await ApiInstance.post(AUTH_ENDPOINTS.login, credentials);
             const { access, refresh } = response.data;
 
             localStorage.setItem('accessToken', access);
@@ -53,7 +48,6 @@ class AuthService {
             throw new Error(error.response?.data?.detail || 'Login failed');
         }
     }
-
 
     scheduleTokenRefresh(token) {
         const payload = this.parseJwt(token);
@@ -70,7 +64,6 @@ class AuthService {
         this.refreshTimeout = setTimeout(() => this.refreshToken(), refreshIn);
     }
 
-
     async refreshToken() {
         if (this.isRefreshing) {
             return new Promise((resolve) => {
@@ -82,7 +75,7 @@ class AuthService {
 
         try {
             const refreshToken = localStorage.getItem('refreshToken');
-            const response = await axios.post(AUTH_ENDPOINTS.refresh, {
+            const response = await ApiInstance.post(AUTH_ENDPOINTS.refresh, {
                 refresh: refreshToken
             });
 
@@ -119,9 +112,17 @@ class AuthService {
         this.refreshSubscribers = [];
     }
 
-
     setupInterceptors() {
-        axios.interceptors.response.use(
+        ApiInstance.interceptors.request.use(
+            (config) => {
+                const token = localStorage.getItem('accessToken');
+                if (token) {
+                    config.headers.Authorization = `Bearer ${token}`;
+                }
+                return config;
+            }
+        );
+        ApiInstance.interceptors.response.use(
             response => response,
             async error => {
                 const originalRequest = error.config;
@@ -130,7 +131,7 @@ class AuthService {
                     try {
                         const token = await this.refreshToken();
                         originalRequest.headers['Authorization'] = `Bearer ${token}`;
-                        return axios(originalRequest);
+                        return ApiInstance(originalRequest);
                     } catch (refreshError) {
                         window.dispatchEvent(new CustomEvent('sessionExpired', {
                             detail: {
