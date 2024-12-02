@@ -1,6 +1,4 @@
-import { ApiInstance } from '../Api';
-import { buildTextMustClausesForAllFields, formatProductField } from '../../utils';
-
+import { buildElasticsearchQuery, executeSearch, formatProductField} from '../../utils'
 
 class ExportService {
   static async exportProducts({
@@ -10,30 +8,15 @@ class ExportService {
   }) {
     try {
       if (format === 'csv') {
-        // Build and execute query
-        const textMustClauses = buildTextMustClausesForAllFields(filters);
-        const nutrientQuery = buildNutrientQuery(filters.nutrition);
-        
-        const finalQuery = {
-          size: 10000,
-          query: {
-            bool: {
-              must: [
-                ...textMustClauses,
-                ...(nutrientQuery ? [nutrientQuery] : [])
-              ]
-            }
+        const query = buildElasticsearchQuery({
+          filters,
+          options: {
+            includeNutrition: true,
+            isExport: true
           }
-        };
-
-        const response = await fetch(`${process.env.REACT_APP_ELASTIC_URL}/_search`, {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify(finalQuery)
         });
 
-        const data = await response.json();
-        const results = data.hits.hits;
+        const { results } = await executeSearch(query);
 
         // Format the data
         const headers = columns.map(col => col.headerName).join(',');
@@ -44,6 +27,7 @@ class ExportService {
           }).join(',')
         );
 
+        // Create and download CSV
         const csv = [headers, ...rows].join('\n');
         const blob = new Blob([csv], { type: 'text/csv' });
         const url = window.URL.createObjectURL(blob);
@@ -59,50 +43,11 @@ class ExportService {
 
         return true;
       }
-      
-      // ... rest of the service code ...
     } catch (error) {
       console.error('Export failed:', error);
       throw error;
     }
   }
 }
-
-const buildNutrientQuery = (nutrition) => {
-  if (!nutrition) return null;
-  
-  const query = {
-    nested: {
-      path: "nutrition_details",
-      query: {
-        bool: {
-          must: []
-        }
-      }
-    }
-  };
-
-  if (nutrition.nutrientId) {
-    query.nested.query.bool.must.push({
-      term: {
-        "nutrition_details.nutrient_id": nutrition.nutrientId
-      }
-    });
-  }
-
-  if (nutrition.minAmount || nutrition.maxAmount) {
-    const amountRange = {};
-    if (nutrition.minAmount) amountRange.gte = parseFloat(nutrition.minAmount);
-    if (nutrition.maxAmount) amountRange.lte = parseFloat(nutrition.maxAmount);
-    
-    query.nested.query.bool.must.push({
-      range: {
-        "nutrition_details.amount": amountRange
-      }
-    });
-  }
-
-  return query;
-};
 
 export default ExportService;
