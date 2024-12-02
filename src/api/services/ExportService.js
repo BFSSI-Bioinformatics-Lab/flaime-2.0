@@ -1,5 +1,6 @@
 import { ApiInstance } from '../Api';
-import { buildTextMustClausesForAllFields } from '../../utils';
+import { buildTextMustClausesForAllFields, formatProductField } from '../../utils';
+
 
 class ExportService {
   static async exportProducts({
@@ -38,42 +39,11 @@ class ExportService {
         const headers = columns.map(col => col.headerName).join(',');
         const rows = results.map(item => 
           columns.map(col => {
-            let value = '';
-            switch (col.field) {
-              case 'id':
-                value = item._id;
-                break;
-              case 'name':
-                value = item._source.site_name;
-                break;
-              case 'price':
-                value = item._source.reading_price;
-                break;
-              case 'source':
-                value = item._source.source?.name;
-                break;
-              case 'store':
-                value = item._source.store?.name;
-                break;
-              case 'date':
-                value = item._source.scrape_batch?.datetime;
-                break;
-              case 'region':
-                value = item._source.scrape_batch?.region;
-                break;
-              case 'category':
-                value = item._source.category || 'No category';
-                break;
-              case 'subcategory':
-                value = item._source.subcategory || 'No subcategory';
-                break;
-              default:
-                value = item._source[col.field] || '';
-            }
+            const value = formatProductField(item, col.field);
             return value ? `"${value.toString().replace(/"/g, '""')}"` : '';
           }).join(',')
         );
-        
+
         const csv = [headers, ...rows].join('\n');
         const blob = new Blob([csv], { type: 'text/csv' });
         const url = window.URL.createObjectURL(blob);

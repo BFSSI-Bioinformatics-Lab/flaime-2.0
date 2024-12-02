@@ -1,34 +1,17 @@
 import React from 'react';
 import { Table, TableHead, TableBody, TableRow, TableCell, TableContainer, Paper, TablePagination } from '@mui/material';
 import { StyledTableCell } from './styles';
+import { formatProductField } from '../../../utils/format/dataFormatting';
 import { Link } from 'react-router-dom';
 
 const ToolTable = ({ columns, data, totalCount, page, rowsPerPage, onPageChange, onRowsPerPageChange }) => {
-  const renderCell = (column, item) => {
-    switch (column) {
-      case 'id':
-        return <Link to={`/tools/product-browser/${item._id}`} target="_blank">{item._id}</Link>;
-      case 'name':
-        return item._source.site_name;
-      case 'price':
-        return item._source.reading_price;
-      case 'source':
-        return item._source.source.name;
-      case 'store':
-        return item._source.store.name;
-      case 'date':
-        return item._source.scrape_batch.datetime;
-      case 'region':
-        return item._source.scrape_batch.region;
-      case 'category':
-        return item._source.category ? item._source.category : 'No category';
-      case 'subcategory':
-        return item._source.subcategory ? item._source.subcategory : 'No subcategory';
-      default:
-        return item._source[column] || '';
-    }
-  };
-
+  const renderCell = (column, item) => 
+    column === 'id' 
+      ? <Link to={`/tools/product-browser/${formatProductField(item, 'id')}`} target="_blank">
+          {formatProductField(item, 'id')}
+        </Link>
+      : formatProductField(item, column);
+  
   return (
     <TableContainer component={Paper}>
       <Table>
