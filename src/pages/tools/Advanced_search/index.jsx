@@ -9,7 +9,7 @@ import RegionSelector from '../../../components/inputs/RegionSelector';
 import SingleDatePicker from '../../../components/inputs/SingleDatePicker';
 import CategorySelector from '../../../components/inputs/CategorySelector';
 import NutritionFilter from '../../../components/inputs/NutritionFilter';
-import { useSearchFilters, buildTextMustClausesForAllFields } from '../util';
+import { useSearchFilters, buildTextMustClausesForAllFields } from '../../../utils'
 import ColumnSelection  from '../../../components/table/ColumnSelection';
 import ToolTable  from '../../../components/table/ToolTable';
 import SearchResultSummary from '../../../components/misc/SearchResultSummary';
@@ -197,21 +197,8 @@ const AdvancedSearch = () => {
     };
 
     const getExportFilters = () => {
-        const filters = {
-            names: searchInputs.Names,
-            ids: searchInputs.IDs,
-            upcs: searchInputs.UPCs,
-            nielsenUpcs: searchInputs.NielsenUPCs,
-            categories: searchInputs.Categories.value,
-            source: searchInputs.Source.value,
-            store: searchInputs.Store.value,
-            region: searchInputs.Region.value,
-            dateRange: {
-                start: searchInputs.StartDate.value,
-                end: searchInputs.EndDate.value
-            }
-        };
-
+        const filters = searchInputs;
+        
         // Only add nutrition filter if it has values
         if (searchInputs.Nutrition.nutrient || 
             searchInputs.Nutrition.minAmount || 
