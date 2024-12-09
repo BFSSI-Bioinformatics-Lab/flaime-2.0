@@ -9,9 +9,9 @@ export const useExport = () => {
       setIsExporting(true);
       await ExportService.exportProducts({
         format: config.format,
-        columns: config.type === 'current' ? config.columns : null,
-        filters: config.filters,
-        limit: config.format === 'excel' ? 50000 : 100000
+        type: config.type,
+        columns: config.columns,
+        filters: config.filters
       });
     } catch (error) {
       console.error('Export failed:', error);
