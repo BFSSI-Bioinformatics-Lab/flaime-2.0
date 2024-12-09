@@ -56,14 +56,21 @@ export const formatProductField = (item, field) => {
   }
 };
 
-export const formatNestedFields(item, nestedField) {
+export const NESTED_FIELDS = {
+  categories: {
+    path: "categories",
+    fields: ["name", "level", "scheme"]
+  }
+};
+
+export const formatNestedFields = (item, nestedField) => {
   const nested = item[nestedField];
   if (!nested?.length) return '';
-
+  
   return nested.map(entry => {
     return NESTED_FIELDS[nestedField].fields
       .map(field => entry[field])
       .filter(Boolean)
       .join(' - ');
   }).join(' | ');
-}
+};

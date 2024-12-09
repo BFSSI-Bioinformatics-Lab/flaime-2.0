@@ -1,6 +1,6 @@
 // ExportService.js
 
-import { formatProductField, formatNestedFields } from '../../utils';
+import { formatProductField, formatNestedFields, NESTED_FIELDS } from '../../utils';
 import { buildElasticsearchQuery, executeSearch } from '../../utils/search/searchUtils';
 import { nutrientsList } from '../../components/constants/data/nutrients';
 import * as XLSX from 'xlsx';
@@ -31,13 +31,6 @@ const ALL_FIELDS = {
   most_recent_flag: "Most Recent",
   nutrition_available_flag: "Has Nutrition"
 };
-
-const NESTED_FIELDS = {
-  categories: {
-    path: "categories",
-    fields: ["name", "level", "scheme"]
-  }
-};nutritionDetails
 
 class ExportService {
   static findAvailableNutrients(results) {
