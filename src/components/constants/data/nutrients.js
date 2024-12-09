@@ -1477,5 +1477,45 @@ export const nutrientsList = [{
     symbol: 'XYL',
     usda_nutrient_code:  null,
     parent_id:  null
+},
+{
+    id: 2013,
+    nutrient_code:  999,
+    name:  'FIBRE, SOLUBLE DIETARY FIBRE',
+    symbol: 'SOLFIB',
+    usda_nutrient_code:  null,
+    parent_id:  null
+},
+{
+    id: 2014,
+    nutrient_code:  998,
+    name:  'VITAMIN K',
+    symbol: 'VK',
+    usda_nutrient_code:  null,
+    parent_id:  null
+},
+{
+    id: 2015,
+    nutrient_code:  997,
+    name:  'FATTY ACIDS, SATURATED + TRANS, TOTAL',
+    symbol: 'SATRANS',
+    usda_nutrient_code:  null,
+    parent_id:  null
+},
+{
+    id: 2016,
+    nutrient_code:  995,
+    name:  'VITAMIN A (MICROGRAMS)',
+    symbol: 'VA',
+    usda_nutrient_code:  null,
+    parent_id:  null
+},
+{
+    id: 2017,
+    nutrient_code:  996,
+    name:  'VITAMIN D (MICROGRAMS)',
+    symbol: 'VD',
+    usda_nutrient_code:  null,
+    parent_id:  null
 }
 ]
