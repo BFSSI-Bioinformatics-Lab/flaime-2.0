@@ -1,14 +1,12 @@
-import { ApiQueryGet } from "../Api";
+import { Api } from "../Api";
 
 const GetAllStores = async () => {
   try {
-    const data = await ApiQueryGet("stores/");
-    return { error: false, stores: data };
+    const stores = await Api.get("stores/");
+    return { error: false, stores };
   } catch (error) {
     return { error: true, message: error.message };
   }
 };
 
-export {
-    GetAllStores,
-};
+export { GetAllStores };

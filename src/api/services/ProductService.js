@@ -1,16 +1,14 @@
-import { ApiQueryGet } from "../Api";
+import { Api } from "../Api";
 
 const GetStoreProductByID = async (productId, controller = null) => {
     console.log(`GetStoreProductByID called with productId: ${productId}`);
     try {
-        const data = await ApiQueryGet(`storeproducts/${productId}/`, controller);
-        return { error: false, data: data };
+        const data = await Api.get(`storeproducts/${productId}/`, controller);
+        return { error: false, data };
     } catch (error) {
         console.error(`Error in GetStoreProductByID: ${error.message}`);
         return { error: true, message: error.message };
     }
 };
   
-export {
-    GetStoreProductByID,
-};
+export { GetStoreProductByID };

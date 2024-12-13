@@ -1,6 +1,7 @@
+// api/services/auth/AuthService.js
 import { ApiInstance } from '../../Api';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://172.17.24.4:8000';
+const API_BASE_URL = process.env.REACT_APP_API_URL;
 const AUTH_ENDPOINTS = {
     login: `${API_BASE_URL}/api/token/`,
     refresh: `${API_BASE_URL}/api/token/refresh/`,
@@ -144,7 +145,7 @@ class AuthService {
             detail: { message }
         }));
     }
-    
+
     async login(credentials) {
         try {
             const response = await ApiInstance.post(AUTH_ENDPOINTS.login, credentials);

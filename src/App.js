@@ -1,3 +1,4 @@
+// App.js
 import { useEffect } from 'react';
 import { useNavigate, BrowserRouter, Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";

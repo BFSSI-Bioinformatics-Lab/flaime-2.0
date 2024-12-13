@@ -1,14 +1,12 @@
-import { ApiQueryGet } from "../Api";
+import { Api } from "../Api";
 
 const GetAllCategories = async () => {
   try {
-    const data = await ApiQueryGet("categories/");
-    return { error: false, categories: data };
+    const categories = await Api.get("categories/");
+    return { error: false, categories };
   } catch (error) {
     return { error: true, message: error.message };
   }
 };
 
-export {
-  GetAllCategories,
-};
+export { GetAllCategories };

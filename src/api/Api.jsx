@@ -1,64 +1,36 @@
+//api/Api.jsx
 import axios from 'axios';
 
+const API_PREFIX = '/api';
+
 export const ApiInstance = axios.create({
-    baseURL: process.env.REACT_APP_API_URL || 'http://172.17.24.4:8000',
-    timeout: 30000,
-    withCredentials: true,
-    headers: {
-        'Content-Type': 'application/json',
-    }
+  baseURL: process.env.REACT_APP_API_URL,
+  timeout: 30000,
+  withCredentials: true,
+  headers: {
+    'Content-Type': 'application/json',
+  }
 });
 
-export const ApiQueryGet = async (endpoint) => {
-    try {
-        const response = await ApiInstance.get(`/api/${endpoint}`);
-        return response.data;
-    } catch (error) {
-        console.error(`API Query error for ${endpoint}: `, error);
-        throw error;
-    }
+const makeRequest = async (method, endpoint, data = null) => {
+  try {
+    const response = await ApiInstance({
+      method,
+      url: `${API_PREFIX}/${endpoint}`,
+      data
+    });
+    return response.data;
+  } catch (error) {
+    console.error(`API error for ${endpoint}: `, error);
+    throw error;
+  }
 };
 
 export const Api = {
-    get: async (endpoint) => {
-        try {
-            const response = await ApiInstance.get(`/api/${endpoint}`);
-            return response.data;
-        } catch (error) {
-            console.error(`API error for ${endpoint}: `, error);
-            throw error;
-        }
-    },
-    
-    post: async (endpoint, data) => {
-        try {
-            const response = await ApiInstance.post(`/api/${endpoint}`, data);
-            return response.data;
-        } catch (error) {
-            console.error(`API error for ${endpoint}: `, error);
-            throw error;
-        }
-    },
-
-    patch: async (endpoint, data) => {
-        try {
-            const response = await ApiInstance.patch(`/api/${endpoint}`, data);
-            return response.data;
-        } catch (error) {
-            console.error(`API error for ${endpoint}: `, error);
-            throw error;
-        }
-    },
-
-    delete: async (endpoint) => {
-        try {
-            const response = await ApiInstance.delete(`/api/${endpoint}`);
-            return response.data;
-        } catch (error) {
-            console.error(`API error for ${endpoint}: `, error);
-            throw error;
-        }
-    }
+  get: (endpoint) => makeRequest('get', endpoint),
+  post: (endpoint, data) => makeRequest('post', endpoint, data),
+  patch: (endpoint, data) => makeRequest('patch', endpoint, data),
+  delete: (endpoint) => makeRequest('delete', endpoint)
 };
 
 export default Api;
