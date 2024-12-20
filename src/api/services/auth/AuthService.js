@@ -28,21 +28,12 @@ class AuthService {
         const currentTime = Date.now();
         const timeUntilExpiry = expirationTime - currentTime;
 
-        console.log(`${type} token:`, {
-            expiresAt: new Date(expirationTime).toISOString(),
-            currentTime: new Date(currentTime).toISOString(),
-            timeUntilExpiry: `${timeUntilExpiry/1000} seconds`,
-            isValid: timeUntilExpiry > 0
-        });
-
         return timeUntilExpiry > 0;
     }
 
     initializeAuthState() {
         const accessToken = localStorage.getItem('accessToken');
         const refreshToken = localStorage.getItem('refreshToken');
-
-        console.log('Initializing auth state...');
         
         if (!accessToken || !refreshToken) {
             this.handleTokenError('No tokens available');
@@ -60,21 +51,18 @@ class AuthService {
             this.setAuthHeader(accessToken);
             this.scheduleTokenRefresh(accessToken);
         } else {
-            console.log('Access token expired, attempting refresh...');
             this.refreshToken();
         }
     }
     
     async refreshToken() {
         if (this.isRefreshing) {
-            console.log('Refresh already in progress, waiting...');
             return new Promise((resolve, reject) => {
                 this.refreshSubscribers.push(resolve);
             });
         }
 
         this.isRefreshing = true;
-        console.log('Starting token refresh...');
 
         try {
             const refreshToken = localStorage.getItem('refreshToken');

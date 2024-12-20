@@ -54,7 +54,6 @@ export const formatProductField = (item, field, format = 'display') => {
     return String(value);
   };
 
-  console.log(format,field,item);
   const getValue = () => {
     switch (field) {
       // Base fields
