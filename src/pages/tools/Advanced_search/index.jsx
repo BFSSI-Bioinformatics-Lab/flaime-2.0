@@ -158,7 +158,7 @@ const AdvancedSearch = () => {
             
             if (response.ok) {
                 console.log("Search successful, hits:", data.hits.hits.length);
-                setSearchResults(data.hits.hits);
+                setSearchResults(data.hits.hits.map(hit => hit._source));
                 setTotalProducts(data.hits.total.value);
             } else {
                 console.error('Search API error:', data.error || data);
@@ -198,7 +198,7 @@ const AdvancedSearch = () => {
 
     const getExportFilters = () => {
         const filters = searchInputs;
-        
+
         // Only add nutrition filter if it has values
         if (searchInputs.Nutrition.nutrient || 
             searchInputs.Nutrition.minAmount || 

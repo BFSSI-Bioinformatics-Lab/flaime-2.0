@@ -1,96 +1,102 @@
-// ExportService.js
-
-import { formatProductField, formatNestedFields, NESTED_FIELDS } from '../../utils';
 import { buildElasticsearchQuery, executeSearch } from '../../utils/search/searchUtils';
-import { nutrientsList } from '../../components/constants/data/nutrients';
+import { formatProductField, formatNestedFields, NESTED_FIELDS } from '../../utils/format/dataFormatting';
+import { SODIUM_FIELD_ORDER } from '../../utils/constants/export/fieldOrder';
+import { SODIUM_FIELD_MAPPING } from '../../utils/constants/export/fieldMapping';
+import { SODIUM_NUTRIENT_MAPPING } from '../../utils/constants/export/nutrientMapping';
+import { formatUPC, formatDate, formatSizeValue } from '../../utils/format/dataFormatting';
 import * as XLSX from 'xlsx';
 
-const ALL_FIELDS = {
-  id: "ID",
-  raw_upc: "UPC",
-  nielsen_upc: "Nielsen UPC",
-  store_product_code: "Store Product Code",
-  raw_brand: "Brand",
-  site_name: "Product Name",
-  site_description: "Description",
-  raw_serving_size: "Serving Size",
-  total_size: "Total Size",
-  reading_price: "Price",
-  dietary_info_description: "Dietary Info",
-  category: "Category",
-  subcategory: "Subcategory",
-  breadcrumb_array: "Category Path",
-  site_url: "Product URL",
-  'ingredients.en': "Ingredients (EN)",
-  'ingredients.fr': "Ingredients (FR)",
-  'source.name': "Source",
-  'store.name': "Store",
-  'scrape_batch.datetime': "Scrape Date",
-  'scrape_batch.region': "Region",
-  'scrape_batch.postal_code': "Postal Code",
-  most_recent_flag: "Most Recent",
-  nutrition_available_flag: "Has Nutrition"
-};
-
 class ExportService {
-  static findAvailableNutrients(results) {
-    const nutrientIds = new Set();
-    results.forEach(item => {
-      item.nutrition_details?.forEach(nutrient => {
-        nutrientIds.add(nutrient.nutrient_id);
-      });
+  static getAllColumns() {
+    return SODIUM_FIELD_ORDER.map(headerName => {
+      const field = Object.entries(SODIUM_FIELD_MAPPING).find(([_, h]) => h === headerName)?.[0];
+      return {
+        field: field || headerName,
+        headerName,
+        isNested: field && field in NESTED_FIELDS
+      };
     });
-    return Array.from(nutrientIds);
   }
 
-  static getNutrientName(nutrientId) {
-    const nutrient = nutrientsList.find(n => n.id === nutrientId);
-    return nutrient ? nutrient.name.replace(/,/g, '') : `Nutrient ${nutrientId}`;
-  }
-
-  static getAllColumns(availableNutrientIds) {
-    const regularColumns = Object.entries(ALL_FIELDS).map(([field, headerName]) => ({
-      field,
-      headerName,
-      isNested: field in NESTED_FIELDS
-    }));
-
-    const nutrientColumns = availableNutrientIds.flatMap(nutrientId => [
-      {
-        field: `nutrition_${nutrientId}_amount`,
-        headerName: `${ExportService.getNutrientName(nutrientId)} Amount`,
-        isNutrient: true,
-        nutrientId,
-        valueType: 'amount'
-      },
-      {
-        field: `nutrition_${nutrientId}_dv`,
-        headerName: `${ExportService.getNutrientName(nutrientId)} DV%`,
-        isNutrient: true,
-        nutrientId,
-        valueType: 'dv'
-      }
-    ]);
-
-    return [...regularColumns, ...nutrientColumns];
-  }
-
-
-  static getNutrientValue(nutritionDetails, nutrientId, valueType) {
-    const nutrient = nutritionDetails?.find(n => n.nutrient_id === nutrientId);
-    if (!nutrient) return '';
+  static getNutrientValue(nutritionDetails, nutrientName, valueType) {
+    const nutrient = nutritionDetails?.find(n => 
+      n.nutrient_name.toUpperCase() === nutrientName.toUpperCase()
+    );
     
-    if (valueType === 'amount') {
-      return nutrient.amount ? `${nutrient.amount}${nutrient.unit}` : '';
-    } else if (valueType === 'dv') {
-      return nutrient.daily_value || '';
+    if (!nutrient) return '';
+
+    switch (valueType) {
+      case 'amount':
+        return nutrient.amount || '';
+      case 'dv':
+        return nutrient.daily_value || '';
+      case 'dvPPD':
+        // Calculate per portion daily value if needed
+        return nutrient.daily_value_ppd || '';
+      case 'kj':
+        // Special case for energy in kilojoules
+        return nutrient.amount_kj || '';
+      case 'kjPPD':
+        return nutrient.amount_kj_ppd || '';
+      default:
+        return '';
     }
-    return '';
   }
-  
-  static getNestedValue(obj, path) {
-    const value = path.split('.').reduce((acc, part) => acc && acc[part], obj);
-    return value !== null && value !== undefined ? value : '';
+
+  static formatRow(item, columns) {
+    return columns.map(col => {
+      // Handle special case for NpPrd
+      if (col.headerName === 'NpPrd') {
+        return '1';
+      }
+
+      // Handle special formatting cases
+      if (col.headerName === 'UPC' || col.headerName === 'LSalesUPC') {
+        return formatUPC(formatProductField(item, col.field, 'export'));
+      }
+
+      if (col.headerName === 'LCollDate' || col.headerName === 'Delivery_Date') {
+        return formatDate(formatProductField(item, col.field, 'export'));
+      }
+
+      // Handle nutrition fields
+      for (const [nutrientName, mapping] of Object.entries(SODIUM_NUTRIENT_MAPPING)) {
+        if (col.headerName === mapping.amount) {
+          return ExportService.getNutrientValue(item.nutrition_details, nutrientName, 'amount');
+        }
+        if (col.headerName === mapping.dv) {
+          return ExportService.getNutrientValue(item.nutrition_details, nutrientName, 'dv');
+        }
+        if (col.headerName === mapping.dvPPD) {
+          return ExportService.getNutrientValue(item.nutrition_details, nutrientName, 'dvPPD');
+        }
+        if (mapping.kj && col.headerName === mapping.kj) {
+          return ExportService.getNutrientValue(item.nutrition_details, nutrientName, 'kj');
+        }
+        if (mapping.kjPPD && col.headerName === mapping.kjPPD) {
+          return ExportService.getNutrientValue(item.nutrition_details, nutrientName, 'kjPPD');
+        }
+      }
+
+      // Handle size fields
+      if (col.field === 'total_size' || col.field === 'serving_size') {
+        const value = formatProductField(item, col.field, 'export');
+        const { value: num, unit } = formatSizeValue(value);
+        return col.headerName.endsWith('UoM') ? unit : num;
+      }
+
+      // Handle nested fields
+      if (col.isNested) {
+        return formatNestedFields(item, col.field);
+      }
+
+      // Handle missing fields
+      if (!col.field || !(col.field in item)) {
+        return '';
+      }
+
+      return formatProductField(item, col.field, 'export');
+    });
   }
 
   static async exportProducts({format, type, columns, filters}) {
@@ -107,31 +113,18 @@ class ExportService {
         _source: ["*", "nutrition_details.*"]
       };
 
-      console.log('final query', query);
-
       let { results } = await executeSearch(query);
       results = results.map(r => r._source);
       
-      const availableNutrientIds = ExportService.findAvailableNutrients(results);
       const exportColumns = type === 'all' ? 
-        ExportService.getAllColumns(availableNutrientIds) : 
+        ExportService.getAllColumns() : 
         columns;
 
       if (!exportColumns) throw new Error('No columns specified for export');
 
-      const formatRow = item => exportColumns.map(col => {
-        if (col.isNested) {
-          return ExportService.formatNestedFields(item, col.field);
-        }
-        if (col.isNutrient) {
-          return ExportService.getNutrientValue(item.nutrition_details, col.nutrientId, col.valueType);
-        }
-        return formatProductField(item, col.field);
-      });
-
       if (format === 'excel') {
         const headers = exportColumns.map(col => col.headerName);
-        const rows = results.map(formatRow);
+        const rows = results.map(item => ExportService.formatRow(item, exportColumns));
         const worksheet = XLSX.utils.aoa_to_sheet([headers, ...rows]);
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, 'Products');
@@ -142,7 +135,7 @@ class ExportService {
       if (format === 'csv') {
         const headers = exportColumns.map(col => col.headerName).join(',');
         const rows = results.map(item =>
-          formatRow(item).map(value => 
+          ExportService.formatRow(item, exportColumns).map(value => 
             value ? `"${value.toString().replace(/"/g, '""')}"` : ''
           ).join(',')
         );

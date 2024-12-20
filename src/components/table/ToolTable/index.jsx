@@ -7,10 +7,10 @@ import { Link } from 'react-router-dom';
 const ToolTable = ({ columns, data, totalCount, page, rowsPerPage, onPageChange, onRowsPerPageChange }) => {
   const renderCell = (column, item) => 
     column === 'id' 
-      ? <Link to={`/tools/product-browser/${formatProductField(item, 'id')}`} target="_blank">
-          {formatProductField(item, 'id')}
+      ? <Link to={`/tools/product-browser/${formatProductField(item, column, 'display')}`} target="_blank">
+          {formatProductField(item, 'id', 'display')}
         </Link>
-      : formatProductField(item, column);
+      : formatProductField(item, column, 'display');
   
   return (
     <TableContainer component={Paper}>
