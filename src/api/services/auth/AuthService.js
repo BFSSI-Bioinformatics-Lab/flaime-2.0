@@ -75,12 +75,10 @@ class AuthService {
                 throw new Error('Refresh token expired');
             }
 
-            console.log('Making refresh request to:', AUTH_ENDPOINTS.refresh);
             const response = await ApiInstance.post(AUTH_ENDPOINTS.refresh, {
                 refresh: refreshToken
             });
 
-            console.log('Refresh response:', response.data);
             const { access } = response.data;
             
             localStorage.setItem('accessToken', access);
@@ -165,7 +163,6 @@ class AuthService {
         const expiresIn = payload.exp * 1000 - Date.now();
         const refreshIn = Math.max(0, expiresIn - TOKEN_REFRESH_THRESHOLD);
 
-        console.log(`Token expires in ${expiresIn}ms, refreshing in ${refreshIn}ms`);
 
         if (refreshIn <= 0) {
             this.refreshToken();
@@ -206,7 +203,6 @@ class AuthService {
                      error.response.status === FORBIDDEN_STATUS) && 
                     !originalRequest._retry) {
                     originalRequest._retry = true;
-                    console.log('Intercepted auth error, attempting refresh...');
 
                     try {
                         const token = await this.refreshToken();
