@@ -21,17 +21,17 @@ const EXPORT_FORMATS = [
     id: 'csv',
     label: 'CSV',
     description: 'Standard comma-separated values format',
-    maxRows: 100000
+    maxRows: 9999,
+    warningThreshold: 1000
   },
   { 
     id: 'excel',
     label: 'Excel Spreadsheet',
     description: 'Microsoft Excel compatible format',
-    maxRows: 50000
+    maxRows: 9999,
+    warningThreshold: 1000
   }
 ];
-
-const MAX_ROWS_WITHOUT_WARNING = 10000;
 
 const DataExportDialog = ({ 
   currentColumns,
@@ -46,11 +46,11 @@ const DataExportDialog = ({
   
   const selectedFormat = availableFormats.find(f => f.id === format);
   const willExceedLimit = totalProducts > (selectedFormat?.maxRows || Infinity);
-  const showWarning = totalProducts > MAX_ROWS_WITHOUT_WARNING;
+  const showWarning = totalProducts > (selectedFormat?.warningThreshold || Infinity);
 
   const handleExport = async () => {
     if (willExceedLimit) {
-      alert(`This export exceeds the maximum limit of ${selectedFormat.maxRows.toLocaleString()} rows for ${selectedFormat.label} format. Please contact administrative staff for assistance with large exports.`);
+      alert(`This export exceeds the maximum limit of ${selectedFormat.maxRows.toLocaleString()} rows. Please contact administrative staff for assistance with large exports.`);
       return;
     }
 
