@@ -74,7 +74,6 @@ export const buildTextMustClauses = (textEntries, fieldKey) => {
   export const buildFilterClauses = (searchInputs) => {
     const filters = [];
   
-    console.log('Building filters with inputs:', searchInputs);
     
     try {
       if (searchInputs.Source && searchInputs.Source.value !== null) {
@@ -140,6 +139,5 @@ export const buildTextMustClauses = (textEntries, fieldKey) => {
     } catch(error) {
       console.error('Error building filter clauses:', error);
     }
-    console.log('Built filters:', filters);
     return filters;
   };

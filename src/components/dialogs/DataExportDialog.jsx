@@ -37,6 +37,7 @@ const DataExportDialog = ({
   currentColumns,
   totalProducts,
   searchFilters,
+  getExportQuery,
   availableFormats = EXPORT_FORMATS 
 }) => {
   const { exportData, isExporting } = useExport();
@@ -58,6 +59,7 @@ const DataExportDialog = ({
       await exportData({
         format: format,
         type: exportType,
+        queryFunction: getExportQuery,
         columns: currentColumns,
         filters: searchFilters
       });

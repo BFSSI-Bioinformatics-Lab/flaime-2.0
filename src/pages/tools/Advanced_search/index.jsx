@@ -9,7 +9,7 @@ import RegionSelector from '../../../components/inputs/RegionSelector';
 import SingleDatePicker from '../../../components/inputs/SingleDatePicker';
 import CategorySelector from '../../../components/inputs/CategorySelector';
 import NutritionFilter from '../../../components/inputs/NutritionFilter';
-import { useSearchFilters, buildTextMustClausesForAllFields } from '../../../utils'
+import { useSearchFilters, buildTextMustClausesForAllFields, executeSearch, buildElasticsearchQuery } from '../../../utils';
 import ColumnSelection  from '../../../components/table/ColumnSelection';
 import ToolTable  from '../../../components/table/ToolTable';
 import SearchResultSummary from '../../../components/misc/SearchResultSummary';
@@ -84,94 +84,51 @@ const AdvancedSearch = () => {
         if (errorMessage) setErrorMessage('');
     };
     
+    const getExportFilters = () => {
+        return {
+          ...searchInputs,
+          nutrition: searchInputs.Nutrition.nutrient || searchInputs.Nutrition.minAmount || searchInputs.Nutrition.maxAmount ? {
+            nutrient: searchInputs.Nutrition.nutrient,
+            minAmount: searchInputs.Nutrition.minAmount, 
+            maxAmount: searchInputs.Nutrition.maxAmount
+          } : null
+        };
+    };
+
     const handleSearch = async () => {
         setIsLoading(true);
-        
-        // Collecting base queries that aren't related to nutrients
-        const textMustClauses = buildTextMustClausesForAllFields(searchInputs);
-        
-        // Initialize the nutrient query
-        let nutrientQuery = {
-            nested: {
-            path: "nutrition_details",
-            query: {
-                bool: {
-                must: []
-                }
-            }
-            }
-        };
-        
-        // Add nutrient ID condition if specified
-        if (searchInputs.Nutrition.nutrient) {
-            nutrientQuery.nested.query.bool.must.push({
-            term: {
-                "nutrition_details.nutrient_id": searchInputs.Nutrition.nutrient
-            }
-            });
-        }
-        
-        // Add range conditions for amount if specified
-        let amountRange = {};
-        if (searchInputs.Nutrition.minAmount) {
-            amountRange.gte = parseFloat(searchInputs.Nutrition.minAmount);
-        }
-        if (searchInputs.Nutrition.maxAmount) {
-            amountRange.lte = parseFloat(searchInputs.Nutrition.maxAmount);
-        }
-        
-        if (Object.keys(amountRange).length > 0) {
-            nutrientQuery.nested.query.bool.must.push({
-            range: {
-                "nutrition_details.amount": amountRange
-            }
-            });
-        }
-        
-        // Combining all must clauses including nutrient query if any conditions were added
-        const finalQuery = {
-            from: page * rowsPerPage,
-            size: rowsPerPage,
-            query: {
-              bool: {
-                must: [
-                  ...textMustClauses,
-                  ...(nutrientQuery.nested.query.bool.must.length > 0 ? [nutrientQuery] : [])
-                ]
-              }
-            }
-          };
-              
-        console.log("Query Body:", JSON.stringify(finalQuery, null, 2));
-        
-        const elastic_url = `${process.env.REACT_APP_ELASTIC_URL}/_search`;
-        
         try {
-            const response = await fetch(elastic_url, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(finalQuery)
-            });
-            
-            const data = await response.json();
-            console.log("Elasticsearch response:", JSON.stringify(data, null, 2));
-            
-            if (response.ok) {
-                console.log("Search successful, hits:", data.hits.hits.length);
-                setSearchResults(data.hits.hits.map(hit => hit._source));
-                setTotalProducts(data.hits.total.value);
-            } else {
-                console.error('Search API error:', data.error || data);
-                setSearchResults([]);   
-            }
+          const query = buildElasticsearchQuery({
+            filters: getExportFilters(),
+            page,
+            rowsPerPage,
+            options: { includeNutrition: true }
+          });
+          
+          const { results, total } = await executeSearch(query);
+          setSearchResults(results.map(hit => hit._source));
+          setTotalProducts(total);
         } catch (error) {
-            console.error('Search request failed:', error);
-            setSearchResults([]);
+          setSearchResults([]);
+          setErrorMessage('Search failed: ' + error.message);
         }
-        
         setIsLoading(false);
+    };
+
+    const getExportQuery = (format) => {
+        return {
+          ...buildElasticsearchQuery({
+            filters: getExportFilters(),
+            options: {
+              includeNutrition: true,
+              isExport: true,
+              size: 10000
+            }
+          }),
+          _source: ["*", "nutrition_details.*"]
         };
-      
+      };
+          
     const handleSelectorChange = (field) => (value) => {
         handleInputChange(field, { value: value === '-1' ? null : value });
     };
@@ -194,32 +151,6 @@ const AdvancedSearch = () => {
         setRowsPerPage(newRowsPerPage);
         setPage(0);
         handleSearch(0, newRowsPerPage);
-    };
-
-    const getExportFilters = () => {
-        const filters = searchInputs;
-
-        // Only add nutrition filter if it has values
-        if (searchInputs.Nutrition.nutrient || 
-            searchInputs.Nutrition.minAmount || 
-            searchInputs.Nutrition.maxAmount) {
-            filters.nutrition = {
-                nutrientId: searchInputs.Nutrition.nutrient,
-                minAmount: searchInputs.Nutrition.minAmount,
-                maxAmount: searchInputs.Nutrition.maxAmount
-            };
-        }
-
-        return filters;
-    };
-
-    // Get formatted column definitions for export
-    const getExportColumns = () => {
-        return selectedColumns.map(col => ({
-            field: col,
-            // You might want to map these to more user-friendly names
-            headerName: col.charAt(0).toUpperCase() + col.slice(1)
-        }));
     };
 
     return (
@@ -322,11 +253,11 @@ const AdvancedSearch = () => {
                     <ResetButton  variant="contained" onClick={handleReset}>Reset Search</ResetButton>
                     {totalProducts > 0 && (
                         <DataExportDialog
-                            currentColumns={getExportColumns()}
+                            currentColumns={selectedColumns}
                             totalProducts={totalProducts}
                             searchFilters={getExportFilters()}
-                        />
-                    )}
+                            getExportQuery={getExportQuery}
+                        />)}
                 </div>
                 <SearchResultSummary totalProducts={totalProducts} />
                 <>

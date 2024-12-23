@@ -54,6 +54,7 @@ export const formatProductField = (item, field, format = 'display') => {
     return String(value);
   };
 
+  console.log(format,field,item);
   const getValue = () => {
     switch (field) {
       // Base fields
@@ -88,7 +89,7 @@ export const formatProductField = (item, field, format = 'display') => {
       
       // Date and region fields
       case 'date':
-        return format === 'display' ? formatDate2(item.scrape_batch?.datetime) : item.scrape_batch?.datetime;
+        return formatDate2(item.scrape_batch?.datetime);
       case 'region':
         return item.scrape_batch?.region;
       

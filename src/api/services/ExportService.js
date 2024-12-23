@@ -18,6 +18,30 @@ class ExportService {
     });
   }
 
+  static transformColumns(columns) {
+    if (!Array.isArray(columns)) {
+      throw new Error('Columns must be an array');
+    }
+  
+    const fieldMappings = {
+      id: 'id',
+      name: 'site_name',
+      price: 'reading_price',
+      source: 'source',
+      store: 'store',
+      date: 'date',
+      region: 'region',
+      category: 'category',
+      subcategory: 'subcategory'
+    };
+
+    return columns.map(headerName => ({
+      field: fieldMappings[headerName] || headerName,
+      headerName,
+      isNested: (fieldMappings[headerName] || headerName).includes('.')
+    }));
+  }
+
   static getNutrientValue(nutritionDetails, nutrientName, valueType) {
     const nutrient = nutritionDetails?.find(n => 
       n.nutrient_name.toUpperCase() === nutrientName.toUpperCase()
@@ -91,37 +115,28 @@ class ExportService {
       }
 
       // Handle missing fields
-      if (!col.field || !(col.field in item)) {
-        return '';
-      }
+      //if (!col.field || !(col.field in item)) {
+      //  console.log('missing!',col.field);
+      //  return '';
+      //}
 
       return formatProductField(item, col.field, 'export');
     });
   }
 
-  static async exportProducts({format, type, columns, filters}) {
+  static async exportProducts({format, type, getQuery, columns, filters}) {
     try {
-      const query = {
-        ...buildElasticsearchQuery({
-          filters,
-          options: {
-            includeNutrition: true,
-            isExport: true,
-            size: format === 'excel' ? 50000 : 100000
-          }
-        }),
-        _source: ["*", "nutrition_details.*"]
-      };
-
+      const query = getQuery(format);
       let { results } = await executeSearch(query);
       results = results.map(r => r._source);
-      
+      console.log('results',results);
       const exportColumns = type === 'all' ? 
         ExportService.getAllColumns() : 
-        columns;
-
+        ExportService.transformColumns(columns);
+      console.log('columns', exportColumns);
+  
       if (!exportColumns) throw new Error('No columns specified for export');
-
+  
       if (format === 'excel') {
         const headers = exportColumns.map(col => col.headerName);
         const rows = results.map(item => ExportService.formatRow(item, exportColumns));
@@ -131,15 +146,14 @@ class ExportService {
         XLSX.writeFile(workbook, `product-export-${new Date().toISOString().split('T')[0]}.xlsx`);
         return true;
       }
-
+  
       if (format === 'csv') {
         const headers = exportColumns.map(col => col.headerName).join(',');
         const rows = results.map(item =>
-          ExportService.formatRow(item, exportColumns).map(value => 
+          ExportService.formatRow(item, exportColumns).map(value =>
             value ? `"${value.toString().replace(/"/g, '""')}"` : ''
           ).join(',')
         );
-
         const csv = [headers, ...rows].join('\n');
         const blob = new Blob([csv], { type: 'text/csv' });
         const url = window.URL.createObjectURL(blob);
