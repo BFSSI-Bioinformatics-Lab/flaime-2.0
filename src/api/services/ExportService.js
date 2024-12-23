@@ -1,5 +1,5 @@
-import { buildElasticsearchQuery, executeSearch } from '../../utils/search/searchUtils';
 import { formatProductField, formatNestedFields, NESTED_FIELDS } from '../../utils/format/dataFormatting';
+import { executeSearch } from '../../utils/search/searchUtils';
 import { SODIUM_FIELD_ORDER } from '../../utils/constants/export/fieldOrder';
 import { SODIUM_FIELD_MAPPING } from '../../utils/constants/export/fieldMapping';
 import { SODIUM_NUTRIENT_MAPPING } from '../../utils/constants/export/nutrientMapping';
@@ -7,40 +7,21 @@ import { formatUPC, formatDate, formatSizeValue } from '../../utils/format/dataF
 import * as XLSX from 'xlsx';
 
 class ExportService {
-  static getAllColumns() {
-    return SODIUM_FIELD_ORDER.map(headerName => {
-      const field = Object.entries(SODIUM_FIELD_MAPPING).find(([_, h]) => h === headerName)?.[0];
-      return {
-        field: field || headerName,
-        headerName,
-        isNested: field && field in NESTED_FIELDS
-      };
-    });
-  }
-
-  static transformColumns(columns) {
-    if (!Array.isArray(columns)) {
-      throw new Error('Columns must be an array');
+  static columnMappers = {
+    UPC: (value) => formatUPC(value),
+    LSalesUPC: (value) => formatUPC(value),
+    LCollDate: (value) => formatDate(value),
+    Delivery_Date: (value) => formatDate(value),
+    NpPrd: () => '1',
+    total_size: (value) => {
+      const { value: num } = formatSizeValue(value);
+      return num;
+    },
+    serving_size: (value) => {
+      const { value: num } = formatSizeValue(value);
+      return num;
     }
-  
-    const fieldMappings = {
-      id: 'id',
-      name: 'site_name',
-      price: 'reading_price',
-      source: 'source',
-      store: 'store',
-      date: 'date',
-      region: 'region',
-      category: 'category',
-      subcategory: 'subcategory'
-    };
-
-    return columns.map(headerName => ({
-      field: fieldMappings[headerName] || headerName,
-      headerName,
-      isNested: (fieldMappings[headerName] || headerName).includes('.')
-    }));
-  }
+  };
 
   static getNutrientValue(nutritionDetails, nutrientName, valueType) {
     const nutrient = nutritionDetails?.find(n => 
@@ -49,116 +30,111 @@ class ExportService {
     
     if (!nutrient) return '';
 
-    switch (valueType) {
-      case 'amount':
-        return nutrient.amount || '';
-      case 'dv':
-        return nutrient.daily_value || '';
-      case 'dvPPD':
-        // Calculate per portion daily value if needed
-        return nutrient.daily_value_ppd || '';
-      case 'kj':
-        // Special case for energy in kilojoules
-        return nutrient.amount_kj || '';
-      case 'kjPPD':
-        return nutrient.amount_kj_ppd || '';
-      default:
-        return '';
+    const valueMapping = {
+      amount: 'amount',
+      dv: 'daily_value',
+      dvPPD: 'daily_value_ppd',
+      kj: 'amount_kj',
+      kjPPD: 'amount_kj_ppd'
+    };
+
+    return nutrient[valueMapping[valueType]] || '';
+  }
+
+  static getFieldMapping(headerName) {
+    const field = Object.entries(SODIUM_FIELD_MAPPING)
+      .find(([_, h]) => h === headerName)?.[0];
+      
+    return {
+      field: field || headerName,
+      headerName,
+      isNested: field?.includes('.')
+    };
+  }
+
+  static getAllColumns() {
+    return SODIUM_FIELD_ORDER.map(this.getFieldMapping);
+  }
+
+  static transformColumns(columns) {
+    if (!Array.isArray(columns)) {
+      throw new Error('Columns must be an array');
     }
+    return columns.map(this.getFieldMapping);
+  }
+
+  static formatValue(item, column) {
+    if (this.columnMappers[column.headerName]) {
+      return this.columnMappers[column.headerName](
+        formatProductField(item, column.field, 'export')
+      );
+    }
+
+    for (const [nutrientName, mapping] of Object.entries(SODIUM_NUTRIENT_MAPPING)) {
+      const valueTypes = ['amount', 'dv', 'dvPPD', 'kj', 'kjPPD'];
+      for (const type of valueTypes) {
+        if (mapping[type] === column.headerName) {
+          return this.getNutrientValue(item.nutrition_details, nutrientName, type);
+        }
+      }
+    }
+
+    if (column.isNested) {
+      return formatNestedFields(item, column.field);
+    }
+
+    return formatProductField(item, column.field, 'export');
   }
 
   static formatRow(item, columns) {
-    return columns.map(col => {
-      // Handle special case for NpPrd
-      if (col.headerName === 'NpPrd') {
-        return '1';
-      }
-
-      // Handle special formatting cases
-      if (col.headerName === 'UPC' || col.headerName === 'LSalesUPC') {
-        return formatUPC(formatProductField(item, col.field, 'export'));
-      }
-
-      if (col.headerName === 'LCollDate' || col.headerName === 'Delivery_Date') {
-        return formatDate(formatProductField(item, col.field, 'export'));
-      }
-
-      // Handle nutrition fields
-      for (const [nutrientName, mapping] of Object.entries(SODIUM_NUTRIENT_MAPPING)) {
-        if (col.headerName === mapping.amount) {
-          return ExportService.getNutrientValue(item.nutrition_details, nutrientName, 'amount');
-        }
-        if (col.headerName === mapping.dv) {
-          return ExportService.getNutrientValue(item.nutrition_details, nutrientName, 'dv');
-        }
-        if (col.headerName === mapping.dvPPD) {
-          return ExportService.getNutrientValue(item.nutrition_details, nutrientName, 'dvPPD');
-        }
-        if (mapping.kj && col.headerName === mapping.kj) {
-          return ExportService.getNutrientValue(item.nutrition_details, nutrientName, 'kj');
-        }
-        if (mapping.kjPPD && col.headerName === mapping.kjPPD) {
-          return ExportService.getNutrientValue(item.nutrition_details, nutrientName, 'kjPPD');
-        }
-      }
-
-      // Handle size fields
-      if (col.field === 'total_size' || col.field === 'serving_size') {
-        const value = formatProductField(item, col.field, 'export');
-        const { value: num, unit } = formatSizeValue(value);
-        return col.headerName.endsWith('UoM') ? unit : num;
-      }
-
-      // Handle nested fields
-      if (col.isNested) {
-        return formatNestedFields(item, col.field);
-      }
-
-      return formatProductField(item, col.field, 'export');
-    });
+    return columns.map(column => this.formatValue(item, column));
   }
 
-  static async exportProducts({format, type, getQuery, columns, filters}) {
+  static async exportToExcel(results, exportColumns) {
+    const headers = exportColumns.map(col => col.headerName);
+    const rows = results.map(item => this.formatRow(item, exportColumns));
+    const worksheet = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Products');
+    XLSX.writeFile(workbook, `product-export-${new Date().toISOString().split('T')[0]}.xlsx`);
+  }
+
+  static exportToCsv(results, exportColumns) {
+    const headers = exportColumns.map(col => col.headerName).join(',');
+    const rows = results.map(item =>
+      this.formatRow(item, exportColumns)
+        .map(value => value ? `"${value.toString().replace(/"/g, '""')}"` : '')
+        .join(',')
+    );
+    const csv = [headers, ...rows].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `product-export-${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(url);
+  }
+
+  static async exportProducts({format, type, getQuery, columns}) {
     try {
       const query = getQuery(format);
       let { results } = await executeSearch(query);
       results = results.map(r => r._source);
+
       const exportColumns = type === 'all' ? 
-        ExportService.getAllColumns() : 
-        ExportService.transformColumns(columns);
-  
-      if (!exportColumns) throw new Error('No columns specified for export');
-  
-      if (format === 'excel') {
-        const headers = exportColumns.map(col => col.headerName);
-        const rows = results.map(item => ExportService.formatRow(item, exportColumns));
-        const worksheet = XLSX.utils.aoa_to_sheet([headers, ...rows]);
-        const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, 'Products');
-        XLSX.writeFile(workbook, `product-export-${new Date().toISOString().split('T')[0]}.xlsx`);
-        return true;
+        this.getAllColumns() : 
+        this.transformColumns(columns);
+
+      if (!exportColumns) {
+        throw new Error('No columns specified for export');
       }
-  
-      if (format === 'csv') {
-        const headers = exportColumns.map(col => col.headerName).join(',');
-        const rows = results.map(item =>
-          ExportService.formatRow(item, exportColumns).map(value =>
-            value ? `"${value.toString().replace(/"/g, '""')}"` : ''
-          ).join(',')
-        );
-        const csv = [headers, ...rows].join('\n');
-        const blob = new Blob([csv], { type: 'text/csv' });
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        const timestamp = new Date().toISOString().split('T')[0];
-        link.href = url;
-        link.setAttribute('download', `product-export-${timestamp}.csv`);
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        window.URL.revokeObjectURL(url);
-        return true;
-      }
+
+      return format === 'excel' 
+        ? await this.exportToExcel(results, exportColumns)
+        : this.exportToCsv(results, exportColumns);
     } catch (error) {
       console.error('Export failed:', error);
       throw error;
