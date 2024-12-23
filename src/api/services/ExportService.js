@@ -114,12 +114,6 @@ class ExportService {
         return formatNestedFields(item, col.field);
       }
 
-      // Handle missing fields
-      //if (!col.field || !(col.field in item)) {
-      //  console.log('missing!',col.field);
-      //  return '';
-      //}
-
       return formatProductField(item, col.field, 'export');
     });
   }
@@ -129,11 +123,9 @@ class ExportService {
       const query = getQuery(format);
       let { results } = await executeSearch(query);
       results = results.map(r => r._source);
-      console.log('results',results);
       const exportColumns = type === 'all' ? 
         ExportService.getAllColumns() : 
         ExportService.transformColumns(columns);
-      console.log('columns', exportColumns);
   
       if (!exportColumns) throw new Error('No columns specified for export');
   

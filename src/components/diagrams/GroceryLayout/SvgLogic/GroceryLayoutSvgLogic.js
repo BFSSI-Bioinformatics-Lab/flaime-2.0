@@ -389,12 +389,10 @@ const getEdgeContainerImagePositionY = (d) => {
 }
 
 const getMiddleCategoryHeadingWidth = (d) => {
-    console.log(d)
     return dim.middleCategoryWidth / 1.5 + d.title.length * 2
 }
 
 const getEdgeCategoryLabelX = (d, numLines) => {
-    console.log(numLines)
     return d.orientation === "h" ? d.posX + 40 + ((d3.max(numLines) + 4)) * dim.edgeCategoryTitleFontSize : d.posX
 }
 

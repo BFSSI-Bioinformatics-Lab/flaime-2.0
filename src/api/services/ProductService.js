@@ -1,7 +1,6 @@
 import { Api } from "../Api";
 
 const GetStoreProductByID = async (productId, controller = null) => {
-    console.log(`GetStoreProductByID called with productId: ${productId}`);
     try {
         const data = await Api.get(`storeproducts/${productId}/`, controller);
         return { error: false, data };

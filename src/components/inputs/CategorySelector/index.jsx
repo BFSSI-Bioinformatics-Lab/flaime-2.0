@@ -48,7 +48,6 @@ const fetchData = async (categoryScheme) => {
     const filteredCategories = categoriesData.categories.filter(cat => 
       cat.scheme.toLowerCase() === categoryScheme.toLowerCase()
     );
-    console.log('Fetched categories:', filteredCategories);
     return filteredCategories;
   } catch (error) {
     console.error("Failed to fetch data:", error);
