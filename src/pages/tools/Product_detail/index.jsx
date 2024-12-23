@@ -4,7 +4,6 @@ import { Grid, Typography, Divider } from '@mui/material';
 import PageContainer from '../../../components/page/PageContainer';
 import Band from '../../../components/page/Band';
 import { ProductInfoBox, PageIcon, PageTitle, DetailItem, ProductIngredientsHeadingContainer } from "./styles";
-import axios from 'axios';
 import NutritionFactsTable from '../../../components/nutrition_facts_table/NutritionFactsTable';
 import ProductImages from './ProductImages';
 import { GetStoreProductByID } from '../../../api/services/ProductService';

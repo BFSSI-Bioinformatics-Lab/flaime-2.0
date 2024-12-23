@@ -9,7 +9,7 @@ import RegionSelector from '../../../components/inputs/RegionSelector';
 import SingleDatePicker from '../../../components/inputs/SingleDatePicker';
 import CategorySelector from '../../../components/inputs/CategorySelector';
 import NutritionFilter from '../../../components/inputs/NutritionFilter';
-import { useSearchFilters, buildTextMustClausesForAllFields, executeSearch, buildElasticsearchQuery } from '../../../utils';
+import { useSearchFilters, executeSearch, buildElasticsearchQuery } from '../../../utils';
 import ColumnSelection  from '../../../components/table/ColumnSelection';
 import ToolTable  from '../../../components/table/ToolTable';
 import SearchResultSummary from '../../../components/misc/SearchResultSummary';

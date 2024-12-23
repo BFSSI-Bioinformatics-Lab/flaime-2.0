@@ -25,7 +25,7 @@ function AppRoutes() {
   useEffect(() => {
     document.title = process.env.REACT_APP_TITLE || 'Default App Title';
 
-    const handleAuthError = (event) => {
+    const handleAuthError = () => {
       navigate('/signin');
     };
 

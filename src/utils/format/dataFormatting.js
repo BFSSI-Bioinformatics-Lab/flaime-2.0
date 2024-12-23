@@ -7,7 +7,7 @@ export const NESTED_FIELDS = {
   }
 };
 
-export const formatNestedFields = (item, nestedField) => {
+export const formatNestedFields = (item, nestedField) => {  
   const nested = item[nestedField];
   if (!nested?.length) return '';
   return nested.map(entry => {

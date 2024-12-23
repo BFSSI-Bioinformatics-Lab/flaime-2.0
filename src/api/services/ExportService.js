@@ -1,4 +1,4 @@
-import { formatProductField, formatNestedFields, NESTED_FIELDS } from '../../utils/format/dataFormatting';
+import { formatProductField, formatNestedFields } from '../../utils/format/dataFormatting';
 import { executeSearch } from '../../utils/search/searchUtils';
 import { SODIUM_FIELD_ORDER } from '../../utils/constants/export/fieldOrder';
 import { SODIUM_FIELD_MAPPING } from '../../utils/constants/export/fieldMapping';
