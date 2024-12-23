@@ -5,8 +5,6 @@ export const useExport = () => {
   const [isExporting, setIsExporting] = useState(false);
 
   const handleExport = async (config) => {
-    console.log('config',config);
-    console.log('getQuery',config.queryFunction);
     try {
       setIsExporting(true);
       await ExportService.exportProducts({

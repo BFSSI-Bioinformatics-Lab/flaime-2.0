@@ -22,9 +22,7 @@ const ProductDetail = () => {
         const fetchProductData = async () => {
             setLoading(true);
             setError(null);
-            console.log("Fetching product data...");
             const result = await GetStoreProductByID(productId, controller);
-            console.log("API result:", result);
             if (result.error) {
                 setError(result.message);
             } else {

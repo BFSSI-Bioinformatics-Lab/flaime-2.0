@@ -118,8 +118,6 @@ const ProductFinder = () => {
   
   const handleSearch = async (newPage = 1) => {
     setSearchResultsIsLoading(true);
-    console.log("Starting search with input mode:", inputMode);
-    console.log("Search filters:", searchInputs);
 
     const filters = buildFilterClauses(searchInputs);
     const fieldKey = getFieldKey(inputMode);
@@ -135,12 +133,7 @@ const ProductFinder = () => {
         }
       }
     };
-    
-    console.log("filters:", filters);
-    console.log("fieldKey:", fieldKey);
-    console.log("textQueries:", JSON.stringify(textQueries, null, 2));
-    console.log("Elasticsearch query body:", JSON.stringify(queryBody, null, 2));
-  
+
     const elastic_url = `${process.env.REACT_APP_ELASTIC_URL}/_search`;
   
     try {
@@ -151,10 +144,8 @@ const ProductFinder = () => {
       });
   
       const data = await response.json();
-      console.log("Elasticsearch response:", JSON.stringify(data, null, 2));
   
       if (response.ok) {
-        console.log("Search successful, hits:", data.hits.total.value);
         if (response.ok) {
           setSearchResults(data.hits.hits);
           setTotalProducts(data.hits.total.value);
@@ -175,7 +166,6 @@ const ProductFinder = () => {
   
     setSearchResultsIsLoading(false);
   };
-console.log(searchResults);
 
 
 return (

@@ -11,7 +11,6 @@ const useNutrients = () => {
         setLoading(true);
         try {
             const { error, nutrients } = await GetAllNutrients();
-            console.log(nutrients)
             if (error || !nutrients) {
                 console.error('Error fetching nutrients:', error);
                 setNutrients([]);
