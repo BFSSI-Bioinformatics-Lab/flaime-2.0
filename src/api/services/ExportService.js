@@ -3,7 +3,7 @@ import { executeSearch } from '../../utils/search/searchUtils';
 import { SODIUM_FIELD_ORDER } from '../../utils/constants/export/fieldOrder';
 import { SODIUM_FIELD_MAPPING } from '../../utils/constants/export/fieldMapping';
 import { SODIUM_NUTRIENT_MAPPING } from '../../utils/constants/export/nutrientMapping';
-import { formatUPC, formatDate, formatSizeValue } from '../../utils/format/dataFormatting';
+import { formatUPC, formatDate, formatSizeValue, extractCategories } from '../../utils/format/dataFormatting';
 import * as XLSX from 'xlsx';
 
 class ExportService {
@@ -64,12 +64,17 @@ class ExportService {
   }
 
   static formatValue(item, column) {
+    const categoryFields = ['GBLClassNum', 'GBLClassDesc', 'ClassNum', 'ClassDesc'];
+    if (categoryFields.includes(column.headerName)) {
+      return extractCategories(item.categories)[column.headerName];
+    }
+  
     if (this.columnMappers[column.headerName]) {
       return this.columnMappers[column.headerName](
         formatProductField(item, column.field, 'export')
       );
     }
-
+  
     for (const [nutrientName, mapping] of Object.entries(SODIUM_NUTRIENT_MAPPING)) {
       const valueTypes = ['amount', 'dv', 'dvPPD', 'kj', 'kjPPD'];
       for (const type of valueTypes) {
@@ -78,14 +83,14 @@ class ExportService {
         }
       }
     }
-
+  
     if (column.isNested) {
       return formatNestedFields(item, column.field);
     }
-
+  
     return formatProductField(item, column.field, 'export');
   }
-
+  
   static formatRow(item, columns) {
     return columns.map(column => this.formatValue(item, column));
   }

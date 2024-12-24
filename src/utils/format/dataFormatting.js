@@ -18,6 +18,25 @@ export const formatNestedFields = (item, nestedField) => {
   }).join(' | ');
 };
 
+export const extractCategories = (categories) => {
+  if (!categories?.length) return {
+    GBLClassNum: '',
+    GBLClassDesc: '',
+    ClassNum: '',
+    ClassDesc: ''
+  };
+
+  const level1 = categories.find(cat => cat.level === 1);
+  const level2 = categories.find(cat => cat.level === 2);
+
+  return {
+    GBLClassNum: level1?.code || '',
+    GBLClassDesc: level1?.name || '',
+    ClassNum: level2?.code || '',
+    ClassDesc: level2?.name || ''
+  };
+};
+
 export const formatDate = (isoDate) => {
   if (!isoDate) return '';
   const date = new Date(isoDate);
@@ -55,8 +74,18 @@ export const formatProductField = (item, field, format = 'display') => {
   };
 
   const getValue = () => {
+    const categoryFields = {
+      GBLClassNum: true,
+      GBLClassDesc: true,
+      ClassNum: true,
+      ClassDesc: true
+    };
+
+    if (categoryFields[field]) {
+      return extractCategories(item.categories)[field];
+    }
+
     switch (field) {
-      // Base fields
       case 'id':
         return item.id;
       case 'raw_upc':
@@ -73,8 +102,6 @@ export const formatProductField = (item, field, format = 'display') => {
         return item.reading_price;
       case 'site_description':
         return item.site_description;
-      
-      // Arrays and nested objects
       case 'breadcrumb_array':
         return Array.isArray(item.breadcrumb_array) ? item.breadcrumb_array : item.breadcrumb_array;
       case 'ingredients.en':
@@ -85,24 +112,16 @@ export const formatProductField = (item, field, format = 'display') => {
         return item.source?.name;
       case 'store':
         return item.store?.name;
-      
-      // Date and region fields
       case 'date':
         return formatDate2(item.scrape_batch?.datetime);
       case 'region':
         return item.scrape_batch?.region;
-      
-      // Boolean flags
       case 'most_recent_flag':
       case 'nutrition_available_flag':
       case 'products_variety_pack_flag':
         return format === 'display' ? formatBoolean2(item[field]) : item[field];
-      
-      // Nutrition fields
       case 'nutrition_facts_json':
         return item.nutrition_facts_json;
-      
-      // Handle nested fields with dot notation
       default:
         if (field.includes('.')) {
           return field.split('.').reduce((obj, key) => obj?.[key], item);

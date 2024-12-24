@@ -115,10 +115,15 @@ import {
       if (!response.ok) {
         throw new Error(data.error || 'Search failed');
       }
-  
+      
+      const results = data.hits.hits;
+      const total = data.hits.total.value;
+
+      console.log(results);
+
       return {
-        results: data.hits.hits,
-        total: data.hits.total.value
+        results,
+        total
       };
     } catch (error) {
       console.error('Search request failed:', error);
