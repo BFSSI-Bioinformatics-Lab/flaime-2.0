@@ -34,20 +34,22 @@ const EXPORT_FORMATS = [
 ];
 
 const DataExportDialog = ({ 
+  open,
+  onClose,
   currentColumns,
   totalProducts,
   searchFilters,
   getExportQuery,
-  availableFormats = EXPORT_FORMATS 
+  availableFormats = EXPORT_FORMATS
 }) => {
   const { exportData, isExporting } = useExport();
-  const [open, setOpen] = useState(false);
   const [exportType, setExportType] = useState('current');
   const [format, setFormat] = useState(availableFormats[0]?.id);
-  
+
   const selectedFormat = availableFormats.find(f => f.id === format);
   const willExceedLimit = totalProducts > (selectedFormat?.maxRows || Infinity);
   const showWarning = totalProducts > (selectedFormat?.warningThreshold || Infinity);
+
 
   const handleExport = async () => {
     if (willExceedLimit) {
@@ -63,29 +65,20 @@ const DataExportDialog = ({
         columns: currentColumns,
         filters: searchFilters
       });
-      setOpen(false);
+      onClose();
     } catch (error) {
       alert('Export failed. If this problem persists with smaller datasets, please contact support.');
     }
   };
 
   return (
-    <>
-      <Button 
-        variant="outlined" 
-        startIcon={<DownloadIcon />} 
-        onClick={() => setOpen(true)}
-      >
-        Export Data
-      </Button>
-
-      <Dialog 
-        open={open} 
-        onClose={() => setOpen(false)}
-        maxWidth="sm"
-        fullWidth
-      >
-        <DialogTitle>Export Data</DialogTitle>
+    <Dialog 
+      open={open} 
+      onClose={onClose}
+      maxWidth="sm"
+      fullWidth
+    >
+      <DialogTitle>Export Data</DialogTitle>
         <DialogContent>
           <Box sx={{ mt: 2, mb: 3 }}>
             <FormControl fullWidth sx={{ mb: 3 }}>
@@ -98,8 +91,8 @@ const DataExportDialog = ({
                 <MenuItem value="current">
                   Current View ({currentColumns.length} columns)
                 </MenuItem>
-                <MenuItem value="all">
-                  Complete Dataset (All Fields)
+                <MenuItem value="sodium">
+                  Sodium Format (all fields)
                 </MenuItem>
               </Select>
             </FormControl>
@@ -146,18 +139,17 @@ const DataExportDialog = ({
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpen(false)}>Cancel</Button>
-          <Button 
-            onClick={handleExport}
-            disabled={isExporting || willExceedLimit}
-            variant="contained"
-            startIcon={<DownloadIcon />}
-          >
-            {isExporting ? 'Preparing Export...' : 'Download'}
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </>
+        <Button onClick={onClose}>Cancel</Button>
+        <Button 
+          onClick={handleExport}
+          disabled={isExporting || willExceedLimit}
+          variant="contained"
+          startIcon={<DownloadIcon />}
+        >
+          {isExporting ? 'Preparing Export...' : 'Download'}
+        </Button>
+      </DialogActions>
+    </Dialog>
   );
 };
 

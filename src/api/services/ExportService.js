@@ -129,7 +129,7 @@ class ExportService {
       let { results } = await executeSearch(query);
       results = results.map(r => r._source);
 
-      const exportColumns = type === 'all' ? 
+      const exportColumns = type === 'sodium' ? 
         this.getAllColumns() : 
         this.transformColumns(columns);
 
