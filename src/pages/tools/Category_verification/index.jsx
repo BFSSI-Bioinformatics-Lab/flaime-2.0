@@ -1,22 +1,10 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../../context/auth/AuthContext';
 import { GetCategoriesToVerify } from '../../../api/services/CategoryVerificationService';
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  Select,
-  MenuItem,
-  Checkbox,
-  Button,
-  Alert,
-  Snackbar,
-  CircularProgress,
-  Typography
+  Table, TableBody, TableCell, TableContainer, TableHead, 
+  TableRow, Paper, Select, MenuItem, Checkbox, Button, 
+  Alert, Snackbar, CircularProgress, Typography
 } from '@mui/material';
 
 const CategoryVerification = () => {
@@ -26,7 +14,7 @@ const CategoryVerification = () => {
   const [successMessage, setSuccessMessage] = useState('');
   const [verificationData, setVerificationData] = useState({});
   const { user } = useAuth();
-  
+
   useEffect(() => {
     fetchProducts();
   }, []);
@@ -34,26 +22,22 @@ const CategoryVerification = () => {
   const fetchProducts = async () => {
     try {
       const { error, products, message } = await GetCategoriesToVerify();
-      if (error) {
-        throw new Error(message);
-      }
+      if (error) throw new Error(message);
 
-      const uniqueProducts = Object.values(
-        products.reduce((acc, product) => {
-          acc[product.id] = product;
-          return acc;
-        }, {})
-      );
+      setProducts(products);
       
-      setProducts(uniqueProducts);
-      
-      const initialVerificationData = uniqueProducts.reduce((acc, product) => {
+      const initialVerificationData = products.reduce((acc, product) => {
+        const topPrediction = product.predictions.reduce((prev, current) => 
+          prev.confidence > current.confidence ? prev : current
+        );
+        
         acc[product.id] = {
-          category: product.predicted_category.id,
+          category: topPrediction.category_id,
           problematic_flag: false
         };
         return acc;
       }, {});
+      
       setVerificationData(initialVerificationData);
       setLoading(false);
     } catch (err) {
@@ -63,12 +47,12 @@ const CategoryVerification = () => {
     }
   };
 
-  const handleCategoryChange = (productId, event) => {
+  const handleCategoryChange = (productId, categoryId) => {
     setVerificationData(prev => ({
       ...prev,
       [productId]: {
         ...prev[productId],
-        category: parseInt(event.target.value)
+        category: parseInt(categoryId)
       }
     }));
   };
@@ -96,9 +80,7 @@ const CategoryVerification = () => {
         verifications.map(verification =>
           fetch('/api/category-verifications/', {
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(verification)
           })
         )
@@ -117,33 +99,25 @@ const CategoryVerification = () => {
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', padding: '2rem' }}>
+      <div className="flex justify-center p-8">
         <CircularProgress />
       </div>
     );
   }
 
   return (
-    <div style={{ padding: '2rem' }}>
-      <Typography variant="h4" gutterBottom>
+    <div className="p-8">
+      <Typography variant="h4" className="mb-6">
         Category Verification
       </Typography>
       
-      <Snackbar 
-        open={!!error} 
-        autoHideDuration={6000} 
-        onClose={() => setError(null)}
-      >
+      <Snackbar open={!!error} autoHideDuration={6000} onClose={() => setError(null)}>
         <Alert severity="error" onClose={() => setError(null)}>
           {error}
         </Alert>
       </Snackbar>
 
-      <Snackbar 
-        open={!!successMessage} 
-        autoHideDuration={3000} 
-        onClose={() => setSuccessMessage('')}
-      >
+      <Snackbar open={!!successMessage} autoHideDuration={3000} onClose={() => setSuccessMessage('')}>
         <Alert severity="success" onClose={() => setSuccessMessage('')}>
           {successMessage}
         </Alert>
@@ -154,6 +128,7 @@ const CategoryVerification = () => {
           <TableHead>
             <TableRow>
               <TableCell>Product Name</TableCell>
+              <TableCell>Size</TableCell>
               <TableCell>Current Category</TableCell>
               <TableCell>Confidence</TableCell>
               <TableCell>New Category</TableCell>
@@ -161,32 +136,49 @@ const CategoryVerification = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {products.map((product) => (
-              <TableRow key={`${product.id}-${product.product_name}`}>
-                <TableCell>{product.product_name}</TableCell>
-                <TableCell>{product.predicted_category.name}</TableCell>
-                <TableCell>{(product.confidence * 100).toFixed(1)}%</TableCell>
-                <TableCell>
-                  <Select
-                    value={verificationData[product.id]?.category}
-                    onChange={(e) => handleCategoryChange(product.id, e)}
-                    fullWidth
-                    size="small"
-                  >
-                    <MenuItem value={765}>Category 1</MenuItem>
-                    <MenuItem value={766}>Category 2</MenuItem>
-                    <MenuItem value={767}>Category 3</MenuItem>
-                    <MenuItem value={768}>Category 4</MenuItem>
-                  </Select>
-                </TableCell>
-                <TableCell>
-                  <Checkbox
-                    checked={verificationData[product.id]?.problematic_flag}
-                    onChange={() => handleProblematicToggle(product.id)}
-                  />
-                </TableCell>
-              </TableRow>
-            ))}
+            {products.map((product) => {
+              const topPrediction = product.predictions.reduce((prev, current) => 
+                prev.confidence > current.confidence ? prev : current
+              );
+              
+              return (
+                <TableRow key={product.id}>
+                  <TableCell>{product.product_name}</TableCell>
+                  <TableCell>{product.product_size}</TableCell>
+                  <TableCell>
+                    {topPrediction.category_name} ({topPrediction.category_code})
+                  </TableCell>
+                  <TableCell>
+                    {(topPrediction.confidence * 100).toFixed(1)}%
+                  </TableCell>
+                  <TableCell>
+                    <Select
+                      value={verificationData[product.id]?.category}
+                      onChange={(e) => handleCategoryChange(product.id, e.target.value)}
+                      fullWidth
+                      size="small"
+                    >
+                      {product.predictions
+                        .sort((a, b) => b.confidence - a.confidence)
+                        .map((prediction) => (
+                          <MenuItem 
+                            key={`${prediction.category_id}-${product.id}`} 
+                            value={prediction.category_id}
+                          >
+                            {prediction.category_name} ({prediction.category_code}) - confidence {(prediction.confidence * 100).toFixed(1)}%
+                          </MenuItem>
+                        ))}
+                    </Select>
+                  </TableCell>
+                  <TableCell>
+                    <Checkbox
+                      checked={verificationData[product.id]?.problematic_flag}
+                      onChange={() => handleProblematicToggle(product.id)}
+                    />
+                  </TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
       </TableContainer>
@@ -195,7 +187,7 @@ const CategoryVerification = () => {
         variant="contained" 
         color="primary"
         onClick={handleSubmit}
-        style={{ marginTop: '2rem' }}
+        className="mt-8"
       >
         Submit Verifications
       </Button>
