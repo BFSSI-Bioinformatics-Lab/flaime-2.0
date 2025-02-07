@@ -14,6 +14,7 @@ import Visualizations from "./pages/data/Visualizations";
 import About from "./pages/About";
 import ProductFinder from "./pages/tools/Product_finder";
 import AdvancedSearch from "./pages/tools/Advanced_search";
+import CategoryVerification from "./pages/tools/Category_verification";
 import SignIn from "./pages/SignIn";
 import { AuthProvider } from './context/auth/AuthContext';
 import PrivateRoute from './context/auth/PrivateRoute';
@@ -37,6 +38,7 @@ function App() {
               <Route path="tools/product-browser" element={<PrivateRoute><ProductBrowser /></PrivateRoute>} />
               <Route path="tools/product-finder" element={<PrivateRoute><ProductFinder /></PrivateRoute>} />
               <Route path="tools/advanced-search" element={<PrivateRoute><AdvancedSearch /></PrivateRoute>} />
+              <Route path="tools/verify-categories" element={<PrivateRoute><CategoryVerification /></PrivateRoute>} />
               <Route path="data/quality" element={<PrivateRoute><Quality /></PrivateRoute>} />
               <Route path="data/download" element={<PrivateRoute><Download /></PrivateRoute>} />
               <Route path="data/visualizations" element={<PrivateRoute><Visualizations /></PrivateRoute>} />
