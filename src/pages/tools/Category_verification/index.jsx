@@ -2,10 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../../context/auth/AuthContext';
 import { GetCategoriesToVerify } from '../../../api/services/CategoryVerificationService';
 import {
-  Table, TableBody, TableCell, TableContainer, TableHead, 
-  TableRow, Paper, Select, MenuItem, Checkbox, Button, 
-  Alert, Snackbar, CircularProgress, Typography
+  Table, TableBody, TableCell, TableContainer, TableHead,
+  TableRow, Paper, Select, MenuItem, Checkbox, Button,
+  Alert, Snackbar, CircularProgress, Typography,
+  Dialog, DialogContent, Box
 } from '@mui/material';
+
+const imagePathToUrl = (imagePath) => {
+  return `${process.env.REACT_APP_IMG_SERVER_URL}/images/${imagePath}`;
+};
 
 const CategoryVerification = () => {
   const [products, setProducts] = useState([]);
@@ -13,6 +18,7 @@ const CategoryVerification = () => {
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState('');
   const [verificationData, setVerificationData] = useState({});
+  const [selectedImage, setSelectedImage] = useState(null);
   const { user } = useAuth();
 
   useEffect(() => {
@@ -25,19 +31,19 @@ const CategoryVerification = () => {
       if (error) throw new Error(message);
 
       setProducts(products);
-      
+
       const initialVerificationData = products.reduce((acc, product) => {
-        const topPrediction = product.predictions.reduce((prev, current) => 
+        const topPrediction = product.predictions.reduce((prev, current) =>
           prev.confidence > current.confidence ? prev : current
         );
-        
+
         acc[product.id] = {
           category: topPrediction.category_id,
           problematic_flag: false
         };
         return acc;
       }, {});
-      
+
       setVerificationData(initialVerificationData);
       setLoading(false);
     } catch (err) {
@@ -110,7 +116,7 @@ const CategoryVerification = () => {
       <Typography variant="h4" className="mb-6">
         Category Verification
       </Typography>
-      
+
       <Snackbar open={!!error} autoHideDuration={6000} onClose={() => setError(null)}>
         <Alert severity="error" onClose={() => setError(null)}>
           {error}
@@ -123,10 +129,30 @@ const CategoryVerification = () => {
         </Alert>
       </Snackbar>
 
+      <Dialog
+        open={!!selectedImage}
+        onClose={() => setSelectedImage(null)}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogContent className="p-0">
+          <div className="w-full h-96 flex items-center justify-center bg-gray-100">
+            {selectedImage && (
+              <img
+                src={imagePathToUrl(selectedImage)}
+                alt="Product"
+                className="max-w-full max-h-full w-auto h-auto object-contain"
+              />
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
             <TableRow>
+              <TableCell>Image</TableCell>
               <TableCell>Product Name</TableCell>
               <TableCell>Size</TableCell>
               <TableCell>Current Category</TableCell>
@@ -137,12 +163,31 @@ const CategoryVerification = () => {
           </TableHead>
           <TableBody>
             {products.map((product) => {
-              const topPrediction = product.predictions.reduce((prev, current) => 
+              const topPrediction = product.predictions.reduce((prev, current) =>
                 prev.confidence > current.confidence ? prev : current
               );
-              
+
+              const imagePath = product.store_product_images[0]?.image_path;
+
               return (
                 <TableRow key={product.id}>
+                  <TableCell sx={{ width: 60 }}>
+                    <div style={{ width: 40, height: 40 }}>
+                      {imagePath && (
+                        <img
+                          src={imagePathToUrl(imagePath)}
+                          alt={product.product_name}
+                          style={{
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'contain',
+                            cursor: 'pointer'
+                          }}
+                          onClick={() => setSelectedImage(imagePath)}
+                        />
+                      )}
+                    </div>
+                  </TableCell>
                   <TableCell>{product.product_name}</TableCell>
                   <TableCell>{product.product_size}</TableCell>
                   <TableCell>
@@ -161,11 +206,12 @@ const CategoryVerification = () => {
                       {product.predictions
                         .sort((a, b) => b.confidence - a.confidence)
                         .map((prediction) => (
-                          <MenuItem 
-                            key={`${prediction.category_id}-${product.id}`} 
+                          <MenuItem
+                            key={`${prediction.category_id}-${product.id}`}
                             value={prediction.category_id}
                           >
-                            {prediction.category_name} ({prediction.category_code}) - confidence {(prediction.confidence * 100).toFixed(1)}%
+                            {prediction.category_name} ({prediction.category_code}) -
+                            {(prediction.confidence * 100).toFixed(1)}%
                           </MenuItem>
                         ))}
                     </Select>
@@ -183,8 +229,8 @@ const CategoryVerification = () => {
         </Table>
       </TableContainer>
 
-      <Button 
-        variant="contained" 
+      <Button
+        variant="contained"
         color="primary"
         onClick={handleSubmit}
         className="mt-8"
