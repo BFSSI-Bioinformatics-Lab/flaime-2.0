@@ -1,5 +1,8 @@
 import axios from 'axios';
 
+// AuthService handles the JWT token management, refresh logic, and API authentication
+
+
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
 const AUTH_ENDPOINTS = {
     login: `${API_BASE_URL}/api/token/`,
@@ -148,4 +151,4 @@ class AuthService {
 }
 
 export const authService = new AuthService();
-export default authService;
+export const axiosInstance = axios;

@@ -15,15 +15,22 @@ import About from "./pages/About";
 import ProductFinder from "./pages/tools/Product_finder";
 import AdvancedSearch from "./pages/tools/Advanced_search";
 import SignIn from "./pages/SignIn";
+import { authService } from "./api/services/auth/AuthService";
 import { AuthProvider } from './context/auth/AuthContext';
 import PrivateRoute from './context/auth/PrivateRoute';
 
 function App() {
-
   useEffect(() => {
     document.title = process.env.REACT_APP_TITLE || 'Default App Title';
+    
+    authService.setupInterceptors();
+    
+    const accessToken = localStorage.getItem('accessToken');
+    if (accessToken) {
+      authService.setAuthHeader(accessToken);
+    }
   }, []);
-
+  
   return (
     <BrowserRouter>
       <AuthProvider>

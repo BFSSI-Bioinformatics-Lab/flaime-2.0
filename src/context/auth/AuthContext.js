@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authService } from '../../api/services/auth/AuthService';
 
+// AuthContext manages the user state and provides authentication methods to your components
 
 const AuthContext = createContext(null);
 
