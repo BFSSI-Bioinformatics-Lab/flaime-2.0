@@ -11,22 +11,25 @@ const AUTH_ENDPOINTS = {
 
 const TOKEN_REFRESH_THRESHOLD = 5 * 60 * 1000; // 5 minutes in milliseconds
 
+const axiosInstance = axios.create({
+    baseURL: API_BASE_URL,
+    withCredentials: true
+});
+
 class AuthService {
     constructor() {
         this.refreshTimeout = null;
         this.isRefreshing = false;
         this.refreshSubscribers = [];
 
-        axios.defaults.baseURL = API_BASE_URL;
-        axios.defaults.withCredentials = true;
     }
 
 
     setAuthHeader(token) {
         if (token) {
-            axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+            axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${token}`;
         } else {
-            delete axios.defaults.headers.common['Authorization'];
+            delete axiosInstance.defaults.headers.common['Authorization'];
         }
     }
 
@@ -151,4 +154,4 @@ class AuthService {
 }
 
 export const authService = new AuthService();
-export const axiosInstance = axios;
+export { axiosInstance };
