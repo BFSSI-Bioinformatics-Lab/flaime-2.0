@@ -25,7 +25,13 @@ const ProductBrowser = () => {
 
   const fetchData = useCallback(async (url, body) => {
     try {
-      const response = await axios.post(url, body);
+      const axiosInstance = axios.create();
+      const response = await axiosInstance.post(url, body, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        withCredentials: false,
+      });
       setProducts(response.data.hits.hits.map(hit => hit._source));
       setTotalProducts(response.data.hits.total.value);
       setAggregationResponse(response.data.aggregations);
@@ -53,7 +59,7 @@ const ProductBrowser = () => {
         queryObject.bool.must.push(fieldMapping[key]);
       }
     });
-
+    console.log(queryObject);
     return queryObject;
   }, [searchTerms]);
 
