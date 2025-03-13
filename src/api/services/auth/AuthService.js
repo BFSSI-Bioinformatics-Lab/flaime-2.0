@@ -103,7 +103,7 @@ class AuthService {
             return access;
         } catch (error) {
             this.logout();
-            throw new Error('Session expired');
+            //throw new Error('Session expired');
         } finally {
             this.isRefreshing = false;
         }
