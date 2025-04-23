@@ -1,18 +1,19 @@
-import { Navigate, useLocation } from 'react-router-dom';
-import { useAuth } from './AuthContext';
+// PrivateRoute.js
+import React from 'react';
+import { Navigate } from 'react-router-dom';
 
-const PrivateRoute = ({ children }) => {
-  const { user, loading } = useAuth();
-  const location = useLocation();
+const PrivateRoute = ({ children, requiredGroup }) => {
+  const user = JSON.parse(localStorage.getItem('user'));
+  const token = localStorage.getItem('token');
 
-  if (loading) {
-    return null; // Or a loading spinner
+  if (!token || !user) {
+    return <Navigate to="/login" />;
   }
-
-  if (!user) {
-    return <Navigate to="/signin" state={{ from: location }} replace />;
+  
+  if (requiredGroup && !user.groups.includes(requiredGroup)) {
+    return <Navigate to="/unauthorized" />;
   }
-
+  
   return children;
 };
 

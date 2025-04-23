@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../../../context/auth/AuthContext';
 import { GetCategoriesToVerify } from '../../../api/services/CategoryVerificationService';
 import {
   Table, TableBody, TableCell, TableContainer, TableHead,
@@ -19,7 +18,6 @@ const CategoryVerification = () => {
   const [successMessage, setSuccessMessage] = useState('');
   const [verificationData, setVerificationData] = useState({});
   const [selectedImage, setSelectedImage] = useState(null);
-  const { user } = useAuth();
 
   useEffect(() => {
     fetchProducts();
@@ -78,7 +76,7 @@ const CategoryVerification = () => {
       product: parseInt(productId),
       category: data.category,
       problematic_flag: data.problematic_flag,
-      user: user.id
+      user: ''
     }));
 
     try {

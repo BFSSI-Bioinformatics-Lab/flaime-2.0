@@ -1,4 +1,4 @@
-import { axiosInstance } from "./services/auth/AuthService";
+import { axiosInstance } from "./services/authService";
 
 const ApiInstance = axiosInstance;
 

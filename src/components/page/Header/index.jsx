@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
@@ -8,54 +8,67 @@ import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from '../../../context/auth/AuthContext';
 import PageContainer from '../PageContainer';
-
-
+import { logout } from '../../../api/services/authService';
 
 const Header = () => {
-    const { user, logout } = useAuth();
     const [anchorEl, setAnchorEl] = React.useState(null);
     const [anchorEl2, setAnchorEl2] = React.useState(null);
     const [anchorEl3, setAnchorEl3] = React.useState(null);
+    const [anchorElUser, setAnchorElUser] = React.useState(null);
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [userData, setUserData] = useState(null);
+
+    // Check authentication status on component mount
+    useEffect(() => {
+        const token = localStorage.getItem('token');
+        const user = localStorage.getItem('user');
+
+        if (token) {
+            setIsAuthenticated(true);
+            if (user) {
+                setUserData(JSON.parse(user));
+            }
+        }
+    }, []);
 
     const handleClose = () => {
         setAnchorEl(null);
         setAnchorEl2(null);
         setAnchorEl3(null);
+        setAnchorElUser(null);
     };
 
-    let navigate = useNavigate(); 
-    const routeHome = () =>{ 
-        let path = '/'; 
+    let navigate = useNavigate();
+    const routeHome = () => {
+        let path = '/';
         navigate(path);
     }
 
     const handleLogout = () => {
         logout();
+        setIsAuthenticated(false);
+        setUserData(null);
+        handleClose();
+        navigate('/login');
     };
 
-
     return (
-        // <div>Header</div>
         <Box sx={{ flexGrow: 1, background: '#732C02' }}>
             <AppBar position="static">
                 <PageContainer>
                     <Toolbar sx={{ paddingLeft: 0, paddingRight: 0 }} disableGutters>
-                        <Typography variant="h6" component="div" 
-                        sx={{ flexGrow: 1, cursor:'pointer' }} onClick={routeHome}>
+                        <Typography variant="h6" component="div"
+                            sx={{ flexGrow: 1, cursor: 'pointer' }} onClick={routeHome}>
                             FLAIME
                         </Typography>
 
                         {/* Menu Buttons */}
                         <Button
                             id="tools"
-                            // aria-controls={open ? "tools-menu" : undefined}
                             aria-haspopup="true"
-                            // aria-expanded={open ? "true" : undefined}
-                            onClick={e=>setAnchorEl(e.currentTarget)}
+                            onClick={e => setAnchorEl(e.currentTarget)}
                             color="inherit"
-                            
                         >
                             Tools
                         </Button>
@@ -65,32 +78,31 @@ const Header = () => {
                             open={Boolean(anchorEl)}
                             onClose={handleClose}
                             MenuListProps={{
-                            "aria-labelledby": "tools-button"
+                                "aria-labelledby": "tools-button"
                             }}
-                            PaperProps={{sx:{
-                                bgcolor:'rgba(115, 44, 2,0.9)', 
-                                color:'white',
-                                "& .MuiMenuItem-root:hover": {
-                                backgroundColor: "rgba(217, 150, 91,0.4)"
-                                },
-                            }}}
+                            PaperProps={{
+                                sx: {
+                                    bgcolor: 'rgba(115, 44, 2,0.9)',
+                                    color: 'white',
+                                    "& .MuiMenuItem-root:hover": {
+                                        backgroundColor: "rgba(217, 150, 91,0.4)"
+                                    },
+                                }
+                            }}
                         >
                             <MenuItem component={Link} to='/tools/product-browser'
-                            onClick={handleClose}>Product Browser</MenuItem>
+                                onClick={handleClose}>Product Browser</MenuItem>
                             <MenuItem component={Link} to='/tools/product-finder'
-                            onClick={handleClose}>Product Finder</MenuItem>
+                                onClick={handleClose}>Product Finder</MenuItem>
                             <MenuItem component={Link} to='/tools/advanced-search'
-                            onClick={handleClose}>Advanced Search</MenuItem>
+                                onClick={handleClose}>Advanced Search</MenuItem>
                         </Menu>
 
                         <Button
                             id="reports"
-                            // aria-controls={open ? "reports-menu" : undefined}
                             aria-haspopup="true"
-                            // aria-expanded={open ? "true" : undefined}
-                            onClick={e=>setAnchorEl2(e.currentTarget)}
+                            onClick={e => setAnchorEl2(e.currentTarget)}
                             color="inherit"
-                            
                         >
                             Reports
                         </Button>
@@ -100,26 +112,25 @@ const Header = () => {
                             open={Boolean(anchorEl2)}
                             onClose={handleClose}
                             MenuListProps={{
-                            "aria-labelledby": "reports-button"
+                                "aria-labelledby": "reports-button"
                             }}
-                            PaperProps={{sx:{
-                                bgcolor:'rgba(115, 44, 2,0.9)', 
-                                color:'white',
-                                "& .MuiMenuItem-root:hover": {
-                                backgroundColor: "rgba(217, 150, 91,0.4)"
-                                },
-                            }}}
+                            PaperProps={{
+                                sx: {
+                                    bgcolor: 'rgba(115, 44, 2,0.9)',
+                                    color: 'white',
+                                    "& .MuiMenuItem-root:hover": {
+                                        backgroundColor: "rgba(217, 150, 91,0.4)"
+                                    },
+                                }
+                            }}
                         >
                         </Menu>
 
                         <Button
                             id="data"
-                            // aria-controls={open ? "tools-menu" : undefined}
                             aria-haspopup="true"
-                            // aria-expanded={open ? "true" : undefined}
-                            onClick={e=>setAnchorEl3(e.currentTarget)}
+                            onClick={e => setAnchorEl3(e.currentTarget)}
                             color="inherit"
-                            
                         >
                             Data
                         </Button>
@@ -129,28 +140,27 @@ const Header = () => {
                             open={Boolean(anchorEl3)}
                             onClose={handleClose}
                             MenuListProps={{
-                            "aria-labelledby": "data-button"
+                                "aria-labelledby": "data-button"
                             }}
-                            PaperProps={{sx:{
-                                bgcolor:'rgba(115, 44, 2,0.9)', 
-                                color:'white',
-                                "& .MuiMenuItem-root:hover": {
-                                backgroundColor: "rgba(217, 150, 91,0.4)"
-                                },
-                            }}}
+                            PaperProps={{
+                                sx: {
+                                    bgcolor: 'rgba(115, 44, 2,0.9)',
+                                    color: 'white',
+                                    "& .MuiMenuItem-root:hover": {
+                                        backgroundColor: "rgba(217, 150, 91,0.4)"
+                                    },
+                                }
+                            }}
                         >
                             <MenuItem component={Link} to='/data/quality'
-                            onClick={handleClose}>Quality</MenuItem>
+                                onClick={handleClose}>Quality</MenuItem>
                             <MenuItem component={Link} to='/data/download'
-                            onClick={handleClose}>Download</MenuItem>
+                                onClick={handleClose}>Download</MenuItem>
                         </Menu>
 
                         <Button
                             id="about"
-                            // aria-controls={open ? "basic-menu" : undefined}
                             aria-haspopup="true"
-                            // aria-expanded={open ? "true" : undefined}
-                            // onClick={handleClick}
                             color="inherit"
                             sx={{ mr: 2 }}
                             component={Link} to="/about"
@@ -158,13 +168,54 @@ const Header = () => {
                             About
                         </Button>
 
-                        {user && (
+                        {/* Authentication Button */}
+                        {isAuthenticated ? (
+                            <>
+                                <Button
+                                    id="user-menu"
+                                    aria-haspopup="true"
+                                    onClick={e => setAnchorElUser(e.currentTarget)}
+                                    color="inherit"
+                                >
+                                    {userData ? userData.username : 'Account'}
+                                </Button>
+                                <Menu
+                                    id="user-menu-dropdown"
+                                    anchorEl={anchorElUser}
+                                    open={Boolean(anchorElUser)}
+                                    onClose={handleClose}
+                                    MenuListProps={{
+                                        "aria-labelledby": "user-menu-button"
+                                    }}
+                                    PaperProps={{
+                                        sx: {
+                                            bgcolor: 'rgba(115, 44, 2,0.9)',
+                                            color: 'white',
+                                            "& .MuiMenuItem-root:hover": {
+                                                backgroundColor: "rgba(217, 150, 91,0.4)"
+                                            },
+                                        }
+                                    }}
+                                >
+                                    {userData && userData.is_staff && (
+                                        <MenuItem
+                                            component="a"
+                                            href="/admin/"
+                                            onClick={handleClose}
+                                        >
+                                            Admin
+                                        </MenuItem>
+                                    )}
+                                    <MenuItem onClick={handleLogout}>Logout</MenuItem>
+                                </Menu>
+                            </>
+                        ) : (
                             <Button
                                 color="inherit"
-                                onClick={handleLogout}
-                                sx={{ ml: 2 }}
+                                component={Link}
+                                to="/login"
                             >
-                                Logout
+                                Login
                             </Button>
                         )}
                     </Toolbar>
