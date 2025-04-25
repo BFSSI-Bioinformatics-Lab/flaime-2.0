@@ -23,6 +23,7 @@ const AdvancedSearch = () => {
     const initialFilters = {
         Names: '',
         IDs: '',
+        ExternalIDs: '',
         UPCs: '',
         NielsenUPCs: '',
         Categories: { value: [] },
@@ -45,6 +46,7 @@ const AdvancedSearch = () => {
 
     const [columnsVisibility, setColumnsVisibility] = useState({
         id: true,
+        external_id: true,
         name: true,
         price: true,
         source: true,
@@ -221,6 +223,14 @@ const AdvancedSearch = () => {
                             label="Product ID"
                             value={searchInputs.IDs}
                             onChange={handleTextFieldChange('IDs')}
+                            variant="outlined"
+                        />
+                    </div>
+                    <div>
+                        <TextField
+                            label="External ID"
+                            value={searchInputs.ExternalIDs}
+                            onChange={handleTextFieldChange('ExternalIDs')}
                             variant="outlined"
                         />
                     </div>

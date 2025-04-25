@@ -41,6 +41,9 @@ export const buildTextMustClausesForAllFields = (searchInputs) => {
     if (searchInputs.IDs) {
         mustClauses.push({ term: { "id": searchInputs.IDs } });
     }
+    if (searchInputs.ExternalIDs) {
+        mustClauses.push({ term: { "external_id": searchInputs.ExternalIDs } });
+    }
     if (searchInputs.UPCs) {
         mustClauses.push({ term: { "raw_upc.keyword": searchInputs.UPCs } });
     }

@@ -20,9 +20,9 @@ import PrivateRoute from './context/auth/PrivateRoute';
 
 function App() {
   useEffect(() => {
-    document.title = process.env.REACT_APP_TITLE || 'Default App Title';    
+    document.title = process.env.REACT_APP_TITLE || 'Default App Title';
   }, []);
-  
+
   return (
     <BrowserRouter>
       <ThemeProvider theme={Theme}>
@@ -34,7 +34,8 @@ function App() {
             <Route path="/" element={<PrivateRoute><Home /></PrivateRoute>} />
             <Route path="tools/product-browser" element={<PrivateRoute><ProductBrowser /></PrivateRoute>} />
             <Route path="tools/product-finder" element={<PrivateRoute><ProductFinder /></PrivateRoute>} />
-            <Route path="tools/advanced-search" element={<PrivateRoute requiredGroup="Staff"><AdvancedSearch /></PrivateRoute>} />
+            {/* <Route path="tools/advanced-search" element={<PrivateRoute requiredGroup="Staff"><AdvancedSearch /></PrivateRoute>} /> */}
+            <Route path="tools/advanced-search" element={<PrivateRoute><AdvancedSearch /></PrivateRoute>} />
             <Route path="tools/verify-categories" element={<PrivateRoute><CategoryVerification /></PrivateRoute>} />
             <Route path="data/quality" element={<PrivateRoute><Quality /></PrivateRoute>} />
             <Route path="data/download" element={<PrivateRoute><Download /></PrivateRoute>} />
