@@ -7,6 +7,7 @@ const axiosInstance = axios.create({
   baseURL: API_BASE_URL,
 });
 
+
 // Add token to all requests
 axiosInstance.interceptors.request.use(
   config => {
@@ -26,7 +27,7 @@ const login = async (username, password) => {
     const response = await fetch(`${API_BASE_URL}/api/token-auth/`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({ username, password }),
       credentials: 'include'
@@ -40,12 +41,10 @@ const login = async (username, password) => {
     }
     
     const data = await response.json();
-    console.log('Login response data:', data);
     
     if (data.token) {
       localStorage.setItem('token', data.token);
       
-      // Now try to get user info with the new token
       const userResponse = await fetch(`${API_BASE_URL}/api/user-info/`, {
         headers: {
           'Authorization': `Token ${data.token}`

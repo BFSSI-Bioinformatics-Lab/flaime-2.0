@@ -177,7 +177,7 @@ const Header = () => {
                                     onClick={e => setAnchorElUser(e.currentTarget)}
                                     color="inherit"
                                 >
-                                    {userData ? userData.username : 'Account'}
+                                    {userData ? userData.email : 'Account'}
                                 </Button>
                                 <Menu
                                     id="user-menu-dropdown"
