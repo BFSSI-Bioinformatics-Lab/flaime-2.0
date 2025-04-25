@@ -51,6 +51,7 @@ const ProductBrowser = () => {
       if (value) {
         const fieldMapping = {
           id: { term: { id: value } },
+          external_id: { term: { external_id: value } },
           storeName: { match: { "store.name": { query: value, operator: "and" } } },
           sourceName: { term: { "source.id": value } },
           siteName: { match: { site_name: { query: value, operator: "and" } } },
@@ -69,6 +70,7 @@ const ProductBrowser = () => {
       .map(([key, value]) => {
         const fieldMapping = {
           id: { term: { id: value } },
+          external_id: { term: { external_id: value } },
           storeName: { match: { "store.name": { query: value, operator: "and" } } },
           sourceName: { term: { "source.id": value } },
           siteName: { match: { site_name: { query: value, operator: "and" } } },
@@ -130,7 +132,7 @@ const ProductBrowser = () => {
     <div style={{ width: '80vw', margin: '0 auto' }}>
       <Typography variant="h4" style={{ padding: '10px' }}>Product Browser</Typography>
       <Typography variant="body1" style={{ padding: '10px', width: '80vw', margin: '0 auto' }}>
-        Search for products by ID, store name, data source, product name or category. Use the form below to search for products. Note that you can also search by more than one search term at once.
+        Search for products by ID, external ID (e.g. FLIP product ID), store name, data source, product name or category. Use the form below to search for products. Note that you can also search by more than one search term at once.
         <ul>
           <li>Please use full words when searching.</li>
           <li>If there are over 10000 products as a result of your search, only the first 10000 will be shown.</li>
@@ -167,6 +169,7 @@ const SearchForm = React.memo(({ searchTerms, handleSearchChange, handleSourceNa
   <div>
     <div style={{ display: 'flex', justifyContent: 'space-evenly', margin: '20px 20px', alignItems: 'center' }}>
       <SearchField label="Search ID" value={searchTerms.id} onChange={handleSearchChange('id')} />
+      <SearchField label="External ID" value={searchTerms.external_id} onChange={handleSearchChange('external_id')} />
       <SearchField label="Search by Store Name" value={searchTerms.storeName} onChange={handleSearchChange('storeName')} />
       <SourceSelector
         value={searchTerms.sourceName}
@@ -234,7 +237,7 @@ const ProductTable = React.memo(({ products }) => (
     <Table>
       <TableHead>
         <TableRow>
-          {['Assigned Flaime ID', 'Store Name', 'Data Source', 'Product Name', 'Category Name'].map((header) => (
+          {['Assigned Flaime ID', 'External ID', 'Store Name', 'Data Source', 'Product Name', 'Category Name'].map((header) => (
             <TableCell key={header} style={{ fontWeight: 'bold', textAlign: 'center', letterSpacing: '1px' }}>{header}</TableCell>
           ))}
         </TableRow>
@@ -245,6 +248,7 @@ const ProductTable = React.memo(({ products }) => (
             <TableCell style={{ width: '80px', textAlign: 'center' }}>
               <Link to={`/tools/product-browser/${product.id}`} target="_blank">{product.id}</Link>
             </TableCell>
+            <TableCell style={{ textAlign: 'center' }}>{product.external_id}</TableCell>
             <TableCell style={{ textAlign: 'center' }}>{product.store.name}</TableCell>
             <TableCell style={{ width: '140px', textAlign: 'center' }}>{product.source.name}</TableCell>
             <TableCell style={{ width: '375px' }}>{product.site_name}</TableCell>
