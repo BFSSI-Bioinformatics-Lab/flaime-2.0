@@ -55,6 +55,7 @@ const ProductDetail = () => {
         { name: "Brand", value: product.raw_brand || product.product?.brand || "None" },
         { name: "Store", value: product.store },
         { name: "Source", value: product.source },
+        { name: "External ID", value: product.external_id },
         { name: "Product Code", value: product.store_product_code || "None" },
         { name: "UPC", value: product.raw_upc || "None" },
         { name: "Price", value: product.reading_price || "Not available" },
