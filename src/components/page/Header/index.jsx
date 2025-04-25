@@ -199,8 +199,8 @@ const Header = () => {
                                 >
                                     {userData && userData.is_staff && (
                                         <MenuItem
-                                            component="a"
-                                            href="/admin/"
+                                            component={Link}
+                                            to="/admin/"
                                             onClick={handleClose}
                                         >
                                             Admin

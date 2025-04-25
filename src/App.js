@@ -17,6 +17,7 @@ import ProductFinder from "./pages/tools/Product_finder";
 import AdvancedSearch from "./pages/tools/Advanced_search";
 import CategoryVerification from "./pages/tools/Category_verification";
 import PrivateRoute from './context/auth/PrivateRoute';
+import AdminPortal from './pages/AdminPortal';
 
 function App() {
   useEffect(() => {
@@ -42,6 +43,7 @@ function App() {
             <Route path="data/visualizations" element={<PrivateRoute><Visualizations /></PrivateRoute>} />
             <Route path="about" element={<PrivateRoute><About /></PrivateRoute>} />
             <Route path="tools/product-browser/:productId" element={<PrivateRoute><ProductDetail /></PrivateRoute>} />
+            <Route path="admin" element={<PrivateRoute><AdminPortal /></PrivateRoute>} />
           </Routes>
           <Footer />
         </div>
