@@ -33,7 +33,7 @@ function App() {
             <Route path="/login" element={<Login />} />
             {/* All other routes wrapped in PrivateRoute. use eg requiredGroup="Staff" to restrict to certain groups */}
             <Route path="/" element={<PrivateRoute><Home /></PrivateRoute>} />
-            <Route path="tools/product-browser" element={<PrivateRoute><ProductBrowser /></PrivateRoute>} />
+            <Route path="tools/product-browser" element={<PrivateRoute requiredGroup="HC"><ProductBrowser /></PrivateRoute>} />
             <Route path="tools/product-finder" element={<PrivateRoute><ProductFinder /></PrivateRoute>} />
             {/* <Route path="tools/advanced-search" element={<PrivateRoute requiredGroup="Staff"><AdvancedSearch /></PrivateRoute>} /> */}
             <Route path="tools/advanced-search" element={<PrivateRoute><AdvancedSearch /></PrivateRoute>} />

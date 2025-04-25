@@ -10,7 +10,7 @@ const PrivateRoute = ({ children, requiredGroup }) => {
     return <Navigate to="/login" />;
   }
   
-  if (requiredGroup && !user.groups.includes(requiredGroup)) {
+  if (requiredGroup && !user.is_staff && !user.groups.includes(requiredGroup)) {
     return <Navigate to="/unauthorized" />;
   }
   
