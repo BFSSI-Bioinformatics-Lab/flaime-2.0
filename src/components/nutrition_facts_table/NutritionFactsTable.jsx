@@ -45,7 +45,7 @@ const NutritionFactsTable = ({ product }) => {
           <Typography variant="body2" style={paddingStyle}>
             {product.nutrition_facts
               .filter(nutritionFact => nutritionFact.nutrient.name === "ENERGY (KILOCALORIES)")
-              .map(nutritionFact => `Calories: ${nutritionFact.amount} ${nutritionFact.amount_unit.name}`)
+              .map(nutritionFact => `Calories: ${nutritionFact.amount}${nutritionFact.amount_unit ? ` ${nutritionFact.amount_unit.name}` : ''}`)
               .join(', ')}
           </Typography>
         )}
@@ -100,7 +100,7 @@ const NutritionFactsTable = ({ product }) => {
                     </span>
                   </TableCell>
                   <TableCell>
-                    {nutritionFact.amount !== null && `${nutritionFact.amount} ${nutritionFact.amount_unit.name}`}
+                    {nutritionFact.amount !== null && nutritionFact.amount_unit !== null && `${nutritionFact.amount} ${nutritionFact.amount_unit.name}`}
                   </TableCell>
                   <TableCell>
                     {nutritionFact.daily_value !== null ? `${nutritionFact.daily_value}%` : ""}
