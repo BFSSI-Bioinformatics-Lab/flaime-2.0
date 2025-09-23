@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { GetCategoriesToVerify } from '../../../api/services/CategoryVerificationService';
+import { GetCategoriesToVerify, SubmitCategoryVerification } from '../../../api/services/CategoryVerificationService';
 import {
   Table, TableBody, TableCell, TableContainer, TableHead,
   TableRow, Paper, Select, MenuItem, Checkbox, Button,
@@ -36,6 +36,7 @@ const CategoryVerification = () => {
         );
 
         acc[product.id] = {
+          product_id: product.product_id,
           category: topPrediction.category_id,
           problematic_flag: false
         };
@@ -73,24 +74,19 @@ const CategoryVerification = () => {
 
   const handleSubmit = async () => {
     const verifications = Object.entries(verificationData).map(([productId, data]) => ({
-      product: parseInt(productId),
+      product: data.product_id,
       category: data.category,
-      problematic_flag: data.problematic_flag,
-      user: ''
+      problematic_flag: data.problematic_flag
     }));
 
     try {
       const results = await Promise.all(
-        verifications.map(verification =>
-          fetch('/api/category-verifications/', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(verification)
-          })
+        verifications.map(verification => 
+          SubmitCategoryVerification(verification)
         )
       );
 
-      if (results.every(res => res.ok)) {
+      if (results.every(result => !result.error)) {
         setSuccessMessage('Categories successfully verified!');
         setTimeout(() => setSuccessMessage(''), 3000);
       } else {
@@ -151,12 +147,12 @@ const CategoryVerification = () => {
           <TableHead>
             <TableRow>
               <TableCell>Image</TableCell>
-              <TableCell>Product Name</TableCell>
+              <TableCell>Product name</TableCell>
               <TableCell>Size</TableCell>
-              <TableCell>Current Category</TableCell>
+              <TableCell>Predicted category</TableCell>
               <TableCell>Confidence</TableCell>
-              <TableCell>New Category</TableCell>
-              <TableCell>Problematic</TableCell>
+              <TableCell>New category</TableCell>
+              <TableCell>Flag for review?</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>

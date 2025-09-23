@@ -14,5 +14,17 @@ const ApiQueryGet = async (url, controller, apiExt = "/api/") => {
   }
 };
 
+const ApiQueryPost = async (url, data, controller, apiExt = "/api/") => {
+  try {
+    const res = await ApiInstance.post(`${apiExt}${url}`, data, {
+      signal: controller ? controller.signal : null
+    });
+    return res.data;
+  } catch (error) {
+    console.error(`API error for ${url}:`, error);
+    throw error;
+  }
+};
+
 export default ApiInstance;
-export { ApiQueryGet };
+export { ApiQueryGet, ApiQueryPost };

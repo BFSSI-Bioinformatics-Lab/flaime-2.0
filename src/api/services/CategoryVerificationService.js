@@ -1,7 +1,6 @@
-import { ApiQueryGet } from "../Api";
-//import { ApiQueryGet, ApiQueryPost } from "../Api";
+import { ApiQueryGet, ApiQueryPost } from "../Api";
 
-const GetCategoriesToVerify = async (scheme = 9, source = 174) => {
+const GetCategoriesToVerify = async (scheme = 9, source = 178) => {
   try {
     const data = await ApiQueryGet(`category-predictions/?scheme=${scheme}&source=${source}`);
     return { error: false, products: data };
@@ -10,7 +9,7 @@ const GetCategoriesToVerify = async (scheme = 9, source = 174) => {
   }
 };
 
-/* const SubmitCategoryVerification = async (verification) => {
+ const SubmitCategoryVerification = async (verification) => {
   try {
     const response = await ApiQueryPost("category-verifications/", verification);
     return { error: false, data: response };
@@ -18,8 +17,8 @@ const GetCategoriesToVerify = async (scheme = 9, source = 174) => {
     return { error: true, message: error.message };
   }
 };
- */
+
 export {
   GetCategoriesToVerify,
-  //SubmitCategoryVerification
+  SubmitCategoryVerification
 };
