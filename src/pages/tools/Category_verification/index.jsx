@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { GetCategoriesToVerify, SubmitCategoryVerification } from '../../../api/services/CategoryVerificationService';
 import {
   Table, TableBody, TableCell, TableContainer, TableHead,
@@ -19,13 +20,27 @@ const CategoryVerification = () => {
   const [verificationData, setVerificationData] = useState({});
   const [selectedImage, setSelectedImage] = useState(null);
 
+  const [searchParams] = useSearchParams();
+  
+  const scheme = searchParams.get('scheme');
+  const source = searchParams.get('source');
+
   useEffect(() => {
-    fetchProducts();
-  }, []);
+    if (scheme && source) {
+      fetchProducts();
+    } else {
+      setError('Missing required parameters: scheme and source');
+      setLoading(false);
+    }
+  }, [scheme, source]);
 
   const fetchProducts = async () => {
     try {
-      const { error, products, message } = await GetCategoriesToVerify();
+      const { error, products, message } = await GetCategoriesToVerify(
+        parseInt(scheme), 
+        parseInt(source)
+      );
+
       if (error) throw new Error(message);
 
       setProducts(products);
@@ -101,6 +116,19 @@ const CategoryVerification = () => {
     return (
       <div className="flex justify-center p-8">
         <CircularProgress />
+      </div>
+    );
+  }
+
+  if (!scheme || !source) {
+    return (
+      <div className="p-8">
+        <Typography variant="h4" className="mb-6">
+          Category Verification
+        </Typography>
+        <Alert severity="error">
+          Missing required parameters. Please access this page through the verification setup.
+        </Alert>
       </div>
     );
   }
