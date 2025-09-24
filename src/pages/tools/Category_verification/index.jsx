@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, Link } from 'react-router-dom';
 import { GetCategoriesToVerify, SubmitCategoryVerification } from '../../../api/services/CategoryVerificationService';
 import {
   Table, TableBody, TableCell, TableContainer, TableHead,
@@ -174,7 +174,7 @@ const CategoryVerification = () => {
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell>Image</TableCell>
+              <TableCell>Images</TableCell>
               <TableCell>Product name</TableCell>
               <TableCell>Size</TableCell>
               <TableCell>Predicted category</TableCell>
@@ -189,28 +189,45 @@ const CategoryVerification = () => {
                 prev.confidence > current.confidence ? prev : current
               );
 
-              const imagePath = product.store_product_images[0]?.image_path;
+              const imagesToShow = product.store_product_images.slice(0, 3);
 
               return (
                 <TableRow key={product.id}>
-                  <TableCell sx={{ width: 60 }}>
-                    <div style={{ width: 40, height: 40 }}>
-                      {imagePath && (
-                        <img
-                          src={imagePathToUrl(imagePath)}
-                          alt={product.product_name}
-                          style={{
-                            width: '100%',
-                            height: '100%',
-                            objectFit: 'contain',
-                            cursor: 'pointer'
-                          }}
-                          onClick={() => setSelectedImage(imagePath)}
-                        />
-                      )}
+                  <TableCell sx={{ width: 140 }}>
+                    <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
+                      {imagesToShow.map((image, index) => (
+                        <div key={index} style={{ width: 40, height: 40 }}>
+                          <img
+                            src={imagePathToUrl(image.image_path)}
+                            alt={`${product.product_name} ${index + 1}`}
+                            style={{
+                              width: '100%',
+                              height: '100%',
+                              objectFit: 'contain',
+                              cursor: 'pointer',
+                              border: '1px solid #ddd',
+                              borderRadius: '4px'
+                            }}
+                            onClick={() => setSelectedImage(image.image_path)}
+                          />
+                        </div>
+                      ))}
                     </div>
                   </TableCell>
-                  <TableCell>{product.product_name}</TableCell>
+                  <TableCell>
+                    <Link 
+                      to={`/tools/product-browser/${product.id}`} 
+                      target="_blank"
+                      style={{
+                        color: '#1976d2',
+                        textDecoration: 'none'
+                      }}
+                      onMouseEnter={(e) => e.target.style.textDecoration = 'underline'}
+                      onMouseLeave={(e) => e.target.style.textDecoration = 'none'}
+                    >
+                      {product.product_name}
+                    </Link>
+                  </TableCell>
                   <TableCell>{product.product_size}</TableCell>
                   <TableCell>
                     {topPrediction.category_name} ({topPrediction.category_code})
