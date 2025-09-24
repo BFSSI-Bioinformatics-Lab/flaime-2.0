@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { GetCategoriesToVerify } from '../../../api/services/CategoryVerificationService';
+import { useSearchParams, Link } from 'react-router-dom';
+import { GetCategoriesToVerify, SubmitCategoryVerification } from '../../../api/services/CategoryVerificationService';
 import {
   Table, TableBody, TableCell, TableContainer, TableHead,
   TableRow, Paper, Select, MenuItem, Checkbox, Button,
@@ -19,13 +20,27 @@ const CategoryVerification = () => {
   const [verificationData, setVerificationData] = useState({});
   const [selectedImage, setSelectedImage] = useState(null);
 
+  const [searchParams] = useSearchParams();
+  
+  const scheme = searchParams.get('scheme');
+  const source = searchParams.get('source');
+
   useEffect(() => {
-    fetchProducts();
-  }, []);
+    if (scheme && source) {
+      fetchProducts();
+    } else {
+      setError('Missing required parameters: scheme and source');
+      setLoading(false);
+    }
+  }, [scheme, source]);
 
   const fetchProducts = async () => {
     try {
-      const { error, products, message } = await GetCategoriesToVerify();
+      const { error, products, message } = await GetCategoriesToVerify(
+        parseInt(scheme), 
+        parseInt(source)
+      );
+
       if (error) throw new Error(message);
 
       setProducts(products);
@@ -36,6 +51,7 @@ const CategoryVerification = () => {
         );
 
         acc[product.id] = {
+          product_id: product.product_id,
           category: topPrediction.category_id,
           problematic_flag: false
         };
@@ -73,24 +89,19 @@ const CategoryVerification = () => {
 
   const handleSubmit = async () => {
     const verifications = Object.entries(verificationData).map(([productId, data]) => ({
-      product: parseInt(productId),
+      product: data.product_id,
       category: data.category,
-      problematic_flag: data.problematic_flag,
-      user: ''
+      problematic_flag: data.problematic_flag
     }));
 
     try {
       const results = await Promise.all(
-        verifications.map(verification =>
-          fetch('/api/category-verifications/', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(verification)
-          })
+        verifications.map(verification => 
+          SubmitCategoryVerification(verification)
         )
       );
 
-      if (results.every(res => res.ok)) {
+      if (results.every(result => !result.error)) {
         setSuccessMessage('Categories successfully verified!');
         setTimeout(() => setSuccessMessage(''), 3000);
       } else {
@@ -105,6 +116,19 @@ const CategoryVerification = () => {
     return (
       <div className="flex justify-center p-8">
         <CircularProgress />
+      </div>
+    );
+  }
+
+  if (!scheme || !source) {
+    return (
+      <div className="p-8">
+        <Typography variant="h4" className="mb-6">
+          Category Verification
+        </Typography>
+        <Alert severity="error">
+          Missing required parameters. Please access this page through the verification setup.
+        </Alert>
       </div>
     );
   }
@@ -150,13 +174,13 @@ const CategoryVerification = () => {
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell>Image</TableCell>
-              <TableCell>Product Name</TableCell>
+              <TableCell>Images</TableCell>
+              <TableCell>Product name</TableCell>
               <TableCell>Size</TableCell>
-              <TableCell>Current Category</TableCell>
+              <TableCell>Predicted category</TableCell>
               <TableCell>Confidence</TableCell>
-              <TableCell>New Category</TableCell>
-              <TableCell>Problematic</TableCell>
+              <TableCell>New category</TableCell>
+              <TableCell>Flag for review?</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -165,28 +189,45 @@ const CategoryVerification = () => {
                 prev.confidence > current.confidence ? prev : current
               );
 
-              const imagePath = product.store_product_images[0]?.image_path;
+              const imagesToShow = product.store_product_images.slice(0, 3);
 
               return (
                 <TableRow key={product.id}>
-                  <TableCell sx={{ width: 60 }}>
-                    <div style={{ width: 40, height: 40 }}>
-                      {imagePath && (
-                        <img
-                          src={imagePathToUrl(imagePath)}
-                          alt={product.product_name}
-                          style={{
-                            width: '100%',
-                            height: '100%',
-                            objectFit: 'contain',
-                            cursor: 'pointer'
-                          }}
-                          onClick={() => setSelectedImage(imagePath)}
-                        />
-                      )}
+                  <TableCell sx={{ width: 140 }}>
+                    <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
+                      {imagesToShow.map((image, index) => (
+                        <div key={index} style={{ width: 40, height: 40 }}>
+                          <img
+                            src={imagePathToUrl(image.image_path)}
+                            alt={`${product.product_name} ${index + 1}`}
+                            style={{
+                              width: '100%',
+                              height: '100%',
+                              objectFit: 'contain',
+                              cursor: 'pointer',
+                              border: '1px solid #ddd',
+                              borderRadius: '4px'
+                            }}
+                            onClick={() => setSelectedImage(image.image_path)}
+                          />
+                        </div>
+                      ))}
                     </div>
                   </TableCell>
-                  <TableCell>{product.product_name}</TableCell>
+                  <TableCell>
+                    <Link 
+                      to={`/tools/product-browser/${product.id}`} 
+                      target="_blank"
+                      style={{
+                        color: '#1976d2',
+                        textDecoration: 'none'
+                      }}
+                      onMouseEnter={(e) => e.target.style.textDecoration = 'underline'}
+                      onMouseLeave={(e) => e.target.style.textDecoration = 'none'}
+                    >
+                      {product.product_name}
+                    </Link>
+                  </TableCell>
                   <TableCell>{product.product_size}</TableCell>
                   <TableCell>
                     {topPrediction.category_name} ({topPrediction.category_code})

@@ -18,6 +18,7 @@ import AdvancedSearch from "./pages/tools/Advanced_search";
 import CategoryVerification from "./pages/tools/Category_verification";
 import PrivateRoute from './context/auth/PrivateRoute';
 import AdminPortal from './pages/AdminPortal';
+import CategoryVerificationSetup from './pages/tools/Category_verification_setup';
 
 function App() {
   useEffect(() => {
@@ -38,6 +39,7 @@ function App() {
             {/* <Route path="tools/advanced-search" element={<PrivateRoute requiredGroup="Staff"><AdvancedSearch /></PrivateRoute>} /> */}
             <Route path="tools/advanced-search" element={<PrivateRoute><AdvancedSearch /></PrivateRoute>} />
             <Route path="tools/verify-categories" element={<PrivateRoute><CategoryVerification /></PrivateRoute>} />
+            <Route path="tools/category-verification-setup" element={<PrivateRoute><CategoryVerificationSetup /></PrivateRoute>} />
             <Route path="data/quality" element={<PrivateRoute><Quality /></PrivateRoute>} />
             <Route path="data/download" element={<PrivateRoute><Download /></PrivateRoute>} />
             <Route path="data/visualizations" element={<PrivateRoute><Visualizations /></PrivateRoute>} />
