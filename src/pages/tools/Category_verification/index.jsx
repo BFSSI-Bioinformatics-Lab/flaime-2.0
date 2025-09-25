@@ -33,18 +33,23 @@ const CategoryVerification = () => {
   const scheme = searchParams.get('scheme');
   const source = searchParams.get('source');
   const view = searchParams.get('view') || 'verify'; // 'verify', 'problematic', 'user-verifications'
+  const preselectedUserId = searchParams.get('user'); // User ID from URL
 
   useEffect(() => {
     if (scheme && source) {
       fetchProducts();
       if (view === 'user-verifications') {
         fetchUsers();
+        // Set preselected user if provided in URL
+        if (preselectedUserId) {
+          setSelectedUser(preselectedUserId);
+        }
       }
     } else {
       setError('Missing required parameters: scheme and source');
       setLoading(false);
     }
-  }, [scheme, source, view, selectedUser]);
+  }, [scheme, source, view, selectedUser, preselectedUserId]);
 
   const fetchUsers = async () => {
     try {
@@ -249,7 +254,6 @@ const CategoryVerification = () => {
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell>Images</TableCell>
               <TableCell>Product name</TableCell>
               <TableCell>Size</TableCell>
               <TableCell>
@@ -268,8 +272,6 @@ const CategoryVerification = () => {
               const topPrediction = product.predictions?.reduce((prev, current) =>
                 prev.confidence > current.confidence ? prev : current
               ) || {};
-
-              const imagesToShow = product.store_product_images?.slice(0, 3) || [];
               
               // For user verifications, show the verified category info
               const displayCategory = view === 'user-verifications' && product.verified_category
@@ -278,27 +280,6 @@ const CategoryVerification = () => {
 
               return (
                 <TableRow key={product.id}>
-                  <TableCell sx={{ width: 140 }}>
-                    <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
-                      {imagesToShow.map((image, index) => (
-                        <div key={index} style={{ width: 40, height: 40 }}>
-                          <img
-                            src={imagePathToUrl(image.image_path)}
-                            alt={`${product.product_name} ${index + 1}`}
-                            style={{
-                              width: '100%',
-                              height: '100%',
-                              objectFit: 'contain',
-                              cursor: 'pointer',
-                              border: '1px solid #ddd',
-                              borderRadius: '4px'
-                            }}
-                            onClick={() => setSelectedImage(image.image_path)}
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  </TableCell>
                   <TableCell>
                     <Link 
                       to={`/tools/product-browser/${product.id}`} 

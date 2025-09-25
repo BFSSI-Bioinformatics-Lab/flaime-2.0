@@ -13,17 +13,23 @@ import {
   Alert,
   Chip,
   LinearProgress,
-  Divider
+  Divider,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem
 } from '@mui/material';
 import { GetAllSources } from '../../../api/services/SourceService';
 import { GetAllCategorySchemes } from '../../../api/services/CategoryService';
-import { GetVerificationStats } from '../../../api/services/CategoryVerificationService';
+import { GetVerificationStats, GetAllUsers } from '../../../api/services/CategoryVerificationService';
 
 const CategoryVerificationSetup = () => {
   const navigate = useNavigate();
   const [schemes, setSchemes] = useState([]);
   const [sources, setSources] = useState([]);
   const [verificationStats, setVerificationStats] = useState({});
+  const [users, setUsers] = useState([]);
+  const [selectedUsers, setSelectedUsers] = useState({}); // Track selected user for each combo
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -37,11 +43,24 @@ const CategoryVerificationSetup = () => {
     fetchData();
   }, []);
 
+  // Initialize selected users when users are loaded
+  useEffect(() => {
+    if (users.length > 0) {
+      const initialSelectedUsers = {};
+      predefinedCombinations.forEach(combo => {
+        const comboKey = `${combo.sourceId}-${combo.schemeId}`;
+        initialSelectedUsers[comboKey] = '';
+      });
+      setSelectedUsers(initialSelectedUsers);
+    }
+  }, [users]);
+
   const fetchData = async () => {
     try {
-      const [schemesResult, sourcesResult] = await Promise.all([
+      const [schemesResult, sourcesResult, usersResult] = await Promise.all([
         GetAllCategorySchemes(),
-        GetAllSources()
+        GetAllSources(),
+        GetAllUsers()
       ]);
 
       if (schemesResult.error) {
@@ -49,6 +68,11 @@ const CategoryVerificationSetup = () => {
       }
       if (sourcesResult.error) {
         throw new Error('Failed to fetch sources: ' + sourcesResult.message);
+      }
+      if (usersResult.error) {
+        console.warn('Failed to fetch users:', usersResult.message);
+      } else {
+        setUsers(usersResult.users || []);
       }
 
       setSchemes(schemesResult.categories);
@@ -93,7 +117,19 @@ const CategoryVerificationSetup = () => {
   };
 
   const handleLaunchUserVerifications = (sourceId, schemeId) => {
-    navigate(`/tools/verify-categories?scheme=${schemeId}&source=${sourceId}&view=user-verifications`);
+    const comboKey = `${sourceId}-${schemeId}`;
+    const userId = selectedUsers[comboKey];
+    if (userId) {
+      navigate(`/tools/verify-categories?scheme=${schemeId}&source=${sourceId}&view=user-verifications&user=${userId}`);
+    }
+  };
+
+  const handleUserSelection = (comboKey, event) => {
+    const userId = event.target.value;
+    setSelectedUsers(prev => ({
+      ...prev,
+      [comboKey]: userId
+    }));
   };
 
   const getProgressPercentage = (stats) => {
@@ -138,6 +174,7 @@ const CategoryVerificationSetup = () => {
           const source = getSourceById(combo.sourceId);
           const stats = verificationStats[`${combo.sourceId}-${combo.schemeId}`] || { total: 0, verified: 0, pending: 0 };
           const progressPercentage = getProgressPercentage(stats);
+          const comboKey = `${combo.sourceId}-${combo.schemeId}`;
           
           return (
             <Grid item xs={12} md={6} lg={4} key={`${combo.sourceId}-${combo.schemeId}`}>
@@ -225,15 +262,38 @@ const CategoryVerificationSetup = () => {
                     Review Problematic
                   </Button>
                   
-                  <Button
-                    variant="outlined"
-                    color="info"
-                    fullWidth
-                    size="small"
-                    onClick={() => handleLaunchUserVerifications(combo.sourceId, combo.schemeId)}
-                  >
-                    View User Verifications
-                  </Button>
+                  <Box className="w-full space-y-2">
+                    <FormControl fullWidth size="small">
+                      <InputLabel id={`user-select-${comboKey}`}>Select User</InputLabel>
+                      <Select
+                        labelId={`user-select-${comboKey}`}
+                        value={selectedUsers[comboKey] || ''}
+                        onChange={(e) => handleUserSelection(comboKey, e)}
+                        label="Select User"
+                        displayEmpty
+                      >
+                        <MenuItem value="">
+                          <em>Choose a user...</em>
+                        </MenuItem>
+                        {users.map((user) => (
+                          <MenuItem key={user.id} value={user.id}>
+                            {user.username || user.email || `User ${user.id}`}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                    
+                    <Button
+                      variant="outlined"
+                      color="info"
+                      fullWidth
+                      size="small"
+                      onClick={() => handleLaunchUserVerifications(combo.sourceId, combo.schemeId)}
+                      disabled={!selectedUsers[comboKey]}
+                    >
+                      View User Verifications
+                    </Button>
+                  </Box>
                 </CardActions>
               </Card>
             </Grid>
