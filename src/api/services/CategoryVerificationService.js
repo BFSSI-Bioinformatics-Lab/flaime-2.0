@@ -38,8 +38,42 @@ const GetVerificationStats = async (scheme = 9, source = 178) => {
   }
 };
 
+const GetProblematicVerifications = async (scheme = 9, source = 178) => {
+  try {
+    const data = await ApiQueryGet(`category-verifications/?scheme=${scheme}&source=${source}&problematic=true`);
+    return { error: false, products: data };
+  } catch (error) {
+    return { error: true, message: error.message };
+  }
+};
+
+const GetUserVerifications = async (scheme = 9, source = 178, userId = null) => {
+  try {
+    let url = `category-verifications/?scheme=${scheme}&source=${source}&verified=true`;
+    if (userId) {
+      url += `&user=${userId}`;
+    }
+    const data = await ApiQueryGet(url);
+    return { error: false, products: data };
+  } catch (error) {
+    return { error: true, message: error.message };
+  }
+};
+
+const GetAllUsers = async () => {
+  try {
+    const data = await ApiQueryGet('users/');
+    return { error: false, users: data };
+  } catch (error) {
+    return { error: true, message: error.message };
+  }
+};
+
 export {
   GetCategoriesToVerify,
   SubmitCategoryVerification,
-  GetVerificationStats
+  GetVerificationStats,
+  GetProblematicVerifications,
+  GetUserVerifications,
+  GetAllUsers
 };

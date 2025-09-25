@@ -88,6 +88,14 @@ const CategoryVerificationSetup = () => {
     navigate(`/tools/verify-categories?scheme=${schemeId}&source=${sourceId}`);
   };
 
+  const handleLaunchProblematic = (sourceId, schemeId) => {
+    navigate(`/tools/verify-categories?scheme=${schemeId}&source=${sourceId}&view=problematic`);
+  };
+
+  const handleLaunchUserVerifications = (sourceId, schemeId) => {
+    navigate(`/tools/verify-categories?scheme=${schemeId}&source=${sourceId}&view=user-verifications`);
+  };
+
   const getProgressPercentage = (stats) => {
     if (!stats || stats.total === 0) return 0;
     return Math.round((stats.verified / stats.total) * 100);
@@ -196,7 +204,7 @@ const CategoryVerificationSetup = () => {
                   </Box>
                 </CardContent>
                 
-                <CardActions>
+                <CardActions className="flex-col space-y-2">
                   <Button
                     variant="contained"
                     color="primary"
@@ -205,6 +213,26 @@ const CategoryVerificationSetup = () => {
                     disabled={stats.pending === 0}
                   >
                     {stats.pending === 0 ? 'Complete' : 'Continue Verification'}
+                  </Button>
+                  
+                  <Button
+                    variant="outlined"
+                    color="warning"
+                    fullWidth
+                    size="small"
+                    onClick={() => handleLaunchProblematic(combo.sourceId, combo.schemeId)}
+                  >
+                    Review Problematic
+                  </Button>
+                  
+                  <Button
+                    variant="outlined"
+                    color="info"
+                    fullWidth
+                    size="small"
+                    onClick={() => handleLaunchUserVerifications(combo.sourceId, combo.schemeId)}
+                  >
+                    View User Verifications
                   </Button>
                 </CardActions>
               </Card>

@@ -1,11 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
-import { GetCategoriesToVerify, SubmitCategoryVerification } from '../../../api/services/CategoryVerificationService';
+import { 
+  GetCategoriesToVerify, 
+  SubmitCategoryVerification, 
+  GetProblematicVerifications, 
+  GetUserVerifications,
+  GetAllUsers 
+} from '../../../api/services/CategoryVerificationService';
 import {
   Table, TableBody, TableCell, TableContainer, TableHead,
   TableRow, Paper, Select, MenuItem, Checkbox, Button,
-  Alert, Snackbar, CircularProgress, Typography
+  Alert, Snackbar, CircularProgress, Typography,
+  Dialog, DialogContent, Box, FormControl, InputLabel
 } from '@mui/material';
+
+const imagePathToUrl = (imagePath) => {
+  return `${process.env.REACT_APP_IMG_SERVER_URL}/images/${imagePath}`;
+};
 
 const CategoryVerification = () => {
   const [products, setProducts] = useState([]);
@@ -13,46 +24,96 @@ const CategoryVerification = () => {
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState('');
   const [verificationData, setVerificationData] = useState({});
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [users, setUsers] = useState([]);
+  const [selectedUser, setSelectedUser] = useState('');
 
   const [searchParams] = useSearchParams();
   
   const scheme = searchParams.get('scheme');
   const source = searchParams.get('source');
+  const view = searchParams.get('view') || 'verify'; // 'verify', 'problematic', 'user-verifications'
 
   useEffect(() => {
     if (scheme && source) {
       fetchProducts();
+      if (view === 'user-verifications') {
+        fetchUsers();
+      }
     } else {
       setError('Missing required parameters: scheme and source');
       setLoading(false);
     }
-  }, [scheme, source]);
+  }, [scheme, source, view, selectedUser]);
+
+  const fetchUsers = async () => {
+    try {
+      const { error, users, message } = await GetAllUsers();
+      if (error) {
+        console.error('Failed to fetch users:', message);
+      } else {
+        setUsers(users || []);
+      }
+    } catch (err) {
+      console.error('Error fetching users:', err);
+    }
+  };
+
+  const getPageTitle = () => {
+    switch (view) {
+      case 'problematic':
+        return 'Review Problematic Verifications';
+      case 'user-verifications':
+        return 'User Verification History';
+      default:
+        return 'Category Verification';
+    }
+  };
+
+  const isReadOnlyView = () => {
+    return view === 'problematic' || view === 'user-verifications';
+  };
 
   const fetchProducts = async () => {
     try {
-      const { error, products, message } = await GetCategoriesToVerify(
-        parseInt(scheme), 
-        parseInt(source)
-      );
+      let result;
+      
+      if (view === 'problematic') {
+        result = await GetProblematicVerifications(parseInt(scheme), parseInt(source));
+      } else if (view === 'user-verifications') {
+        result = await GetUserVerifications(
+          parseInt(scheme), 
+          parseInt(source), 
+          selectedUser || null
+        );
+      } else {
+        result = await GetCategoriesToVerify(parseInt(scheme), parseInt(source));
+      }
+
+      const { error, products, message } = result;
 
       if (error) throw new Error(message);
 
       setProducts(products);
 
-      const initialVerificationData = products.reduce((acc, product) => {
-        const topPrediction = product.predictions.reduce((prev, current) =>
-          prev.confidence > current.confidence ? prev : current
-        );
+      if (view === 'verify') {
+        // Only set up verification data for the main verification view
+        const initialVerificationData = products.reduce((acc, product) => {
+          const topPrediction = product.predictions.reduce((prev, current) =>
+            prev.confidence > current.confidence ? prev : current
+          );
 
-        acc[product.id] = {
-          product_id: product.product_id,
-          category: topPrediction.category_id,
-          problematic_flag: false
-        };
-        return acc;
-      }, {});
+          acc[product.id] = {
+            product_id: product.product_id,
+            category: topPrediction.category_id,
+            problematic_flag: false
+          };
+          return acc;
+        }, {});
 
-      setVerificationData(initialVerificationData);
+        setVerificationData(initialVerificationData);
+      }
+      
       setLoading(false);
     } catch (err) {
       console.error('Fetch error:', err);
@@ -130,8 +191,28 @@ const CategoryVerification = () => {
   return (
     <div className="p-8">
       <Typography variant="h4" className="mb-6">
-        Category Verification
+        {getPageTitle()}
       </Typography>
+
+      {view === 'user-verifications' && (
+        <Box className="mb-4">
+          <FormControl sx={{ minWidth: 200 }}>
+            <InputLabel>Filter by User</InputLabel>
+            <Select
+              value={selectedUser}
+              onChange={(e) => setSelectedUser(e.target.value)}
+              label="Filter by User"
+            >
+              <MenuItem value="">All Users</MenuItem>
+              {users.map((user) => (
+                <MenuItem key={user.id} value={user.id}>
+                  {user.username || user.email || `User ${user.id}`}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Box>
+      )}
 
       <Snackbar open={!!error} autoHideDuration={6000} onClose={() => setError(null)}>
         <Alert severity="error" onClose={() => setError(null)}>
@@ -145,26 +226,79 @@ const CategoryVerification = () => {
         </Alert>
       </Snackbar>
 
+      <Dialog
+        open={!!selectedImage}
+        onClose={() => setSelectedImage(null)}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogContent className="p-0">
+          <div className="w-full h-96 flex items-center justify-center bg-gray-100">
+            {selectedImage && (
+              <img
+                src={imagePathToUrl(selectedImage)}
+                alt="Product"
+                className="max-w-full max-h-full w-auto h-auto object-contain"
+              />
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
             <TableRow>
+              <TableCell>Images</TableCell>
               <TableCell>Product name</TableCell>
               <TableCell>Size</TableCell>
-              <TableCell>Predicted category</TableCell>
+              <TableCell>
+                {view === 'user-verifications' ? 'Verified category' : 'Predicted category'}
+              </TableCell>
               <TableCell>Confidence</TableCell>
-              <TableCell>New category</TableCell>
-              <TableCell>Flag for review?</TableCell>
+              {!isReadOnlyView() && <TableCell>New category</TableCell>}
+              <TableCell>
+                {view === 'problematic' ? 'Problematic' : 'Flag for review?'}
+              </TableCell>
+              {view === 'user-verifications' && <TableCell>Verified by</TableCell>}
             </TableRow>
           </TableHead>
           <TableBody>
             {products.map((product) => {
-              const topPrediction = product.predictions.reduce((prev, current) =>
+              const topPrediction = product.predictions?.reduce((prev, current) =>
                 prev.confidence > current.confidence ? prev : current
-              );
+              ) || {};
+
+              const imagesToShow = product.store_product_images?.slice(0, 3) || [];
+              
+              // For user verifications, show the verified category info
+              const displayCategory = view === 'user-verifications' && product.verified_category
+                ? product.verified_category
+                : topPrediction;
 
               return (
                 <TableRow key={product.id}>
+                  <TableCell sx={{ width: 140 }}>
+                    <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
+                      {imagesToShow.map((image, index) => (
+                        <div key={index} style={{ width: 40, height: 40 }}>
+                          <img
+                            src={imagePathToUrl(image.image_path)}
+                            alt={`${product.product_name} ${index + 1}`}
+                            style={{
+                              width: '100%',
+                              height: '100%',
+                              objectFit: 'contain',
+                              cursor: 'pointer',
+                              border: '1px solid #ddd',
+                              borderRadius: '4px'
+                            }}
+                            onClick={() => setSelectedImage(image.image_path)}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </TableCell>
                   <TableCell>
                     <Link 
                       to={`/tools/product-browser/${product.id}`} 
@@ -181,37 +315,57 @@ const CategoryVerification = () => {
                   </TableCell>
                   <TableCell>{product.product_size}</TableCell>
                   <TableCell>
-                    {topPrediction.category_name} ({topPrediction.category_code})
+                    {displayCategory.category_name} ({displayCategory.category_code})
                   </TableCell>
                   <TableCell>
-                    {(topPrediction.confidence * 100).toFixed(1)}%
+                    {displayCategory.confidence ? (displayCategory.confidence * 100).toFixed(1) + '%' : 'N/A'}
                   </TableCell>
+                  {!isReadOnlyView() && (
+                    <TableCell>
+                      <Select
+                        value={verificationData[product.id]?.category || ''}
+                        onChange={(e) => handleCategoryChange(product.id, e.target.value)}
+                        fullWidth
+                        size="small"
+                      >
+                        {product.predictions
+                          ?.sort((a, b) => b.confidence - a.confidence)
+                          .map((prediction) => (
+                            <MenuItem
+                              key={`${prediction.category_id}-${product.id}`}
+                              value={prediction.category_id}
+                            >
+                              {prediction.category_name} ({prediction.category_code}) -
+                              {(prediction.confidence * 100).toFixed(1)}%
+                            </MenuItem>
+                          ))}
+                      </Select>
+                    </TableCell>
+                  )}
                   <TableCell>
-                    <Select
-                      value={verificationData[product.id]?.category}
-                      onChange={(e) => handleCategoryChange(product.id, e.target.value)}
-                      fullWidth
-                      size="small"
-                    >
-                      {product.predictions
-                        .sort((a, b) => b.confidence - a.confidence)
-                        .map((prediction) => (
-                          <MenuItem
-                            key={`${prediction.category_id}-${product.id}`}
-                            value={prediction.category_id}
-                          >
-                            {prediction.category_name} ({prediction.category_code}) -
-                            {(prediction.confidence * 100).toFixed(1)}%
-                          </MenuItem>
-                        ))}
-                    </Select>
+                    {isReadOnlyView() ? (
+                      <Typography variant="body2" color={product.problematic_flag ? 'error' : 'text.secondary'}>
+                        {product.problematic_flag ? 'Yes' : 'No'}
+                      </Typography>
+                    ) : (
+                      <Checkbox
+                        checked={verificationData[product.id]?.problematic_flag || false}
+                        onChange={() => handleProblematicToggle(product.id)}
+                      />
+                    )}
                   </TableCell>
-                  <TableCell>
-                    <Checkbox
-                      checked={verificationData[product.id]?.problematic_flag}
-                      onChange={() => handleProblematicToggle(product.id)}
-                    />
-                  </TableCell>
+                  {view === 'user-verifications' && (
+                    <TableCell>
+                      <Typography variant="body2">
+                        {product.verified_by_username || product.verified_by || 'Unknown'}
+                      </Typography>
+                      {product.verified_at && (
+                        <Typography variant="caption" color="text.secondary">
+                          {new Date(product.verified_at).toLocaleDateString()}
+                        </Typography>
+                      )}
+                    </TableCell>
+                  )}
                 </TableRow>
               );
             })}
@@ -219,14 +373,16 @@ const CategoryVerification = () => {
         </Table>
       </TableContainer>
 
-      <Button
-        variant="contained"
-        color="primary"
-        onClick={handleSubmit}
-        className="mt-8"
-      >
-        Submit Verifications
-      </Button>
+      {!isReadOnlyView() && (
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={handleSubmit}
+          className="mt-8"
+        >
+          Submit Verifications
+        </Button>
+      )}
     </div>
   );
 };
