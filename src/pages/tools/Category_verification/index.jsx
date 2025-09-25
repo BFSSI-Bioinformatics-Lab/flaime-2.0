@@ -4,13 +4,8 @@ import { GetCategoriesToVerify, SubmitCategoryVerification } from '../../../api/
 import {
   Table, TableBody, TableCell, TableContainer, TableHead,
   TableRow, Paper, Select, MenuItem, Checkbox, Button,
-  Alert, Snackbar, CircularProgress, Typography,
-  Dialog, DialogContent, Box
+  Alert, Snackbar, CircularProgress, Typography
 } from '@mui/material';
-
-const imagePathToUrl = (imagePath) => {
-  return `${process.env.REACT_APP_IMG_SERVER_URL}/images/${imagePath}`;
-};
 
 const CategoryVerification = () => {
   const [products, setProducts] = useState([]);
@@ -18,7 +13,6 @@ const CategoryVerification = () => {
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState('');
   const [verificationData, setVerificationData] = useState({});
-  const [selectedImage, setSelectedImage] = useState(null);
 
   const [searchParams] = useSearchParams();
   
@@ -151,30 +145,10 @@ const CategoryVerification = () => {
         </Alert>
       </Snackbar>
 
-      <Dialog
-        open={!!selectedImage}
-        onClose={() => setSelectedImage(null)}
-        maxWidth="md"
-        fullWidth
-      >
-        <DialogContent className="p-0">
-          <div className="w-full h-96 flex items-center justify-center bg-gray-100">
-            {selectedImage && (
-              <img
-                src={imagePathToUrl(selectedImage)}
-                alt="Product"
-                className="max-w-full max-h-full w-auto h-auto object-contain"
-              />
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
-
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell>Images</TableCell>
               <TableCell>Product name</TableCell>
               <TableCell>Size</TableCell>
               <TableCell>Predicted category</TableCell>
@@ -189,31 +163,8 @@ const CategoryVerification = () => {
                 prev.confidence > current.confidence ? prev : current
               );
 
-              const imagesToShow = product.store_product_images.slice(0, 3);
-
               return (
                 <TableRow key={product.id}>
-                  <TableCell sx={{ width: 140 }}>
-                    <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
-                      {imagesToShow.map((image, index) => (
-                        <div key={index} style={{ width: 40, height: 40 }}>
-                          <img
-                            src={imagePathToUrl(image.image_path)}
-                            alt={`${product.product_name} ${index + 1}`}
-                            style={{
-                              width: '100%',
-                              height: '100%',
-                              objectFit: 'contain',
-                              cursor: 'pointer',
-                              border: '1px solid #ddd',
-                              borderRadius: '4px'
-                            }}
-                            onClick={() => setSelectedImage(image.image_path)}
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  </TableCell>
                   <TableCell>
                     <Link 
                       to={`/tools/product-browser/${product.id}`} 
