@@ -230,7 +230,7 @@ const CategoryVerification = () => {
       to={`/tools/product-browser/${product.id}`} 
       target="_blank"
       style={{
-        color: '#1976d2',
+        color: '#023466ff',
         textDecoration: 'none'
       }}
       onMouseEnter={(e) => e.target.style.textDecoration = 'underline'}
