@@ -11,7 +11,7 @@ import {
   Table, TableBody, TableCell, TableContainer, TableHead,
   TableRow, Paper, Select, MenuItem, Checkbox, Button,
   Alert, Snackbar, CircularProgress, Typography,
-  Box, FormControl, InputLabel
+  Box
 } from '@mui/material';
 
 const CategoryVerification = () => {
@@ -177,11 +177,28 @@ const CategoryVerification = () => {
       if (results.every(result => !result.error)) {
         setSuccessMessage('Categories successfully verified!');
         setTimeout(() => setSuccessMessage(''), 3000);
+        return true; // Success
       } else {
         setError('Some verifications failed to submit');
+        return false;
       }
     } catch (err) {
       setError('Failed to submit verifications');
+      return false;
+    }
+  };
+
+  const handleSubmitAndReturn = async () => {
+    const success = await handleSubmit();
+    if (success) {
+      window.location.href = '/tools/category-verification-setup';
+    }
+  };
+
+  const handleSubmitAndLoadMore = async () => {
+    const success = await handleSubmit();
+    if (success) {
+      await fetchProducts(); // Load new products
     }
   };
 
@@ -320,16 +337,24 @@ const CategoryVerification = () => {
         </Table>
       </TableContainer>
 
-      {view !== 'read-only' && (
+    {view !== 'read-only' && (
+      <Box className="mt-8 space-x-4">
         <Button
           variant="contained"
           color="primary"
-          onClick={handleSubmit}
-          className="mt-8"
+          onClick={handleSubmitAndReturn}
         >
-          Submit Verifications
+          Submit and Return to Setup
         </Button>
-      )}
+        <Button
+          variant="outlined"
+          color="primary"
+          onClick={handleSubmitAndLoadMore}
+        >
+          Submit and Load Another 10
+        </Button>
+      </Box>
+    )}
     </div>
   );
 };
