@@ -11,12 +11,8 @@ import {
   Table, TableBody, TableCell, TableContainer, TableHead,
   TableRow, Paper, Select, MenuItem, Checkbox, Button,
   Alert, Snackbar, CircularProgress, Typography,
-  Dialog, DialogContent, Box, FormControl, InputLabel
+  Box, FormControl, InputLabel
 } from '@mui/material';
-
-const imagePathToUrl = (imagePath) => {
-  return `${process.env.REACT_APP_IMG_SERVER_URL}/images/${imagePath}`;
-};
 
 const CategoryVerification = () => {
   const [products, setProducts] = useState([]);
@@ -24,32 +20,80 @@ const CategoryVerification = () => {
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState('');
   const [verificationData, setVerificationData] = useState({});
-  const [selectedImage, setSelectedImage] = useState(null);
+
   const [users, setUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState('');
 
   const [searchParams] = useSearchParams();
-  
   const scheme = searchParams.get('scheme');
   const source = searchParams.get('source');
-  const view = searchParams.get('view') || 'verify'; // 'verify', 'problematic', 'user-verifications'
-  const preselectedUserId = searchParams.get('user'); // User ID from URL
+  const view = searchParams.get('view') || 'verify';
+  const preselectedUserId = searchParams.get('user');
 
-  useEffect(() => {
-    if (scheme && source) {
-      fetchProducts();
-      if (view === 'user-verifications') {
-        fetchUsers();
-        // Set preselected user if provided in URL
-        if (preselectedUserId) {
-          setSelectedUser(preselectedUserId);
-        }
-      }
-    } else {
-      setError('Missing required parameters: scheme and source');
-      setLoading(false);
+  const isVerificationView = () => view === 'verify';
+
+  const getPageTitle = () => {
+    const titles = {
+      'problematic': 'Review Problematic Verifications',
+      'user-verifications': 'User Verification History',
+      'default': 'Category Verification'
+    };
+    return titles[view] || titles.default;
+  };
+
+  const getPageDesc = () => {
+    const titles = {
+      'problematic': 'Most recent 50 shown',
+      'user-verifications': 'Most recent 50 shown',
+      'default': 'Random 10 shown'
+    };
+    return titles[view] || titles.default;
+  };
+
+  const getApiCall = () => {
+    if (view === 'problematic') {
+      return GetProblematicVerifications(parseInt(scheme), parseInt(source));
     }
-  }, [scheme, source, view, selectedUser, preselectedUserId]);
+    if (view === 'user-verifications') {
+      const userId = preselectedUserId || selectedUser;
+      return GetUserVerifications(
+        parseInt(scheme), 
+        parseInt(source), 
+        userId ? parseInt(userId) : null
+      );
+    }
+    return GetCategoriesToVerify(parseInt(scheme), parseInt(source));
+  };
+
+  const initializeVerificationData = (products, view) => {
+    return products.reduce((acc, product) => {
+      let category, problematicFlag;
+      
+      if (view === 'user-verifications' && product.verified_category) {
+        category = product.verified_category.category_id;
+        problematicFlag = product.problematic_flag || false;
+      } else if (view === 'problematic') {
+        const topPrediction = product.predictions?.reduce((prev, current) =>
+          prev.confidence > current.confidence ? prev : current
+        ) || {};
+        category = product.verified_category?.category_id || topPrediction.category_id;
+        problematicFlag = product.problematic_flag || false;
+      } else {
+        const topPrediction = product.predictions.reduce((prev, current) =>
+          prev.confidence > current.confidence ? prev : current
+        );
+        category = topPrediction.category_id;
+        problematicFlag = product.problematic_flag || false; // Use actual flag from product
+      }
+
+      acc[product.id] = {
+        product_id: product.product_id,
+        category: category,
+        problematic_flag: problematicFlag
+      };
+      return acc;
+    }, {});
+  };
 
   const fetchUsers = async () => {
     try {
@@ -64,61 +108,15 @@ const CategoryVerification = () => {
     }
   };
 
-  const getPageTitle = () => {
-    switch (view) {
-      case 'problematic':
-        return 'Review Problematic Verifications';
-      case 'user-verifications':
-        return 'User Verification History';
-      default:
-        return 'Category Verification';
-    }
-  };
-
-  const isReadOnlyView = () => {
-    return view === 'problematic' || view === 'user-verifications';
-  };
-
   const fetchProducts = async () => {
     try {
-      let result;
-      
-      if (view === 'problematic') {
-        result = await GetProblematicVerifications(parseInt(scheme), parseInt(source));
-      } else if (view === 'user-verifications') {
-        result = await GetUserVerifications(
-          parseInt(scheme), 
-          parseInt(source), 
-          selectedUser || null
-        );
-      } else {
-        result = await GetCategoriesToVerify(parseInt(scheme), parseInt(source));
-      }
-
-      const { error, products, message } = result;
-
+      const { error, products, message } = await getApiCall();
       if (error) throw new Error(message);
-
-      setProducts(products);
-
-      if (view === 'verify') {
-        // Only set up verification data for the main verification view
-        const initialVerificationData = products.reduce((acc, product) => {
-          const topPrediction = product.predictions.reduce((prev, current) =>
-            prev.confidence > current.confidence ? prev : current
-          );
-
-          acc[product.id] = {
-            product_id: product.product_id,
-            category: topPrediction.category_id,
-            problematic_flag: false
-          };
-          return acc;
-        }, {});
-
-        setVerificationData(initialVerificationData);
-      }
       
+      console.log('Loaded products:', products);
+      
+      setProducts(products);
+      setVerificationData(initializeVerificationData(products, view));
       setLoading(false);
     } catch (err) {
       console.error('Fetch error:', err);
@@ -126,6 +124,21 @@ const CategoryVerification = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (scheme && source) {
+      fetchProducts();
+      if (view === 'user-verifications') {
+        fetchUsers();
+        if (preselectedUserId) {
+          setSelectedUser(preselectedUserId);
+        }
+      }
+    } else {
+      setError('Missing required parameters: scheme and source');
+      setLoading(false);
+    }
+  }, [scheme, source, view, selectedUser, preselectedUserId]);
 
   const handleCategoryChange = (productId, categoryId) => {
     setVerificationData(prev => ({
@@ -193,31 +206,62 @@ const CategoryVerification = () => {
     );
   }
 
+
+
+  const ProductLink = ({ product }) => (
+    <Link 
+      to={`/tools/product-browser/${product.id}`} 
+      target="_blank"
+      style={{
+        color: '#1976d2',
+        textDecoration: 'none'
+      }}
+      onMouseEnter={(e) => e.target.style.textDecoration = 'underline'}
+      onMouseLeave={(e) => e.target.style.textDecoration = 'none'}
+    >
+      {product.product_name}
+    </Link>
+  );
+
+  const CategorySelect = ({ product }) => (
+    <Select
+      value={verificationData[product.id]?.category || ''}
+      onChange={(e) => handleCategoryChange(product.id, e.target.value)}
+      fullWidth
+      size="small"
+    >
+      {(product.predictions || [])
+        .sort((a, b) => b.confidence - a.confidence)
+        .map((prediction) => (
+          <MenuItem
+            key={`${prediction.category_id}-${product.id}`}
+            value={prediction.category_id}
+          >
+            {prediction.category_name} ({prediction.category_code}) -
+            {(prediction.confidence * 100).toFixed(1)}%
+          </MenuItem>
+        ))}
+    </Select>
+  );
+
+  const ProblematicCell = ({ product }) => (
+    <Checkbox
+      checked={verificationData[product.id]?.problematic_flag || false}
+      onChange={() => handleProblematicToggle(product.id)}
+    />
+  );
+
+
+
   return (
     <div className="p-8">
       <Typography variant="h4" className="mb-6">
         {getPageTitle()}
       </Typography>
 
-      {view === 'user-verifications' && (
-        <Box className="mb-4">
-          <FormControl sx={{ minWidth: 200 }}>
-            <InputLabel>Filter by User</InputLabel>
-            <Select
-              value={selectedUser}
-              onChange={(e) => setSelectedUser(e.target.value)}
-              label="Filter by User"
-            >
-              <MenuItem value="">All Users</MenuItem>
-              {users.map((user) => (
-                <MenuItem key={user.id} value={user.id}>
-                  {user.username || user.email || `User ${user.id}`}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        </Box>
-      )}
+      <Typography variant="p" className="mb-6">
+        {getPageDesc()}
+      </Typography>
 
       <Snackbar open={!!error} autoHideDuration={6000} onClose={() => setError(null)}>
         <Alert severity="error" onClose={() => setError(null)}>
@@ -225,30 +269,7 @@ const CategoryVerification = () => {
         </Alert>
       </Snackbar>
 
-      <Snackbar open={!!successMessage} autoHideDuration={3000} onClose={() => setSuccessMessage('')}>
-        <Alert severity="success" onClose={() => setSuccessMessage('')}>
-          {successMessage}
-        </Alert>
-      </Snackbar>
 
-      <Dialog
-        open={!!selectedImage}
-        onClose={() => setSelectedImage(null)}
-        maxWidth="md"
-        fullWidth
-      >
-        <DialogContent className="p-0">
-          <div className="w-full h-96 flex items-center justify-center bg-gray-100">
-            {selectedImage && (
-              <img
-                src={imagePathToUrl(selectedImage)}
-                alt="Product"
-                className="max-w-full max-h-full w-auto h-auto object-contain"
-              />
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
 
       <TableContainer component={Paper}>
         <Table>
@@ -257,14 +278,11 @@ const CategoryVerification = () => {
               <TableCell>Product name</TableCell>
               <TableCell>Size</TableCell>
               <TableCell>
-                {view === 'user-verifications' ? 'Verified category' : 'Predicted category'}
+                {isVerificationView() ? 'Predicted category' : 'Current verified category'}
               </TableCell>
               <TableCell>Confidence</TableCell>
-              {!isReadOnlyView() && <TableCell>New category</TableCell>}
-              <TableCell>
-                {view === 'problematic' ? 'Problematic' : 'Flag for review?'}
-              </TableCell>
-              {view === 'user-verifications' && <TableCell>Verified by</TableCell>}
+              <TableCell>New category</TableCell>
+              <TableCell>Flag for review?</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -272,8 +290,7 @@ const CategoryVerification = () => {
               const topPrediction = product.predictions?.reduce((prev, current) =>
                 prev.confidence > current.confidence ? prev : current
               ) || {};
-              
-              // For user verifications, show the verified category info
+
               const displayCategory = view === 'user-verifications' && product.verified_category
                 ? product.verified_category
                 : topPrediction;
@@ -281,18 +298,7 @@ const CategoryVerification = () => {
               return (
                 <TableRow key={product.id}>
                   <TableCell>
-                    <Link 
-                      to={`/tools/product-browser/${product.id}`} 
-                      target="_blank"
-                      style={{
-                        color: '#1976d2',
-                        textDecoration: 'none'
-                      }}
-                      onMouseEnter={(e) => e.target.style.textDecoration = 'underline'}
-                      onMouseLeave={(e) => e.target.style.textDecoration = 'none'}
-                    >
-                      {product.product_name}
-                    </Link>
+                    <ProductLink product={product} />
                   </TableCell>
                   <TableCell>{product.product_size}</TableCell>
                   <TableCell>
@@ -301,52 +307,12 @@ const CategoryVerification = () => {
                   <TableCell>
                     {displayCategory.confidence ? (displayCategory.confidence * 100).toFixed(1) + '%' : 'N/A'}
                   </TableCell>
-                  {!isReadOnlyView() && (
-                    <TableCell>
-                      <Select
-                        value={verificationData[product.id]?.category || ''}
-                        onChange={(e) => handleCategoryChange(product.id, e.target.value)}
-                        fullWidth
-                        size="small"
-                      >
-                        {product.predictions
-                          ?.sort((a, b) => b.confidence - a.confidence)
-                          .map((prediction) => (
-                            <MenuItem
-                              key={`${prediction.category_id}-${product.id}`}
-                              value={prediction.category_id}
-                            >
-                              {prediction.category_name} ({prediction.category_code}) -
-                              {(prediction.confidence * 100).toFixed(1)}%
-                            </MenuItem>
-                          ))}
-                      </Select>
-                    </TableCell>
-                  )}
                   <TableCell>
-                    {isReadOnlyView() ? (
-                      <Typography variant="body2" color={product.problematic_flag ? 'error' : 'text.secondary'}>
-                        {product.problematic_flag ? 'Yes' : 'No'}
-                      </Typography>
-                    ) : (
-                      <Checkbox
-                        checked={verificationData[product.id]?.problematic_flag || false}
-                        onChange={() => handleProblematicToggle(product.id)}
-                      />
-                    )}
+                    <CategorySelect product={product} />
                   </TableCell>
-                  {view === 'user-verifications' && (
-                    <TableCell>
-                      <Typography variant="body2">
-                        {product.verified_by_username || product.verified_by || 'Unknown'}
-                      </Typography>
-                      {product.verified_at && (
-                        <Typography variant="caption" color="text.secondary">
-                          {new Date(product.verified_at).toLocaleDateString()}
-                        </Typography>
-                      )}
-                    </TableCell>
-                  )}
+                  <TableCell>
+                    <ProblematicCell product={product} />
+                  </TableCell>
                 </TableRow>
               );
             })}
@@ -354,7 +320,7 @@ const CategoryVerification = () => {
         </Table>
       </TableContainer>
 
-      {!isReadOnlyView() && (
+      {view !== 'read-only' && (
         <Button
           variant="contained"
           color="primary"
