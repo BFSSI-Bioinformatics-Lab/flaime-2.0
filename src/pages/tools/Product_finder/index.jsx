@@ -48,8 +48,7 @@ const ProductFinder = () => {
     store: true,
     date: true,
     region: true,
-    category: true,
-    subcategory: true,
+    categories: true,
   });
 
   const [selectedColumns, setSelectedColumns] = useState(Object.keys(columnsVisibility));

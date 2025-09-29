@@ -20,10 +20,13 @@ const ToolTable = ({ columns, data, totalCount, page, rowsPerPage, onPageChange,
         return item._source.scrape_batch.datetime;
       case 'region':
         return item._source.scrape_batch.region;
-      case 'category':
-        return item._source.category ? item._source.category : 'No category';
-      case 'subcategory':
-        return item._source.subcategory ? item._source.subcategory : 'No subcategory';
+      case 'categories':
+        return item._source.categories && item._source.categories.length > 0
+          ? item._source.categories
+              .sort((a, b) => a.level - b.level)
+              .map(cat => cat.name)
+              .join(' > ')
+          : 'No category';
       default:
         return item._source[column] || '';
     }

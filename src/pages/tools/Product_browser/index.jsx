@@ -55,7 +55,14 @@ const ProductBrowser = () => {
           storeName: { match: { "store.name": { query: value, operator: "and" } } },
           sourceName: { term: { "source.id": value } },
           siteName: { match: { site_name: { query: value, operator: "and" } } },
-          category: { match: { "category.name": { query: value, operator: "and" } } }
+          category: {
+            nested: {
+              path: "categories",
+              query: {
+                match: { "categories.name": { query: value, operator: "and" } }
+              }
+            }
+          }
         };
         queryObject.bool.must.push(fieldMapping[key]);
       }
@@ -74,8 +81,15 @@ const ProductBrowser = () => {
           storeName: { match: { "store.name": { query: value, operator: "and" } } },
           sourceName: { term: { "source.id": value } },
           siteName: { match: { site_name: { query: value, operator: "and" } } },
-          category: { match: { "category.name": { query: value, operator: "and" } } }
-        };
+        category: {
+          nested: {
+            path: "categories",
+            query: {
+              match: { "categories.name": { query: value, operator: "and" } }
+            }
+          }
+        }
+      };
         return fieldMapping[key];
       });
 
@@ -252,8 +266,13 @@ const ProductTable = React.memo(({ products }) => (
             <TableCell style={{ textAlign: 'center' }}>{product.store.name}</TableCell>
             <TableCell style={{ width: '140px', textAlign: 'center' }}>{product.source.name}</TableCell>
             <TableCell style={{ width: '375px' }}>{product.site_name}</TableCell>
-            <TableCell style={{ textAlign: 'center' }}>
-              {product.category ? product.category : 'No category'}
+            <TableCell style={{ textAlign: 'left' }}>
+              {product.categories && product.categories.length > 0
+                ? product.categories
+                    .sort((a, b) => a.level - b.level)
+                    .map(cat => cat.name)
+                    .join(' > ')
+                : 'No category'}
             </TableCell>
           </TableRow>
         ))}
@@ -261,5 +280,4 @@ const ProductTable = React.memo(({ products }) => (
     </Table>
   </TableContainer>
 ));
-
 export default ProductBrowser;

@@ -1,4 +1,3 @@
-// advanced_search.jsx
 import React, { useState, useEffect } from 'react';
 import dayjs from 'dayjs';
 import { TextField, Button, Alert, Typography, Divider, Grid } from '@mui/material';
@@ -17,7 +16,7 @@ import { ResetButton } from '../../../components/buttons';
 
 const AdvancedSearch = () => {
     useEffect(() => {
-        window.scrollTo(0, 0); // Scroll to the top of the page when the component mounts
+        window.scrollTo(0, 0);
     }, []);
     
     const initialFilters = {
@@ -40,7 +39,6 @@ const AdvancedSearch = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
     const [totalProducts, setTotalProducts] = useState(0);
-    // for pagination
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(25);
 
@@ -53,32 +51,27 @@ const AdvancedSearch = () => {
         store: true,
         date: true,
         region: true,
-        category: true,
-        subcategory: true,
-      });
+        categories: true,
+    });
     
-      const [selectedColumns, setSelectedColumns] = useState(Object.keys(columnsVisibility));
+    const [selectedColumns, setSelectedColumns] = useState(Object.keys(columnsVisibility));
 
-      const handleReset = () => {
-        // Reset all search inputs to their initial values
+    const handleReset = () => {
         Object.keys(initialFilters).forEach(key => {
-          handleInputChange(key, initialFilters[key]);
+            handleInputChange(key, initialFilters[key]);
         });
-      
-        // Reset other state variables
+        
         setSearchResults([]);
         setIsLoading(false);
         setTotalProducts(0);
         setPage(0);
         setRowsPerPage(25);
         setErrorMessage('');
-      
-      };
+    };
 
-      const handleColumnSelection = (event) => {
+    const handleColumnSelection = (event) => {
         setSelectedColumns(event.target.value);
-      };
-
+    };
 
     const handleTextFieldChange = (field) => (event) => {
         handleInputChange(field, event.target.value);
@@ -88,31 +81,27 @@ const AdvancedSearch = () => {
     const handleSearch = async () => {
         setIsLoading(true);
         
-        // Collecting base queries that aren't related to nutrients
         const textMustClauses = buildTextMustClausesForAllFields(searchInputs);
         
-        // Initialize the nutrient query
         let nutrientQuery = {
             nested: {
-            path: "nutrition_details",
-            query: {
-                bool: {
-                must: []
+                path: "nutrition_details",
+                query: {
+                    bool: {
+                        must: []
+                    }
                 }
-            }
             }
         };
         
-        // Add nutrient ID condition if specified
         if (searchInputs.Nutrition.nutrient) {
             nutrientQuery.nested.query.bool.must.push({
-            term: {
-                "nutrition_details.nutrient_id": searchInputs.Nutrition.nutrient
-            }
+                term: {
+                    "nutrition_details.nutrient_id": searchInputs.Nutrition.nutrient
+                }
             });
         }
         
-        // Add range conditions for amount if specified
         let amountRange = {};
         if (searchInputs.Nutrition.minAmount) {
             amountRange.gte = parseFloat(searchInputs.Nutrition.minAmount);
@@ -123,25 +112,24 @@ const AdvancedSearch = () => {
         
         if (Object.keys(amountRange).length > 0) {
             nutrientQuery.nested.query.bool.must.push({
-            range: {
-                "nutrition_details.amount": amountRange
-            }
+                range: {
+                    "nutrition_details.amount": amountRange
+                }
             });
         }
         
-        // Combining all must clauses including nutrient query if any conditions were added
         const finalQuery = {
             from: page * rowsPerPage,
             size: rowsPerPage,
             query: {
-              bool: {
-                must: [
-                  ...textMustClauses,
-                  ...(nutrientQuery.nested.query.bool.must.length > 0 ? [nutrientQuery] : [])
-                ]
-              }
+                bool: {
+                    must: [
+                        ...textMustClauses,
+                        ...(nutrientQuery.nested.query.bool.must.length > 0 ? [nutrientQuery] : [])
+                    ]
+                }
             }
-          };
+        };
               
         console.log("Query Body:", JSON.stringify(finalQuery, null, 2));
         
@@ -171,7 +159,7 @@ const AdvancedSearch = () => {
         }
         
         setIsLoading(false);
-        };
+    };
       
     const handleSelectorChange = (field) => (value) => {
         handleInputChange(field, { value: value === '-1' ? null : value });
@@ -312,18 +300,18 @@ const AdvancedSearch = () => {
                         columnsVisibility={columnsVisibility}
                         handleColumnSelection={handleColumnSelection}
                     />
-                            {isLoading ? (
+                    {isLoading ? (
                         <p>Loading...</p>
                     ) : (
                         <ToolTable 
-                        columns={selectedColumns}
-                        data={searchResults}
-                        totalCount={totalProducts}
-                        page={page}
-                        rowsPerPage={rowsPerPage}
-                        onPageChange={handlePageChange}
-                        onRowsPerPageChange={handleRowsPerPageChange}
-                      />
+                            columns={selectedColumns}
+                            data={searchResults}
+                            totalCount={totalProducts}
+                            page={page}
+                            rowsPerPage={rowsPerPage}
+                            onPageChange={handlePageChange}
+                            onRowsPerPageChange={handleRowsPerPageChange}
+                        />
                     )}
                 </>
             </div>
