@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { 
   GetCategoriesToVerify, 
-  SubmitCategoryVerification, 
+  SubmitCategoryVerification,
+  UpdateCategoryVerification,
   GetProblematicVerifications, 
   GetUserVerifications,
   GetAllUsers 
@@ -11,7 +12,7 @@ import {
   Table, TableBody, TableCell, TableContainer, TableHead,
   TableRow, Paper, Select, MenuItem, Checkbox, Button,
   Alert, Snackbar, CircularProgress, Typography,
-  Box
+  Box, TextField
 } from '@mui/material';
 
 const CategoryVerification = () => {
@@ -31,6 +32,7 @@ const CategoryVerification = () => {
   const preselectedUserId = searchParams.get('user');
 
   const isVerificationView = () => view === 'verify';
+  const isProblematicView = () => view === 'problematic';
 
   const getPageTitle = () => {
     const titles = {
@@ -67,29 +69,32 @@ const CategoryVerification = () => {
 
   const initializeVerificationData = (products, view) => {
     return products.reduce((acc, product) => {
-      let category, problematicFlag;
-      
-      if (view === 'user-verifications' && product.verified_category) {
-        category = product.verified_category.category_id;
+      let category, problematicFlag, notes, verificationId;
+      if (view === 'user-verifications') {
+        category = product.category_id;
         problematicFlag = product.problematic_flag || false;
+        notes = product.notes || '';
+        verificationId = product.id;
       } else if (view === 'problematic') {
-        const topPrediction = product.predictions?.reduce((prev, current) =>
-          prev.confidence > current.confidence ? prev : current
-        ) || {};
-        category = product.verified_category?.category_id || topPrediction.category_id;
+        category = product.category_id
         problematicFlag = product.problematic_flag || false;
+        notes = product.notes || '';
+        verificationId = product.id;
       } else {
         const topPrediction = product.predictions.reduce((prev, current) =>
           prev.confidence > current.confidence ? prev : current
         );
         category = topPrediction.category_id;
-        problematicFlag = product.problematic_flag || false; // Use actual flag from product
+        problematicFlag = product.problematic_flag || false;
+        notes = '';
+        verificationId = null;
       }
-
       acc[product.id] = {
         product_id: product.product_id,
         category: category,
-        problematic_flag: problematicFlag
+        problematic_flag: problematicFlag,
+        notes: notes,
+        verification_id: verificationId
       };
       return acc;
     }, {});
@@ -112,8 +117,6 @@ const CategoryVerification = () => {
     try {
       const { error, products, message } = await getApiCall();
       if (error) throw new Error(message);
-      
-      console.log('Loaded products:', products);
       
       setProducts(products);
       setVerificationData(initializeVerificationData(products, view));
@@ -160,31 +163,74 @@ const CategoryVerification = () => {
     }));
   };
 
-  const handleSubmit = async () => {
-    const verifications = Object.entries(verificationData).map(([productId, data]) => ({
-      product: data.product_id,
-      category: data.category,
-      problematic_flag: data.problematic_flag
+  const handleNotesChange = (productId, notes) => {
+    setVerificationData(prev => ({
+      ...prev,
+      [productId]: {
+        ...prev[productId],
+        notes: notes
+      }
     }));
+  };
 
-    try {
-      const results = await Promise.all(
-        verifications.map(verification => 
-          SubmitCategoryVerification(verification)
-        )
-      );
+  const handleSubmit = async () => {
+    const isUpdateView = view === 'problematic' || view === 'user-verifications';
 
-      if (results.every(result => !result.error)) {
-        setSuccessMessage('Categories successfully verified!');
-        setTimeout(() => setSuccessMessage(''), 3000);
-        return true; // Success
-      } else {
-        setError('Some verifications failed to submit');
+    if (isUpdateView) {
+      const updates = Object.entries(verificationData).map(([productId, data]) => ({
+        verification_id: data.verification_id,
+        updates: {
+          category: data.category,
+          problematic_flag: data.problematic_flag,
+          ...(view === 'problematic' && { notes: data.notes })
+        }
+      }));
+
+      try {
+        const results = await Promise.all(
+          updates.map(({ verification_id, updates }) => 
+            UpdateCategoryVerification(verification_id, updates)
+          )
+        );
+
+        if (results.every(result => !result.error)) {
+          setSuccessMessage('Verifications successfully updated!');
+          setTimeout(() => setSuccessMessage(''), 3000);
+          return true;
+        } else {
+          setError('Some verifications failed to update');
+          return false;
+        }
+      } catch (err) {
+        setError('Failed to update verifications');
         return false;
       }
-    } catch (err) {
-      setError('Failed to submit verifications');
-      return false;
+    } else {
+      const verifications = Object.entries(verificationData).map(([productId, data]) => ({
+        product: data.product_id,
+        category: data.category,
+        problematic_flag: data.problematic_flag
+      }));
+
+      try {
+        const results = await Promise.all(
+          verifications.map(verification => 
+            SubmitCategoryVerification(verification)
+          )
+        );
+
+        if (results.every(result => !result.error)) {
+          setSuccessMessage('Categories successfully verified!');
+          setTimeout(() => setSuccessMessage(''), 3000);
+          return true;
+        } else {
+          setError('Some verifications failed to submit');
+          return false;
+        }
+      } catch (err) {
+        setError('Failed to submit verifications');
+        return false;
+      }
     }
   };
 
@@ -198,7 +244,7 @@ const CategoryVerification = () => {
   const handleSubmitAndLoadMore = async () => {
     const success = await handleSubmit();
     if (success) {
-      await fetchProducts(); // Load new products
+      await fetchProducts();
     }
   };
 
@@ -225,51 +271,6 @@ const CategoryVerification = () => {
 
 
 
-  const ProductLink = ({ product }) => (
-    <Link 
-      to={`/tools/product-browser/${product.id}`} 
-      target="_blank"
-      style={{
-        color: '#023466ff',
-        textDecoration: 'none'
-      }}
-      onMouseEnter={(e) => e.target.style.textDecoration = 'underline'}
-      onMouseLeave={(e) => e.target.style.textDecoration = 'none'}
-    >
-      {product.product_name}
-    </Link>
-  );
-
-  const CategorySelect = ({ product }) => (
-    <Select
-      value={verificationData[product.id]?.category || ''}
-      onChange={(e) => handleCategoryChange(product.id, e.target.value)}
-      fullWidth
-      size="small"
-    >
-      {(product.predictions || [])
-        .sort((a, b) => b.confidence - a.confidence)
-        .map((prediction) => (
-          <MenuItem
-            key={`${prediction.category_id}-${product.id}`}
-            value={prediction.category_id}
-          >
-            {prediction.category_name} ({prediction.category_code}) -
-            {(prediction.confidence * 100).toFixed(1)}%
-          </MenuItem>
-        ))}
-    </Select>
-  );
-
-  const ProblematicCell = ({ product }) => (
-    <Checkbox
-      checked={verificationData[product.id]?.problematic_flag || false}
-      onChange={() => handleProblematicToggle(product.id)}
-    />
-  );
-
-
-
   return (
     <div className="p-8">
       <Typography variant="h4" className="mb-6">
@@ -286,8 +287,6 @@ const CategoryVerification = () => {
         </Alert>
       </Snackbar>
 
-
-
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
@@ -300,6 +299,7 @@ const CategoryVerification = () => {
               <TableCell>Confidence</TableCell>
               <TableCell>New category</TableCell>
               <TableCell>Flag for review?</TableCell>
+              {isProblematicView() && <TableCell>Notes</TableCell>}
             </TableRow>
           </TableHead>
           <TableBody>
@@ -315,7 +315,18 @@ const CategoryVerification = () => {
               return (
                 <TableRow key={product.id}>
                   <TableCell>
-                    <ProductLink product={product} />
+                    <Link 
+                      to={`/tools/product-browser/${product.id}`} 
+                      target="_blank"
+                      style={{
+                        color: '#023466ff',
+                        textDecoration: 'none'
+                      }}
+                      onMouseEnter={(e) => e.target.style.textDecoration = 'underline'}
+                      onMouseLeave={(e) => e.target.style.textDecoration = 'none'}
+                    >
+                      {product.product_name}
+                    </Link>
                   </TableCell>
                   <TableCell>{product.product_size}</TableCell>
                   <TableCell>
@@ -325,11 +336,44 @@ const CategoryVerification = () => {
                     {displayCategory.confidence ? (displayCategory.confidence * 100).toFixed(1) + '%' : 'N/A'}
                   </TableCell>
                   <TableCell>
-                    <CategorySelect product={product} />
+                    <Select
+                      value={verificationData[product.id]?.category || ''}
+                      onChange={(e) => handleCategoryChange(product.id, e.target.value)}
+                      fullWidth
+                      size="small"
+                    >
+                      {(product.predictions || [])
+                        .sort((a, b) => b.confidence - a.confidence)
+                        .map((prediction) => (
+                          <MenuItem
+                            key={`${prediction.category_id}-${product.id}`}
+                            value={prediction.category_id}
+                          >
+                            {prediction.category_name} ({prediction.category_code}) -
+                            {(prediction.confidence * 100).toFixed(1)}%
+                          </MenuItem>
+                        ))}
+                    </Select>
                   </TableCell>
                   <TableCell>
-                    <ProblematicCell product={product} />
+                    <Checkbox
+                      checked={verificationData[product.id]?.problematic_flag || false}
+                      onChange={() => handleProblematicToggle(product.id)}
+                    />
                   </TableCell>
+                  {isProblematicView() && (
+                    <TableCell>
+                      <TextField
+                        value={verificationData[product.id]?.notes || ''}
+                        onChange={(e) => handleNotesChange(product.id, e.target.value)}
+                        fullWidth
+                        size="small"
+                        multiline
+                        maxRows={3}
+                        placeholder="Add notes..."
+                      />
+                    </TableCell>
+                  )}
                 </TableRow>
               );
             })}
@@ -337,24 +381,26 @@ const CategoryVerification = () => {
         </Table>
       </TableContainer>
 
-    {view !== 'read-only' && (
-      <Box className="mt-8 space-x-4">
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={handleSubmitAndReturn}
-        >
-          Submit and Return to Setup
-        </Button>
-        <Button
-          variant="outlined"
-          color="primary"
-          onClick={handleSubmitAndLoadMore}
-        >
-          Submit and Load Another 10
-        </Button>
-      </Box>
-    )}
+      {view !== 'read-only' && (
+        <Box className="mt-8 space-x-4">
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleSubmitAndReturn}
+          >
+            Submit and Return to Setup
+          </Button>
+          {isVerificationView() && (
+            <Button
+              variant="outlined"
+              color="primary"
+              onClick={handleSubmitAndLoadMore}
+            >
+              Submit and Load Another 10
+            </Button>
+          )}
+        </Box>
+      )}
     </div>
   );
 };

@@ -1,8 +1,9 @@
-import { ApiQueryGet, ApiQueryPost } from "../Api";
+import { ApiQueryGet, ApiQueryPost, ApiQueryPatch } from "../Api";
+
 
 const GetCategoriesToVerify = async (scheme = 9, source = 178) => {
   try {
-    const data = await ApiQueryGet(`category-predictions/?scheme=${scheme}&source=${source}`);
+    const data = await ApiQueryGet(`category-verifications/get_predictions/?scheme=${scheme}&source=${source}`);
     return { error: false, products: data };
   } catch (error) {
     return { error: true, message: error.message };
@@ -11,7 +12,7 @@ const GetCategoriesToVerify = async (scheme = 9, source = 178) => {
 
 const SubmitCategoryVerification = async (verification) => {
   try {
-    const response = await ApiQueryPost("category-verifications/", verification);
+    const response = await ApiQueryPost("category-verifications/create_verification/", verification);
     return { error: false, data: response };
   } catch (error) {
     return { error: true, message: error.message };
@@ -20,9 +21,9 @@ const SubmitCategoryVerification = async (verification) => {
 
 const GetVerificationStats = async (scheme = 9, source = 178) => {
   try {
-    const data = await ApiQueryGet(`category-predictions/?scheme=${scheme}&source=${source}&stats_only=true`);
-    return { 
-      error: false, 
+    const data = await ApiQueryGet(`category-verifications/get_predictions/?scheme=${scheme}&source=${source}&stats_only=true`);
+    return {
+      error: false,
       stats: {
         total: data.total_count || 0,
         verified: data.verified_count || 0,
@@ -30,8 +31,8 @@ const GetVerificationStats = async (scheme = 9, source = 178) => {
       }
     };
   } catch (error) {
-    return { 
-      error: true, 
+    return {
+      error: true,
       message: error.message,
       stats: { total: 0, verified: 0, pending: 0 }
     };
@@ -40,7 +41,7 @@ const GetVerificationStats = async (scheme = 9, source = 178) => {
 
 const GetProblematicVerifications = async (scheme = 9, source = 178) => {
   try {
-    const data = await ApiQueryGet(`category-predictions/?scheme=${scheme}&source=${source}&problematic=true`);
+    const data = await ApiQueryGet(`category-verifications/get_predictions/?scheme=${scheme}&source=${source}&problematic=true`);
     return { error: false, products: data };
   } catch (error) {
     return { error: true, message: error.message };
@@ -49,7 +50,7 @@ const GetProblematicVerifications = async (scheme = 9, source = 178) => {
 
 const GetUserVerifications = async (scheme = 9, source = 178, userId = null) => {
   try {
-    let url = `category-predictions/?scheme=${scheme}&source=${source}&verified=true`;
+    let url = `category-verifications/get_predictions/?scheme=${scheme}&source=${source}&verified=true`;
     if (userId) {
       url += `&user=${userId}`;
     }
@@ -59,6 +60,16 @@ const GetUserVerifications = async (scheme = 9, source = 178, userId = null) => 
     return { error: true, message: error.message };
   }
 };
+
+const UpdateCategoryVerification = async (verificationId, updates) => {
+  try {
+    const response = await ApiQueryPatch(`category-verifications/${verificationId}/update_verification/`, updates);
+    return { error: false, data: response };
+  } catch (error) {
+    return { error: true, message: error.message };
+  }
+};
+
 
 const GetAllUsers = async () => {
   try {
@@ -75,5 +86,6 @@ export {
   GetVerificationStats,
   GetProblematicVerifications,
   GetUserVerifications,
+  UpdateCategoryVerification,
   GetAllUsers
 };

@@ -26,5 +26,29 @@ const ApiQueryPost = async (url, data, controller, apiExt = "/api/") => {
   }
 };
 
+const ApiQueryPatch = async (url, data, controller, apiExt = "/api/") => {
+  try {
+    const res = await ApiInstance.patch(`${apiExt}${url}`, data, {
+      signal: controller ? controller.signal : null
+    });
+    return res.data;
+  } catch (error) {
+    console.error(`API error for ${url}:`, error);
+    throw error;
+  }
+};
+
+const ApiQueryPut = async (url, data, controller, apiExt = "/api/") => {
+  try {
+    const res = await ApiInstance.put(`${apiExt}${url}`, data, {
+      signal: controller ? controller.signal : null
+    });
+    return res.data;
+  } catch (error) {
+    console.error(`API error for ${url}:`, error);
+    throw error;
+  }
+};
+
 export default ApiInstance;
-export { ApiQueryGet, ApiQueryPost };
+export { ApiQueryGet, ApiQueryPost, ApiQueryPatch, ApiQueryPut };
