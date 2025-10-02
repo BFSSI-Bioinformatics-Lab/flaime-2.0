@@ -316,7 +316,7 @@ const CategoryVerification = () => {
                 <TableRow key={product.id}>
                   <TableCell>
                     <Link 
-                      to={`/tools/product-browser/${product.id}`} 
+                      to={`/tools/product-browser/${product.store_product_id || product.id}`} 
                       target="_blank"
                       style={{
                         color: '#023466ff',
