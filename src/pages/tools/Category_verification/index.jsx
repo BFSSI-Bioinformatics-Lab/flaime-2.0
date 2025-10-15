@@ -269,15 +269,13 @@ const CategoryVerification = () => {
     );
   }
 
-
-
   return (
-    <div className="p-8">
+    <div className="p-4 md:p-8 max-w-full overflow-x-auto">
       <Typography variant="h4" className="mb-6">
         {getPageTitle()}
       </Typography>
 
-      <Typography variant="p" className="mb-6">
+      <Typography variant="body1" className="mb-6">
         {getPageDesc()}
       </Typography>
 
@@ -287,18 +285,13 @@ const CategoryVerification = () => {
         </Alert>
       </Snackbar>
 
-      <TableContainer component={Paper}>
-        <Table>
+      <TableContainer component={Paper} sx={{ overflowX: 'auto' }}>
+        <Table sx={{ minWidth: isProblematicView() ? 650 : 450 }}>
           <TableHead>
             <TableRow>
               <TableCell>Product name</TableCell>
-              <TableCell>Size</TableCell>
-              <TableCell>
-                {isVerificationView() ? 'Predicted category' : 'Current verified category'}
-              </TableCell>
-              <TableCell>Confidence</TableCell>
-              <TableCell>New category</TableCell>
-              <TableCell>Flag for review?</TableCell>
+              <TableCell>Category</TableCell>
+              <TableCell>Flag</TableCell>
               {isProblematicView() && <TableCell>Notes</TableCell>}
             </TableRow>
           </TableHead>
@@ -308,13 +301,9 @@ const CategoryVerification = () => {
                 prev.confidence > current.confidence ? prev : current
               ) || {};
 
-              const displayCategory = view === 'user-verifications' && product.verified_category
-                ? product.verified_category
-                : topPrediction;
-
               return (
                 <TableRow key={product.id}>
-                  <TableCell>
+                  <TableCell sx={{ minWidth: 200 }}>
                     <Link 
                       to={`/tools/product-browser/${product.store_product_id || product.id}`} 
                       target="_blank"
@@ -328,14 +317,7 @@ const CategoryVerification = () => {
                       {product.product_name}
                     </Link>
                   </TableCell>
-                  <TableCell>{product.product_size}</TableCell>
-                  <TableCell>
-                    {displayCategory.category_name} ({displayCategory.category_code})
-                  </TableCell>
-                  <TableCell>
-                    {displayCategory.confidence ? (displayCategory.confidence * 100).toFixed(1) + '%' : 'N/A'}
-                  </TableCell>
-                  <TableCell>
+                  <TableCell sx={{ minWidth: 250 }}>
                     <Select
                       value={verificationData[product.id]?.category || ''}
                       onChange={(e) => handleCategoryChange(product.id, e.target.value)}
@@ -362,7 +344,7 @@ const CategoryVerification = () => {
                     />
                   </TableCell>
                   {isProblematicView() && (
-                    <TableCell>
+                    <TableCell sx={{ minWidth: 200 }}>
                       <TextField
                         value={verificationData[product.id]?.notes || ''}
                         onChange={(e) => handleNotesChange(product.id, e.target.value)}
@@ -382,7 +364,7 @@ const CategoryVerification = () => {
       </TableContainer>
 
       {view !== 'read-only' && (
-        <Box className="mt-8 space-x-4">
+        <Box className="mt-8 flex flex-col sm:flex-row gap-4">
           <Button
             variant="contained"
             color="primary"
