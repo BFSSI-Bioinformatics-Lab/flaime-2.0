@@ -45,8 +45,8 @@ const CategoryVerification = () => {
 
   const getPageDesc = () => {
     const titles = {
-      'problematic': 'Most recent 50 shown',
-      'user-verifications': 'Most recent 50 shown',
+      'problematic': 'All problematic products shown',
+      'user-verifications': 'All products shown',
       'default': 'Random 10 shown'
     };
     return titles[view] || titles.default;
