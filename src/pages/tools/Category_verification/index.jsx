@@ -331,7 +331,7 @@ const CategoryVerification = () => {
                             key={`${prediction.category_id}-${product.id}`}
                             value={prediction.category_id}
                           >
-                            {prediction.category_name} ({prediction.category_code}) -
+                            {prediction.category_code} - {prediction.category_name} -
                             {(prediction.confidence * 100).toFixed(1)}%
                           </MenuItem>
                         ))}
