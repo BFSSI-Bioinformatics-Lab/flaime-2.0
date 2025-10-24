@@ -173,7 +173,9 @@ const CategoryVerification = () => {
 
   const handlePageChange = (event, value) => {
     setCurrentPage(value);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    requestAnimationFrame(() => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
   };
 
   const handleCategoryChange = (productId, categoryId) => {
