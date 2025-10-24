@@ -23,13 +23,14 @@ import { GetAllSources } from '../../../api/services/SourceService';
 import { GetAllCategorySchemes } from '../../../api/services/CategoryService';
 import { GetVerificationStats, GetAllUsers } from '../../../api/services/CategoryVerificationService';
 
+
 const CategoryVerificationSetup = () => {
   const navigate = useNavigate();
   const [schemes, setSchemes] = useState([]);
   const [sources, setSources] = useState([]);
   const [verificationStats, setVerificationStats] = useState({});
   const [users, setUsers] = useState([]);
-  const [selectedUsers, setSelectedUsers] = useState({}); // Track selected user for each combo
+  const [selectedUsers, setSelectedUsers] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -43,7 +44,6 @@ const CategoryVerificationSetup = () => {
     fetchData();
   }, []);
 
-  // Initialize selected users when users are loaded
   useEffect(() => {
     if (users.length > 0) {
       const initialSelectedUsers = {};
@@ -306,7 +306,10 @@ const CategoryVerificationSetup = () => {
           Verification Process
         </Typography>
         <Typography variant="body2" className="mb-2">
-          • Each session presents up to 10 random unverified products
+          • Products are shown in a consistent order by prediction confidence
+        </Typography>
+        <Typography variant="body2" className="mb-2">
+          • Navigate through pages to review and verify products at your own pace
         </Typography>
         <Typography variant="body2" className="mb-2">
           • Review the predicted category and confirm or correct as needed
