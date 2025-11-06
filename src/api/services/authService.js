@@ -23,7 +23,6 @@ axiosInstance.interceptors.request.use(
 // Auth methods
 const login = async (username, password) => {
   try {
-    // Use a more direct approach to rule out any axios configuration issues
     const response = await fetch(`${API_BASE_URL}/api/token-auth/`, {
       method: 'POST',
       headers: {

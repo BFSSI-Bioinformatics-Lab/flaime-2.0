@@ -2,6 +2,7 @@
   "name": "flaime-2.0",
   "version": "0.1.0",
   "private": true,
+  "homepage": "/",
   "dependencies": {
     "@elastic/elasticsearch": "^8.13.1",
     "@emotion/react": "^11.11.4",
@@ -39,6 +40,8 @@
     "start": "dotenv -e .env.development react-scripts start",
     "build:dev": "dotenv -e .env.development react-scripts build",
     "build:prod": "dotenv -e .env.production react-scripts build",
+    "build:django:dev": "BUILD_PATH='../flaime_py/frontend_build' dotenv -e .env.development react-scripts build",
+    "build:django:prod": "BUILD_PATH='../flaime_py/frontend_build' dotenv -e .env.production react-scripts build",
     "build": "echo \"Please use build:dev or build:prod \" && exit 1",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
