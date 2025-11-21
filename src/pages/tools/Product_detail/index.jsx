@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Grid, Typography, Divider, Chip, Box } from '@mui/material';
+import { Grid, Typography, Divider } from '@mui/material';
 import PageContainer from '../../../components/page/PageContainer';
 import Band from '../../../components/page/Band';
 import { ProductInfoBox, PageIcon, PageTitle, DetailItem, ProductIngredientsHeadingContainer } from "./styles";
-import axios from 'axios';
 import NutritionFactsTable from '../../../components/nutrition_facts_table/NutritionFactsTable';
 import ProductImages from './ProductImages';
+import CategoryDisplay from '../../../components/category_display/CategoryDisplay';
 import { GetStoreProductByID } from '../../../api/services/ProductService';
 
 const ProductDetail = () => {
@@ -64,21 +64,12 @@ const ProductDetail = () => {
         { name: "URL", value: product.site_url ? <a href={product.site_url} target="_blank" rel="noopener noreferrer">{product.site_name}</a> : "Not available" }
     ].filter(item => item.value);
 
-    console.log("=== CATEGORY DEBUG START ===");
-    console.log("Product object:", product);
-    console.log("Product.product:", product.product);
-    console.log("Categories object:", product.product?.categories);
-
     const sortedCategories = product.product?.categories 
         ? Object.entries(product.product.categories)
             .sort(([schemeA], [schemeB]) => schemeA.localeCompare(schemeB))
             .flatMap(([scheme, data]) => [...data.manual])
             .sort((a, b) => a.level - b.level)
         : [];
-
-    console.log("Sorted categories result:", sortedCategories);
-    console.log("Length:", sortedCategories.length);
-    console.log("=== CATEGORY DEBUG END ===");
 
     return (
         <div>
@@ -95,60 +86,15 @@ const ProductDetail = () => {
                             {productDescItems.map(item => (
                                 <DetailItem key={item.name}><b>{item.name}</b>: {item.value}</DetailItem>
                             ))}
-                            
-                            {sortedCategories.length > 0 && (
-                                <div style={{ marginTop: '20px' }}>
-                                    <ProductIngredientsHeadingContainer>
-                                        <Divider> Categories </Divider>
-                                    </ProductIngredientsHeadingContainer>
-                                    <Box sx={{ padding: '10px' }}>
-                                        <Typography variant="body1" sx={{ marginBottom: '10px' }}>
-                                            {sortedCategories.map(cat => cat.name).join(' > ')}
-                                        </Typography>
-                                        {sortedCategories.map((cat, index) => (
-                                            <Box 
-                                                key={index} 
-                                                sx={{ 
-                                                    marginBottom: '15px', 
-                                                    padding: '10px', 
-                                                    backgroundColor: '#f5f5f5',
-                                                    borderRadius: '4px'
-                                                }}
-                                            >
-                                                <Typography variant="body2">
-                                                    <b>Level {cat.level}:</b> {cat.name} ({cat.scheme})
-                                                </Typography>
-                                                {cat.code && (
-                                                    <Typography variant="body2" color="textSecondary">
-                                                        Code: {cat.code}
-                                                    </Typography>
-                                                )}
-                                                {cat.verified_by && (
-                                                    <Typography variant="body2" sx={{ marginTop: '5px' }}>
-                                                        Verified by: {cat.verified_by}
-                                                        {cat.date_added && ` on ${new Date(cat.date_added).toLocaleDateString()}`}
-                                                    </Typography>
-                                                )}
-                                                {cat.problematic && (
-                                                    <Chip 
-                                                        label="Problematic" 
-                                                        color="warning" 
-                                                        size="small" 
-                                                        sx={{ marginTop: '5px' }}
-                                                    />
-                                                )}
-                                                {cat.notes && (
-                                                    <Typography variant="body2" sx={{ marginTop: '5px', fontStyle: 'italic' }}>
-                                                        Notes: {cat.notes}
-                                                    </Typography>
-                                                )}
-                                            </Box>
-                                        ))}
-                                    </Box>
-                                </div>
-                            )}
-
-                            {product.ingredient_en && (
+                                {product.product?.categories && (
+                                    <div style={{ marginTop: '20px' }}>
+                                        <ProductIngredientsHeadingContainer>
+                                            <Divider> Categories </Divider>
+                                        </ProductIngredientsHeadingContainer>
+                                        <CategoryDisplay categories={product.product.categories} />
+                                    </div>
+                                )}
+                                {product.ingredient_en && (
                                 <div>
                                     <ProductIngredientsHeadingContainer>
                                         <Divider> Ingredients </Divider>
