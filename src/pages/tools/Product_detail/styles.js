@@ -1,4 +1,4 @@
-import { Box, Paper } from "@mui/material";
+import { Box, Paper, IconButton } from "@mui/material";
 import { styled } from "@mui/system";
 import costcoImage from './logos/costco.png';
 import loblawsImage from './logos/loblaws.png';
@@ -17,6 +17,24 @@ const imageMap = {
     VOILA: voilaImage,
     NOFRILLS: nofrillsImage,
 };
+
+export const ExpandMore = styled((props) => {
+    const { expand, ...other } = props;
+    return <IconButton {...other} />;
+})(({ theme, expand }) => ({
+    transform: !expand ? 'rotate(0deg)' : 'rotate(180deg)',
+    marginLeft: 'auto',
+    transition: theme.transitions.create('transform', {
+        duration: theme.transitions.duration.shortest,
+    }),
+}));
+
+export const DescriptionHeader = styled('div')({
+    display: 'flex',
+    alignItems: 'center',
+    cursor: 'pointer',
+    userSelect: 'none',
+});
 
 export const ProductInfoBox = styled(Box)(() => ({
     padding: "40px 0" 
