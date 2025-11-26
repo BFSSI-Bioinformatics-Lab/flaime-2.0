@@ -65,13 +65,6 @@ const ProductDetail = () => {
         { name: "URL", value: product.site_url ? <a href={product.site_url} target="_blank" rel="noopener noreferrer">{product.site_name}</a> : "Not available" }
     ].filter(item => item.value);
 
-    const sortedCategories = product.product?.categories 
-        ? Object.entries(product.product.categories)
-            .sort(([schemeA], [schemeB]) => schemeA.localeCompare(schemeB))
-            .flatMap(([scheme, data]) => [...data.manual])
-            .sort((a, b) => a.level - b.level)
-        : [];
-
     return (
         <div>
             <Band>
