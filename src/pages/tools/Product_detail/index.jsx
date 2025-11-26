@@ -64,12 +64,22 @@ const ProductDetail = () => {
         { name: "URL", value: product.site_url ? <a href={product.site_url} target="_blank" rel="noopener noreferrer">{product.site_name}</a> : "Not available" }
     ].filter(item => item.value);
 
-const sortedCategories = product.product?.categories 
-    ? Object.values(product.product.categories)
-        .flatMap(scheme => [...scheme.manual, ...scheme.predicted])
-        .sort((a, b) => a.level - b.level)
-    : [];
-    
+    console.log("=== CATEGORY DEBUG START ===");
+    console.log("Product object:", product);
+    console.log("Product.product:", product.product);
+    console.log("Categories object:", product.product?.categories);
+
+    const sortedCategories = product.product?.categories 
+        ? Object.entries(product.product.categories)
+            .sort(([schemeA], [schemeB]) => schemeA.localeCompare(schemeB))
+            .flatMap(([scheme, data]) => [...data.manual])
+            .sort((a, b) => a.level - b.level)
+        : [];
+
+    console.log("Sorted categories result:", sortedCategories);
+    console.log("Length:", sortedCategories.length);
+    console.log("=== CATEGORY DEBUG END ===");
+
     return (
         <div>
             <Band>
