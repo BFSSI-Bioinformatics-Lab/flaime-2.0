@@ -66,5 +66,6 @@
   },
   "devDependencies": {
     "dotenv-cli": "^7.4.1"
-  }
+  },
+  "proxy": "http://localhost:8000"
 }
