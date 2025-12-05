@@ -8,6 +8,7 @@ import { ProductInfoBox, PageIcon, PageTitle, DetailItem, ProductIngredientsHead
 import NutritionFactsTable from '../../../components/nutrition_facts_table/NutritionFactsTable';
 import ProductImages from './ProductImages';
 import CategoryDisplay from '../../../components/category_display/CategoryDisplay';
+import SupplementedFoodFlags from '../../../components/supp_food_flags/SupplementedFoodFlags';
 import { GetStoreProductByID } from '../../../api/services/ProductService';
 
 const ProductDetail = () => {
@@ -99,22 +100,33 @@ const ProductDetail = () => {
                                     </Collapse>
                                 </DetailItem>
                             )}
-                                {product.product?.categories && (
+                            {product.product?.categories && 
+                            Object.values(product.product.categories).some(data => 
+                            data.manual?.length > 0 || data.predicted?.length > 0
+                            ) && (
                                     <div style={{ marginTop: '20px' }}>
-                                        <ProductIngredientsHeadingContainer>
-                                            <Divider> Categories </Divider>
-                                        </ProductIngredientsHeadingContainer>
-                                        <CategoryDisplay categories={product.product.categories} />
-                                    </div>
-                                )}
-                                {product.ingredient_en && (
-                                <div>
                                     <ProductIngredientsHeadingContainer>
-                                        <Divider> Ingredients </Divider>
+                                        <Divider> Categories </Divider>
                                     </ProductIngredientsHeadingContainer>
-                                    <Typography variant="body2" style={{ padding: '10px', textTransform: 'capitalize' }}>
-                                        {product.ingredient_en.toLowerCase()}
-                                    </Typography>
+                                    <CategoryDisplay categories={product.product.categories} />
+                                </div>
+                            )}
+                            {product.ingredient_en && (
+                            <div>
+                                <ProductIngredientsHeadingContainer>
+                                    <Divider> Ingredients </Divider>
+                                </ProductIngredientsHeadingContainer>
+                                <Typography variant="body2" style={{ padding: '10px', textTransform: 'capitalize' }}>
+                                    {product.ingredient_en.toLowerCase()}
+                                </Typography>
+                            </div>
+                            )}
+                            {product.product?.supplemented_food && product.label_flags && (
+                                <div style={{ marginTop: '20px' }}>
+                                    <ProductIngredientsHeadingContainer>
+                                        <Divider> Supplemented Food Flags </Divider>
+                                    </ProductIngredientsHeadingContainer>
+                                    <SupplementedFoodFlags labelFlags={product.label_flags} />
                                 </div>
                             )}
                         </Grid>
