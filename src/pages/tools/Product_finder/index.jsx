@@ -18,7 +18,7 @@ const ProductFinder = () => {
 
   useEffect(() => {
     window.scrollTo(0, 0); // Scroll to the top of the page when the component mounts
-}, []);
+  }, []);
 
   const initialFilters = {
     TextEntries: { value: [] },
@@ -115,9 +115,8 @@ const ProductFinder = () => {
     setRowsPerPage(newRowsPerPage);
     setPage(0);
     handleSearch(0, newRowsPerPage);
-};
+  };
 
-  
   const handleSearch = async (newPage = 1) => {
     if (searchInputs.TextEntries.value.length === 0) {
       setInputError(true);
