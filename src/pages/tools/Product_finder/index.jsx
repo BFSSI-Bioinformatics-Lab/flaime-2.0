@@ -36,6 +36,8 @@ const ProductFinder = () => {
   const [searchResults, setSearchResults] = useState([]);
   const [searchResultsIsLoading, setSearchResultsIsLoading] = useState(false);
   const [totalProducts, setTotalProducts] = useState(0);
+  const [inputError, setInputError] = useState(false);
+
   // for pagination
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(25);
@@ -78,6 +80,7 @@ const ProductFinder = () => {
 
   // Handler for changes in text file input
   const handleTextChange = (text) => {
+    if (inputError) setInputError(false);
     handleInputChange('TextEntries', { value: text.split("\n").filter(line => line.trim() !== "") });
   };
 
@@ -116,6 +119,14 @@ const ProductFinder = () => {
 
   
   const handleSearch = async (newPage = 1) => {
+    if (searchInputs.TextEntries.value.length === 0) {
+      setInputError(true);
+      return;
+    }
+    
+    // Clear error if validation passes
+    setInputError(false);
+
     setSearchResultsIsLoading(true);
     console.log("Starting search with input mode:", inputMode);
     console.log("Search filters:", searchInputs);
@@ -233,6 +244,15 @@ return (
         />
       </div>
       <div style={{ marginTop: '20px' }}>
+        {inputError && (
+           <Typography 
+             color="error" 
+             variant="body2" 
+             style={{ display: 'block', marginBottom: '10px', fontWeight: 'bold' }}
+           >
+            Please enter at least one product name or ID.
+           </Typography>
+        )}
         <Button variant="contained" onClick={() => handleSearch(1)}>
           Search
         </Button>
