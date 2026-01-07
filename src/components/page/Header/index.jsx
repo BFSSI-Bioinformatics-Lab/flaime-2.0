@@ -96,8 +96,8 @@ const Header = () => {
                                 onClick={handleClose}>Product Finder</MenuItem>
                             <MenuItem component={Link} to='/tools/advanced-search'
                                 onClick={handleClose}>Advanced Search</MenuItem>
-                            <MenuItem component={Link} to='/tools/category-verification-setup'
-                                onClick={handleClose}>Category Verification</MenuItem>
+                            {/*<MenuItem component={Link} to='/tools/category-verification-setup'
+                                onClick={handleClose}>Category Verification</MenuItem>*/}
                         </Menu>
 
                         <Button
