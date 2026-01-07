@@ -81,7 +81,9 @@ const ProductFinder = () => {
   // Handler for changes in text file input
   const handleTextChange = (text) => {
     if (inputError) setInputError(false);
-    handleInputChange('TextEntries', { value: text.split("\n").filter(line => line.trim() !== "") });
+    const lines = text.split("\n");
+    const limitedLines = lines.slice(0, 1000);
+    handleInputChange('TextEntries', { value: limitedLines });
   };
 
   // Handlers for selectors
@@ -118,7 +120,13 @@ const ProductFinder = () => {
   };
 
   const handleSearch = async (newPage = 1) => {
-    if (searchInputs.TextEntries.value.length === 0) {
+    // Create a clean list (remove empty lines)
+    const cleanTextEntries = searchInputs.TextEntries.value
+      .map(line => line.trim())
+      .filter(line => line !== "");
+
+    // Validate using the clean list
+    if (cleanTextEntries.length === 0) {
       setInputError(true);
       return;
     }
@@ -132,7 +140,7 @@ const ProductFinder = () => {
 
     const filters = buildFilterClauses(searchInputs);
     const fieldKey = getFieldKey(inputMode);
-    const textQueries = buildTextMustClauses(searchInputs.TextEntries, fieldKey);
+    const textQueries = buildTextMustClauses({ value: cleanTextEntries }, fieldKey);
 
     const queryBody = {
       from: (newPage - 1) * rowsPerPage,
@@ -211,6 +219,19 @@ return (
           text={searchInputs.TextEntries.value.join("\n")}
           onTextChange={handleTextChange}
         />
+
+        <Typography 
+            variant="caption" 
+            style={{ 
+                display: 'block', 
+                textAlign: 'right', 
+                marginTop: '5px',
+                // Change color to red if they hit the limit
+                color: searchInputs.TextEntries.value.length >= 1000 ? 'red' : 'gray' 
+            }}
+        >
+            {searchInputs.TextEntries.value.length} / 1000 lines
+        </Typography>
       </div>
       <Divider style={{ width: '60vw', margin: '15px auto 5px auto' }}/>
       <div style={{ display: 'flex', justifyContent: 'space-around', paddingBottom: '25px' }}>
