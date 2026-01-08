@@ -69,6 +69,7 @@ const AdvancedSearch = () => {
         setRowsPerPage(25);
         setErrorMessage('');
         setCategoryResetKey(prev => prev + 1);
+        setSelectedColumns(Object.keys(columnsVisibility));
     };
 
     const handleColumnSelection = (event) => {
