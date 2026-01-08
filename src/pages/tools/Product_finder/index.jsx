@@ -220,28 +220,41 @@ return (
       
       <div style={{ width: '75vw', margin: '10px auto'}}>
         <Typography variant="h5">Enter product names (or IDs) or upload a file</Typography>
-        <TextFileInput 
-          text={searchInputs.TextEntries.value.join("\n")}
-          onTextChange={handleTextChange}
-          error={searchInputs.TextEntries.value.length > 1000}
-        />
+        {(() => {
+            const validItemCount = searchInputs.TextEntries.value.filter(line => line.trim() !== "").length;
+            
+            return (
+              <>
+                <TextFileInput 
+                  text={searchInputs.TextEntries.value.join("\n")}
+                  onTextChange={handleTextChange}
+                  multiline={true} 
+                  minRows={4}
+                  // Indicate error state if valid item count exceeds 1000
+                  error={validItemCount > 1000}
+                />
 
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', marginTop: '5px' }}>
-            {searchInputs.TextEntries.value.length > 1000 && (
-                <Typography variant="caption" color="error" style={{ fontWeight: 'bold', fontSize: '14px' }}>
-                    Maximum 1000 entries
-                </Typography>
-            )}
-            <Typography 
-                variant="caption" 
-                style={{ 
-                    color: searchInputs.TextEntries.value.length > 1000 ? '#d32f2f' : 'gray',
-                    fontWeight: searchInputs.TextEntries.value.length > 1000 ? 'bold' : 'normal'
-                }}
-            >
-                Current count: {searchInputs.TextEntries.value.length} / 1000
-            </Typography>
-        </div>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', marginTop: '5px' }}>
+                    {validItemCount > 1000 && (
+                        <Typography variant="caption" color="error" style={{ fontWeight: 'bold', fontSize: '14px' }}>
+                            Maximum 1000 entries allowed. Please reduce your input.
+                        </Typography>
+                    )}
+
+                    {/* Display current count with dynamic styling based on validity */}
+                    <Typography 
+                        variant="caption" 
+                        style={{ 
+                            color: validItemCount > 1000 ? '#d32f2f' : 'gray',
+                            fontWeight: validItemCount > 1000 ? 'bold' : 'normal'
+                        }}
+                    >
+                        Current count: {validItemCount} / 1000
+                    </Typography>
+                </div>
+              </>
+            );
+        })()}
       </div>
       <Divider style={{ width: '60vw', margin: '15px auto 5px auto' }}/>
       <div style={{ display: 'flex', justifyContent: 'space-around', paddingBottom: '25px' }}>
