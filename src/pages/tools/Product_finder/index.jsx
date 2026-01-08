@@ -228,8 +228,6 @@ return (
                 <TextFileInput 
                   text={searchInputs.TextEntries.value.join("\n")}
                   onTextChange={handleTextChange}
-                  multiline={true} 
-                  minRows={4}
                   // Indicate error state if valid item count exceeds 1000
                   error={validItemCount > 1000}
                 />
