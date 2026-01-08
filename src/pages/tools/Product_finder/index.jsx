@@ -81,9 +81,7 @@ const ProductFinder = () => {
   // Handler for changes in text file input
   const handleTextChange = (text) => {
     if (inputError) setInputError(false);
-    const lines = text.split("\n");
-    const limitedLines = lines.slice(0, 1000);
-    handleInputChange('TextEntries', { value: limitedLines });
+    handleInputChange('TextEntries', { value: text.split("\n") });  
   };
 
   // Handlers for selectors
@@ -120,15 +118,22 @@ const ProductFinder = () => {
   };
 
   const handleSearch = async (newPage = 1) => {
-    // Create a clean list (remove empty lines)
-    const cleanTextEntries = searchInputs.TextEntries.value
-      .map(line => line.trim())
-      .filter(line => line !== "");
+    // Create a clean list (remove empty line, trim whitespace, remove duplicates)
+    const cleanTextEntries = [...new Set(
+      searchInputs.TextEntries.value
+        .map(line => line.trim())
+        .filter(line => line !== "")
+    )];
 
     // Validate using the clean list
     if (cleanTextEntries.length === 0) {
       setInputError(true);
       return;
+    }
+    
+    // Enforce maximum limit of 1000 entries
+    if (cleanTextEntries.length > 1000) {
+      return; 
     }
     
     // Clear error if validation passes
@@ -218,20 +223,25 @@ return (
         <TextFileInput 
           text={searchInputs.TextEntries.value.join("\n")}
           onTextChange={handleTextChange}
+          error={searchInputs.TextEntries.value.length > 1000}
         />
 
-        <Typography 
-            variant="caption" 
-            style={{ 
-                display: 'block', 
-                textAlign: 'right', 
-                marginTop: '5px',
-                // Change color to red if they hit the limit
-                color: searchInputs.TextEntries.value.length >= 1000 ? 'red' : 'gray' 
-            }}
-        >
-            {searchInputs.TextEntries.value.length} / 1000 lines
-        </Typography>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', marginTop: '5px' }}>
+            {searchInputs.TextEntries.value.length > 1000 && (
+                <Typography variant="caption" color="error" style={{ fontWeight: 'bold', fontSize: '14px' }}>
+                    Maximum 1000 entries
+                </Typography>
+            )}
+            <Typography 
+                variant="caption" 
+                style={{ 
+                    color: searchInputs.TextEntries.value.length > 1000 ? '#d32f2f' : 'gray',
+                    fontWeight: searchInputs.TextEntries.value.length > 1000 ? 'bold' : 'normal'
+                }}
+            >
+                Current count: {searchInputs.TextEntries.value.length} / 1000
+            </Typography>
+        </div>
       </div>
       <Divider style={{ width: '60vw', margin: '15px auto 5px auto' }}/>
       <div style={{ display: 'flex', justifyContent: 'space-around', paddingBottom: '25px' }}>
