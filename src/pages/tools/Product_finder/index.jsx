@@ -81,7 +81,7 @@ const ProductFinder = () => {
   // Handler for changes in text file input
   const handleTextChange = (text) => {
     if (inputError) setInputError(false);
-    handleInputChange('TextEntries', { value: text.split("\n").filter(line => line.trim() !== "") });
+    handleInputChange('TextEntries', { value: text.split("\n") });  
   };
 
   // Handlers for selectors
@@ -118,9 +118,22 @@ const ProductFinder = () => {
   };
 
   const handleSearch = async (newPage = 1) => {
-    if (searchInputs.TextEntries.value.length === 0) {
+    // Create a clean list (remove empty line, trim whitespace, remove duplicates)
+    const cleanTextEntries = [...new Set(
+      searchInputs.TextEntries.value
+        .map(line => line.trim())
+        .filter(line => line !== "")
+    )];
+
+    // Validate using the clean list
+    if (cleanTextEntries.length === 0) {
       setInputError(true);
       return;
+    }
+    
+    // Enforce maximum limit of 1000 entries
+    if (cleanTextEntries.length > 1000) {
+      return; 
     }
     
     // Clear error if validation passes
@@ -132,7 +145,7 @@ const ProductFinder = () => {
 
     const filters = buildFilterClauses(searchInputs);
     const fieldKey = getFieldKey(inputMode);
-    const textQueries = buildTextMustClauses(searchInputs.TextEntries, fieldKey);
+    const textQueries = buildTextMustClauses({ value: cleanTextEntries }, fieldKey);
 
     const queryBody = {
       from: (newPage - 1) * rowsPerPage,
@@ -207,10 +220,39 @@ return (
       
       <div style={{ width: '75vw', margin: '10px auto'}}>
         <Typography variant="h5">Enter product names (or IDs) or upload a file</Typography>
-        <TextFileInput 
-          text={searchInputs.TextEntries.value.join("\n")}
-          onTextChange={handleTextChange}
-        />
+        {(() => {
+            const validItemCount = searchInputs.TextEntries.value.filter(line => line.trim() !== "").length;
+            
+            return (
+              <>
+                <TextFileInput 
+                  text={searchInputs.TextEntries.value.join("\n")}
+                  onTextChange={handleTextChange}
+                  // Indicate error state if valid item count exceeds 1000
+                  error={validItemCount > 1000}
+                />
+
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', marginTop: '5px' }}>
+                    {validItemCount > 1000 && (
+                        <Typography variant="caption" color="error" style={{ fontWeight: 'bold', fontSize: '14px' }}>
+                            Maximum 1000 entries allowed. Please reduce your input.
+                        </Typography>
+                    )}
+
+                    {/* Display current count with dynamic styling based on validity */}
+                    <Typography 
+                        variant="caption" 
+                        style={{ 
+                            color: validItemCount > 1000 ? '#d32f2f' : 'gray',
+                            fontWeight: validItemCount > 1000 ? 'bold' : 'normal'
+                        }}
+                    >
+                        Current count: {validItemCount} / 1000
+                    </Typography>
+                </div>
+              </>
+            );
+        })()}
       </div>
       <Divider style={{ width: '60vw', margin: '15px auto 5px auto' }}/>
       <div style={{ display: 'flex', justifyContent: 'space-around', paddingBottom: '25px' }}>
