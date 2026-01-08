@@ -41,6 +41,7 @@ const AdvancedSearch = () => {
     const [totalProducts, setTotalProducts] = useState(0);
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(25);
+    const [categoryResetKey, setCategoryResetKey] = useState(0);
 
     const [columnsVisibility, setColumnsVisibility] = useState({
         id: true,
@@ -67,6 +68,7 @@ const AdvancedSearch = () => {
         setPage(0);
         setRowsPerPage(25);
         setErrorMessage('');
+        setCategoryResetKey(prev => prev + 1);
     };
 
     const handleColumnSelection = (event) => {
@@ -259,7 +261,7 @@ const AdvancedSearch = () => {
 
                 <Grid container spacing={1} direction="row" justifyContent="space-between" >
                     <Grid item xs={12} md={6}>
-                        <CategorySelector onChange={handleCategoryChange('Categories')} />
+                        <CategorySelector key={categoryResetKey} onChange={handleCategoryChange('Categories')} />
                     </Grid>
                     <Grid item xs={12} md={6}>
                         <Typography variant="h5" style={{ padding: '10px 20px 20px 20px' }}>Select a date range</Typography>
