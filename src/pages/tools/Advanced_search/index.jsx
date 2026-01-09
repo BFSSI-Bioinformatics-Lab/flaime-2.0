@@ -41,7 +41,7 @@ const AdvancedSearch = () => {
     const [totalProducts, setTotalProducts] = useState(0);
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(25);
-    const [categoryResetKey, setCategoryResetKey] = useState(0);
+    const [resetKey, setResetKey] = useState(0);
 
     const [columnsVisibility, setColumnsVisibility] = useState({
         id: true,
@@ -68,7 +68,7 @@ const AdvancedSearch = () => {
         setPage(0);
         setRowsPerPage(25);
         setErrorMessage('');
-        setCategoryResetKey(prev => prev + 1);
+        setResetKey(prev => prev + 1);
         setSelectedColumns(Object.keys(columnsVisibility));
     };
 
@@ -262,18 +262,20 @@ const AdvancedSearch = () => {
 
                 <Grid container spacing={1} direction="row" justifyContent="space-between" >
                     <Grid item xs={12} md={6}>
-                        <CategorySelector key={categoryResetKey} onChange={handleCategoryChange('Categories')} />
+                        <CategorySelector key={resetKey} onChange={handleCategoryChange('Categories')} />
                     </Grid>
                     <Grid item xs={12} md={6}>
                         <Typography variant="h5" style={{ padding: '10px 20px 20px 20px' }}>Select a date range</Typography>
                         <div style={{ display: 'flex', justifyContent: 'space-around', padding: '15px 20px' }}>
                             
                             <SingleDatePicker
+                                key={`start-${resetKey}`}
                                 label="Start Date"
                                 initialDate="1900-01-01"
                                 onChange={(date) => handleInputChange('StartDate', { value: date })}
                             />
                             <SingleDatePicker
+                                key={`end-${resetKey}`}
                                 label="End Date"
                                 initialDate={dayjs().format('YYYY-MM-DD')}
                                 onChange={(date) => handleInputChange('EndDate', { value: date })}
