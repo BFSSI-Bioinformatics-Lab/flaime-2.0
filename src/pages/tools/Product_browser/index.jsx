@@ -2,11 +2,53 @@ import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import {
   TableContainer, Table, TableHead, TableRow, TableCell, TableBody,
-  Pagination, TextField, Paper, Typography, Card, CardContent, Divider
+  Pagination, TextField, Paper, Typography, Card, CardContent, Divider, Button, Menu, MenuItem
 } from '@mui/material';
 import { Link } from 'react-router-dom';
 import SourceSelector from '../../../components/inputs/SourceSelector';
 import { ResetButton } from '../../../components/buttons';
+
+// CSV downloal function
+const downloadCSV = (data, filename) => {
+  if (!data || data.length === 0) {
+    alert("No data to download");
+    return;
+  }
+  const csvContent = "data:text/csv;charset=utf-8," 
+      + data.map(e => e.join(",")).join("\n");
+      
+  const encodedUri = encodeURI(csvContent);
+  const link = document.createElement("a");
+  link.setAttribute("href", encodedUri);
+  link.setAttribute("download", filename);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};
+
+// Handle CSV field escaping
+const escapeCsvField = (field) => {
+  if (field === null || field === undefined) return "";
+  const stringField = String(field);
+  if (stringField.includes(",") || stringField.includes("\"") || stringField.includes("\n")) {
+      return `"${stringField.replace(/"/g, '""')}"`;
+  }
+  return stringField;
+};
+
+// Get all unique nutrient names from products
+const getAllNutrientNames = (allProducts) => {
+  const nutrients = new Set();
+  allProducts.forEach(p => {
+    if (p.nutrition_details) {
+      p.nutrition_details.forEach(n => {
+        const unit = n.unit ? ` (${n.unit})` : '';
+        nutrients.add(`${n.nutrient_name}${unit}`);
+      });
+    }
+  });
+  return Array.from(nutrients).sort(); // Sort for alphabetical order
+};
 
 const ProductBrowser = () => {
   const [products, setProducts] = useState([]);
@@ -22,6 +64,115 @@ const ProductBrowser = () => {
   });
   const [aggregationResponse, setAggregationResponse] = useState(null);
   const [isSearching, setIsSearching] = useState(false);
+
+  // Download menu state
+  const [anchorEl, setAnchorEl] = useState(null);
+  const openDownloadMenu = Boolean(anchorEl);
+  const DOWNLOAD_LIMIT = 5000; // Sensible Limit
+
+  // Handle download menu open/close
+  const handleDownloadClick = (event) => setAnchorEl(event.currentTarget);
+  const handleDownloadClose = () => setAnchorEl(null);
+
+  // Fetch all data for export (with limit check)
+  const fetchAllDataForExport = async () => {
+    if (totalProducts > DOWNLOAD_LIMIT) {
+      alert(`Export is limited to ${DOWNLOAD_LIMIT} results. Your search has ${totalProducts}.\nPlease contact us for a customized export.`);
+      handleDownloadClose();
+      return null;
+    }
+
+    const elasticUrl = `${process.env.REACT_APP_ELASTIC_URL}/_search`;
+    // Reuse buildQueryObject function, and set size to totalProducts or DOWNLOAD_LIMIT
+    const body = {
+      query: buildQueryObject(),
+      from: 0,
+      size: Math.min(totalProducts, DOWNLOAD_LIMIT)
+    };
+
+    try {
+      const axiosInstance = axios.create();
+      const response = await axiosInstance.post(elasticUrl, body, {
+        headers: { 'Content-Type': 'application/json' },
+        withCredentials: false,
+      });
+      return response.data.hits.hits.map(hit => hit._source);
+    } catch (error) {
+      console.error("Export fetch failed", error);
+      alert("Failed to fetch data for export.");
+      return null;
+    }
+  };
+
+  // Simple Download Handler (Visible Columns)
+  const handleDownloadSimple = async () => {
+    const allData = await fetchAllDataForExport();
+    if (!allData) return;
+
+    const header = ['Assigned Flaime ID', 'External ID', 'Store Name', 'Data Source', 'Product Name', 'Category Name'];
+    const rows = allData.map(product => [
+      escapeCsvField(product.id),
+      escapeCsvField(product.external_id),
+      escapeCsvField(product.store?.name),
+      escapeCsvField(product.source?.name),
+      escapeCsvField(product.site_name),
+      escapeCsvField(product.categories?.map(c => c.name).join(' > '))
+    ]);
+
+    downloadCSV([header, ...rows], `product_browser_simple_${new Date().toISOString().slice(0,10)}.csv`);
+    handleDownloadClose();
+  };
+
+  // Full Download Handler (All Data)
+  const handleDownloadFull = async () => {
+    const allData = await fetchAllDataForExport();
+    if (!allData) return;
+
+    // All unique nutrient columns
+    const nutrientColumns = getAllNutrientNames(allData);
+
+    // Header row
+    const header = [
+      'Assigned Flaime ID', 'External ID', 'Store Name', 'Data Source', 'Product Name', 
+      'Category Name', 'UPC', 'Ingredients (EN)', 'Total Size', 'Serving Size',
+      ...nutrientColumns 
+    ];
+
+    // Data Mapping
+    const rows = allData.map(product => {
+      // Nutrient name to amount mapping
+      const nutrientMap = {};
+      if (product.nutrition_details) {
+        product.nutrition_details.forEach(n => {
+          const unit = n.unit ? ` (${n.unit})` : '';
+          nutrientMap[`${n.nutrient_name}${unit}`] = n.amount;
+        });
+      }
+
+      const baseData = [
+        escapeCsvField(product.id),
+        escapeCsvField(product.external_id),
+        escapeCsvField(product.store?.name),
+        escapeCsvField(product.source?.name),
+        escapeCsvField(product.site_name),
+        escapeCsvField(product.categories?.map(c => c.name).join(' > ')),
+        escapeCsvField(product.raw_upc),
+        escapeCsvField(product.ingredients?.en),
+        escapeCsvField(product.total_size),
+        escapeCsvField(product.raw_serving_size),
+      ];
+
+      // Nutrient data in order of nutrientColumns
+      const nutrientData = nutrientColumns.map(colName => 
+        escapeCsvField(nutrientMap[colName] || "")
+      );
+
+      return [...baseData, ...nutrientData];
+    });
+
+    downloadCSV([header, ...rows], `product_browser_full_${new Date().toISOString().slice(0,10)}.csv`);
+    handleDownloadClose();
+  };
 
   const fetchData = useCallback(async (url, body) => {
     try {
@@ -159,6 +310,12 @@ const ProductBrowser = () => {
         handleSearchChange={handleSearchChange}
         handleSourceNameSearch={handleSourceNameSearch}
         handleReset={handleReset}
+        anchorEl={anchorEl}
+        openDownloadMenu={openDownloadMenu}
+        handleDownloadClick={handleDownloadClick}
+        handleDownloadClose={handleDownloadClose}
+        handleDownloadSimple={handleDownloadSimple}
+        handleDownloadFull={handleDownloadFull}
       />
 
       <StoreCards aggregationResponse={aggregationResponse} />
@@ -179,7 +336,8 @@ const ProductBrowser = () => {
   );
 };
 
-const SearchForm = React.memo(({ searchTerms, handleSearchChange, handleSourceNameSearch, handleReset }) => (
+const SearchForm = React.memo(({ searchTerms, handleSearchChange, handleSourceNameSearch, handleReset,
+  anchorEl, openDownloadMenu, handleDownloadClick, handleDownloadClose, handleDownloadSimple, handleDownloadFull }) => (
   <div>
     <div style={{ display: 'flex', justifyContent: 'space-evenly', margin: '20px 20px', alignItems: 'center' }}>
       <SearchField label="Search ID" value={searchTerms.id} onChange={handleSearchChange('id')} />
@@ -195,7 +353,24 @@ const SearchForm = React.memo(({ searchTerms, handleSearchChange, handleSourceNa
     <div style={{ display: 'flex', justifyContent: 'space-evenly', margin: '10px 20px' }}>
       <SearchField label="Search by Product Name" value={searchTerms.siteName} onChange={handleSearchChange('siteName')} style={{ maxWidth: '480px' }} />
       <SearchField label="Search by category" value={searchTerms.category} onChange={handleSearchChange('category')} style={{ maxWidth: '480px' }} />
-      <ResetButton variant="contained" onClick={handleReset}>Reset Search</ResetButton>
+      <div style={{ display: 'flex', gap: '10px' }}>
+        <ResetButton variant="contained" onClick={handleReset}>Reset Search</ResetButton>
+        <Button 
+          variant="contained" 
+          color="secondary" 
+          onClick={handleDownloadClick}
+        >
+          Download Results
+        </Button>
+        <Menu
+          anchorEl={anchorEl}
+          open={openDownloadMenu}
+          onClose={handleDownloadClose}
+        >
+          <MenuItem onClick={handleDownloadSimple}>Simple CSV (Visible Columns)</MenuItem>
+          <MenuItem onClick={handleDownloadFull}>Full CSV (All Data)</MenuItem>
+        </Menu>
+      </div>
     </div>
   </div>
 ));
