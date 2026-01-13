@@ -302,13 +302,11 @@ return (
           Search
         </Button>
         <ResetButton variant="contained" onClick={handleReset}>Reset Search</ResetButton>
-        {totalProducts > 0 && (
-            <DownloadResultButton 
-              queryBody={currentQueryBody} 
-              totalProducts={totalProducts} 
-              fileNamePrefix="product_finder" 
-            />
-          )}
+        <DownloadResultButton 
+          queryBody={currentQueryBody} 
+          totalProducts={totalProducts} 
+          fileNamePrefix="product_finder" 
+        />
       </div>
       <SearchResultSummary totalProducts={totalProducts} />
       <>

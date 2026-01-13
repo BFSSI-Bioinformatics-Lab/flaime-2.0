@@ -18,6 +18,7 @@ export const DownloadResultButton = ({ queryBody, totalProducts, fileNamePrefix 
         variant="contained" 
         color="secondary" 
         onClick={handleDownloadClick}
+        disabled={!totalProducts || totalProducts === 0}
       >
         Download Results
       </Button>
