@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import dayjs from 'dayjs';
 import { Button, FormControl, FormControlLabel, Radio, RadioGroup, Typography, Divider, TablePagination } from '@mui/material';
 import PageContainer from '../../../components/page/PageContainer';
@@ -9,6 +9,7 @@ import RegionSelector from '../../../components/inputs/RegionSelector';
 import SingleDatePicker from '../../../components/inputs/SingleDatePicker';
 import { useSearchFilters, buildFilterClauses, buildTextMustClauses, getFieldKey } from '../util';
 import { ResetButton } from '../../../components/buttons/ResetButton';
+import { DownloadResultButton } from '../../../components/buttons/DownloadResultButton';
 import ColumnSelection  from '../../../components/table/ColumnSelection';
 import ToolTable  from '../../../components/table/ToolTable';
 import SearchResultSummary from '../../../components/misc/SearchResultSummary';
@@ -117,51 +118,55 @@ const ProductFinder = () => {
     handleSearch(1, newRowsPerPage);
   };
 
-  const handleSearch = async (newPage = 1, currentRowsPerPage = rowsPerPage) => {
-    // Create a clean list (remove empty line, trim whitespace, remove duplicates)
+// Separated function to build the query object
+  const buildQueryObject = useCallback(() => {
+    // Input organization and cleaning
     const cleanTextEntries = [...new Set(
       searchInputs.TextEntries.value
         .map(line => line.trim())
         .filter(line => line !== "")
     )];
 
-    // Validate using the clean list
-    if (cleanTextEntries.length === 0) {
-      setInputError(true);
-      return;
-    }
-    
-    // Enforce maximum limit of 1000 entries
-    if (cleanTextEntries.length > 1000) {
-      return; 
-    }
-    
-    // Clear error if validation passes
-    setInputError(false);
+    if (cleanTextEntries.length === 0) return null;
 
-    setSearchResultsIsLoading(true);
-    console.log("Starting search with input mode:", inputMode);
-    console.log("Search filters:", searchInputs);
-
+    // Create filter and text query clauses
     const filters = buildFilterClauses(searchInputs);
     const fieldKey = getFieldKey(inputMode);
     const textQueries = buildTextMustClauses({ value: cleanTextEntries }, fieldKey);
 
+    // Return the final query object
+    return {
+      bool: {
+        must: textQueries,
+        filter: filters
+      }
+    };
+  }, [searchInputs, inputMode]);
+
+  const handleSearch = async (newPage = 1, currentRowsPerPage = rowsPerPage) => {
+    // Check validity of text entries
+    const cleanTextEntries = [...new Set(
+      searchInputs.TextEntries.value.map(line => line.trim()).filter(line => line !== "")
+    )];
+
+    if (cleanTextEntries.length === 0) {
+      setInputError(true);
+      return;
+    }
+    if (cleanTextEntries.length > 1000) return;
+    
+    setInputError(false);
+    setSearchResultsIsLoading(true);
+
+    // Retrieve the query object
+    const queryObject = buildQueryObject();
+    
+    // Construct the full query body with pagination
     const queryBody = {
       from: (newPage - 1) * currentRowsPerPage,
       size: currentRowsPerPage,
-      query: {
-        bool: {
-          must: textQueries,
-          filter: filters
-        }
-      }
+      query: queryObject // Use the built query object here
     };
-    
-    console.log("filters:", filters);
-    console.log("fieldKey:", fieldKey);
-    console.log("textQueries:", JSON.stringify(textQueries, null, 2));
-    console.log("Elasticsearch query body:", JSON.stringify(queryBody, null, 2));
   
     const elastic_url = `${process.env.REACT_APP_ELASTIC_URL}/_search`;
   
@@ -173,15 +178,11 @@ const ProductFinder = () => {
       });
   
       const data = await response.json();
-      console.log("Elasticsearch response:", JSON.stringify(data, null, 2));
   
       if (response.ok) {
-        console.log("Search successful, hits:", data.hits.total.value);
-        if (response.ok) {
-          setSearchResults(data.hits.hits);
-          setTotalProducts(data.hits.total.value);
-          setPage(newPage - 1);  // Subtract 1 to convert to 0-indexed for Material-UI
-        }
+        setSearchResults(data.hits.hits);
+        setTotalProducts(data.hits.total.value);
+        setPage(newPage - 1);
       } else {
         console.error('Search API error:', data.error || data);
         setSearchResults([]);
@@ -197,6 +198,9 @@ const ProductFinder = () => {
   
     setSearchResultsIsLoading(false);
   };
+
+  // Build current query body for download button
+  const currentQueryBody = buildQueryObject();
 console.log(searchResults);
 
 
@@ -284,7 +288,7 @@ return (
             onChange={handleEndDateChange}
         />
       </div>
-      <div style={{ marginTop: '20px' }}>
+      <div style={{ marginTop: '20px',display: 'flex', gap: '10px'}}>
         {inputError && (
            <Typography 
              color="error" 
@@ -298,6 +302,13 @@ return (
           Search
         </Button>
         <ResetButton variant="contained" onClick={handleReset}>Reset Search</ResetButton>
+        {totalProducts > 0 && (
+            <DownloadResultButton 
+              queryBody={currentQueryBody} 
+              totalProducts={totalProducts} 
+              fileNamePrefix="product_finder" 
+            />
+          )}
       </div>
       <SearchResultSummary totalProducts={totalProducts} />
       <>
