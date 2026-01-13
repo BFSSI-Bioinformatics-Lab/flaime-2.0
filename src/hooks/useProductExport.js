@@ -70,9 +70,9 @@ export const useProductExport = (queryBody, totalProducts) => {
 
     // Prepare Request Body (Fetch All)
     const body = {
-      ...queryBody,
+      query: queryBody,
       from: 0,
-      size: Math.min(totalProducts, DOWNLOAD_LIMIT)
+      size: Math.min(totalProducts || 0, DOWNLOAD_LIMIT)
     };
 
     const elasticUrl = `${process.env.REACT_APP_ELASTIC_URL}/_search`;
