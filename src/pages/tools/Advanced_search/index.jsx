@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import dayjs from 'dayjs';
 import { TextField, Button, Alert, Typography, Divider, Grid } from '@mui/material';
 import PageContainer from '../../../components/page/PageContainer';
@@ -13,6 +13,7 @@ import ColumnSelection  from '../../../components/table/ColumnSelection';
 import ToolTable  from '../../../components/table/ToolTable';
 import SearchResultSummary from '../../../components/misc/SearchResultSummary';
 import { ResetButton } from '../../../components/buttons/ResetButton';
+import { DownloadResultButton } from '../../../components/buttons/DownloadResultButton';
 
 const AdvancedSearch = () => {
     useEffect(() => {
@@ -81,9 +82,7 @@ const AdvancedSearch = () => {
         if (errorMessage) setErrorMessage('');
     };
     
-    const handleSearch = async () => {
-        setIsLoading(true);
-        
+    const buildQueryObject = useCallback(() => {
         const textMustClauses = buildTextMustClausesForAllFields(searchInputs);
         
         let nutrientQuery = {
@@ -121,20 +120,27 @@ const AdvancedSearch = () => {
             });
         }
         
-        const finalQuery = {
-            from: page * rowsPerPage,
-            size: rowsPerPage,
-            query: {
-                bool: {
-                    must: [
-                        ...textMustClauses,
-                        ...(nutrientQuery.nested.query.bool.must.length > 0 ? [nutrientQuery] : [])
-                    ]
-                }
+        return {
+            bool: {
+                must: [
+                    ...textMustClauses,
+                    ...(nutrientQuery.nested.query.bool.must.length > 0 ? [nutrientQuery] : [])
+                ]
             }
         };
-              
-        console.log("Query Body:", JSON.stringify(finalQuery, null, 2));
+        
+    }, [searchInputs]);
+
+    const handleSearch = async (newPage = page, currentRowsPerPage = rowsPerPage) => {
+        setIsLoading(true);
+        
+        const queryObject = buildQueryObject();
+        
+        const finalQuery = {
+            from: newPage * currentRowsPerPage,
+            size: currentRowsPerPage,
+            query: queryObject
+        };
         
         const elastic_url = `${process.env.REACT_APP_ELASTIC_URL}/_search`;
         
@@ -163,6 +169,7 @@ const AdvancedSearch = () => {
         
         setIsLoading(false);
     };
+    const currentQueryBody = buildQueryObject();
       
     const handleSelectorChange = (field) => (value) => {
         handleInputChange(field, { value: value === '-1' ? null : value });
@@ -291,11 +298,16 @@ const AdvancedSearch = () => {
                     </Grid>
                 </Grid>
                 
-                <div style={{ marginTop: '20px' }}>
-                    <Button variant="contained" onClick={handleSearch} disabled={isLoading} >
+                <div style={{ marginTop: '20px', display: 'flex', gap: '10px' }}>
+                    <Button variant="contained" onClick={() => handleSearch(0, rowsPerPage)} disabled={isLoading} >
                         Search
                     </Button>
                     <ResetButton  variant="contained" onClick={handleReset}>Reset Search</ResetButton>
+                    <DownloadResultButton 
+                        queryBody={currentQueryBody} 
+                        totalProducts={totalProducts} 
+                        fileNamePrefix="advanced_search" 
+                    />
                 </div>
                 <SearchResultSummary totalProducts={totalProducts} />
                 <>
