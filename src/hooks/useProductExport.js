@@ -17,14 +17,25 @@ const downloadCSV = (data, filename) => {
     alert("No data to download");
     return;
   }
-  const csvContent = "data:text/csv;charset=utf-8," + data.map(e => e.join(",")).join("\n");
-  const encodedUri = encodeURI(csvContent);
+  
+  // Create CSV content
+  const csvContent = data.map(e => e.join(",")).join("\n");
+
+  // Create Blob object (virtual file in memory)
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  
+  // Create URL for Blob and link element
+  const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
-  link.setAttribute("href", encodedUri);
+  link.setAttribute("href", url);
   link.setAttribute("download", filename);
+  link.style.visibility = 'hidden';
+  
+  // Trigger download
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
+  URL.revokeObjectURL(url); // Clean up the URL object
 };
 
 /**
