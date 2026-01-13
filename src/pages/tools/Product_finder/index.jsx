@@ -114,10 +114,10 @@ const ProductFinder = () => {
     const newRowsPerPage = parseInt(event.target.value, 10);
     setRowsPerPage(newRowsPerPage);
     setPage(0);
-    handleSearch(0, newRowsPerPage);
+    handleSearch(1, newRowsPerPage);
   };
 
-  const handleSearch = async (newPage = 1) => {
+  const handleSearch = async (newPage = 1, currentRowsPerPage = rowsPerPage) => {
     // Create a clean list (remove empty line, trim whitespace, remove duplicates)
     const cleanTextEntries = [...new Set(
       searchInputs.TextEntries.value
@@ -148,8 +148,8 @@ const ProductFinder = () => {
     const textQueries = buildTextMustClauses({ value: cleanTextEntries }, fieldKey);
 
     const queryBody = {
-      from: (newPage - 1) * rowsPerPage,
-      size: rowsPerPage,
+      from: (newPage - 1) * currentRowsPerPage,
+      size: currentRowsPerPage,
       query: {
         bool: {
           must: textQueries,
