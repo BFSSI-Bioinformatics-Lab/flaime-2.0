@@ -12,7 +12,7 @@ import { useSearchFilters, buildTextMustClausesForAllFields } from '../util';
 import ColumnSelection  from '../../../components/table/ColumnSelection';
 import ToolTable  from '../../../components/table/ToolTable';
 import SearchResultSummary from '../../../components/misc/SearchResultSummary';
-import { ResetButton } from '../../../components/buttons';
+import { ResetButton } from '../../../components/buttons/ResetButton';
 
 const AdvancedSearch = () => {
     useEffect(() => {

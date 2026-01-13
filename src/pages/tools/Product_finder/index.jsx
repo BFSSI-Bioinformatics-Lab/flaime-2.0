@@ -8,7 +8,7 @@ import SourceSelector from '../../../components/inputs/SourceSelector';
 import RegionSelector from '../../../components/inputs/RegionSelector';
 import SingleDatePicker from '../../../components/inputs/SingleDatePicker';
 import { useSearchFilters, buildFilterClauses, buildTextMustClauses, getFieldKey } from '../util';
-import { ResetButton } from '../../../components/buttons';
+import { ResetButton } from '../../../components/buttons/ResetButton';
 import ColumnSelection  from '../../../components/table/ColumnSelection';
 import ToolTable  from '../../../components/table/ToolTable';
 import SearchResultSummary from '../../../components/misc/SearchResultSummary';
