@@ -8,7 +8,7 @@ import { Link } from 'react-router-dom';
 import SourceSelector from '../../../components/inputs/SourceSelector';
 import { ResetButton } from '../../../components/buttons';
 
-// CSV downloal function
+// CSV download function
 const downloadCSV = (data, filename) => {
   if (!data || data.length === 0) {
     alert("No data to download");
