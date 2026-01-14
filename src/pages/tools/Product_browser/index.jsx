@@ -6,7 +6,8 @@ import {
 } from '@mui/material';
 import { Link } from 'react-router-dom';
 import SourceSelector from '../../../components/inputs/SourceSelector';
-import { ResetButton } from '../../../components/buttons';
+import { ResetButton } from '../../../components/buttons/ResetButton';
+import { DownloadResultButton } from '../../../components/buttons/DownloadResultButton';
 
 const ProductBrowser = () => {
   const [products, setProducts] = useState([]);
@@ -142,6 +143,8 @@ const ProductBrowser = () => {
     fetchProducts();
   }, [fetchProducts]);
 
+  const currentQueryBody = buildQueryObject();
+
   return (
     <div style={{ width: '80vw', margin: '0 auto' }}>
       <Typography variant="h4" style={{ padding: '10px' }}>Product Browser</Typography>
@@ -159,6 +162,8 @@ const ProductBrowser = () => {
         handleSearchChange={handleSearchChange}
         handleSourceNameSearch={handleSourceNameSearch}
         handleReset={handleReset}
+        queryBody={currentQueryBody}
+        totalProducts={totalProducts}
       />
 
       <StoreCards aggregationResponse={aggregationResponse} />
@@ -179,7 +184,7 @@ const ProductBrowser = () => {
   );
 };
 
-const SearchForm = React.memo(({ searchTerms, handleSearchChange, handleSourceNameSearch, handleReset }) => (
+const SearchForm = React.memo(({ searchTerms, handleSearchChange, handleSourceNameSearch, handleReset, queryBody, totalProducts}) => (
   <div>
     <div style={{ display: 'flex', justifyContent: 'space-evenly', margin: '20px 20px', alignItems: 'center' }}>
       <SearchField label="Search ID" value={searchTerms.id} onChange={handleSearchChange('id')} />
@@ -195,7 +200,10 @@ const SearchForm = React.memo(({ searchTerms, handleSearchChange, handleSourceNa
     <div style={{ display: 'flex', justifyContent: 'space-evenly', margin: '10px 20px' }}>
       <SearchField label="Search by Product Name" value={searchTerms.siteName} onChange={handleSearchChange('siteName')} style={{ maxWidth: '480px' }} />
       <SearchField label="Search by category" value={searchTerms.category} onChange={handleSearchChange('category')} style={{ maxWidth: '480px' }} />
-      <ResetButton variant="contained" onClick={handleReset}>Reset Search</ResetButton>
+      <div style={{ display: 'flex', gap: '10px' }}>
+        <ResetButton variant="contained" onClick={handleReset}>Reset Search</ResetButton>
+        <DownloadResultButton queryBody={queryBody} totalProducts={totalProducts} fileNamePrefix="product_browser" />
+      </div>
     </div>
   </div>
 ));
