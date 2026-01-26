@@ -111,7 +111,7 @@ const ProductDetail = () => {
                                     <CategoryDisplay categories={product.product.categories} />
                                 </div>
                             )}
-                            {product.ingredient_en || product.ingredient_fr (
+                            {(product.ingredient_en || product.ingredient_fr) && (
                             <div>
                                 <ProductIngredientsHeadingContainer>
                                     <Divider> Ingredients test test </Divider>
