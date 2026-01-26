@@ -114,7 +114,7 @@ const ProductDetail = () => {
                             {(product.ingredient_en || product.ingredient_fr) && (
                             <div>
                                 <ProductIngredientsHeadingContainer>
-                                    <Divider> Ingredients test test </Divider>
+                                    <Divider> Ingredients </Divider>
                                 </ProductIngredientsHeadingContainer>
                                 {product.ingredient_en && (
                                 <Typography variant="body2" style={{ padding: '10px', textTransform: 'capitalize' }}>
