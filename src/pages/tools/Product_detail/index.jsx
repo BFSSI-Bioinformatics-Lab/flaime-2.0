@@ -114,14 +114,18 @@ const ProductDetail = () => {
                             {product.ingredient_en || product.ingredient_fr (
                             <div>
                                 <ProductIngredientsHeadingContainer>
-                                    <Divider> Ingredients </Divider>
+                                    <Divider> Ingredients test test </Divider>
                                 </ProductIngredientsHeadingContainer>
+                                {product.ingredient_en && (
                                 <Typography variant="body2" style={{ padding: '10px', textTransform: 'capitalize' }}>
                                     {product.ingredient_en.toLowerCase()}
                                 </Typography>
+                                )}
+                                {product.ingredient_fr && (
                                 <Typography variant="body2" style={{ padding: '10px', textTransform: 'capitalize' }}>
                                     {product.ingredient_fr.toLowerCase()}
                                 </Typography>
+                                )}
                             </div>
                             )}
                             {product.product?.supplemented_food && product.label_flags && (
