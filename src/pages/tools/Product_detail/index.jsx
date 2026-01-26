@@ -111,13 +111,16 @@ const ProductDetail = () => {
                                     <CategoryDisplay categories={product.product.categories} />
                                 </div>
                             )}
-                            {product.ingredient_en && (
+                            {product.ingredient_en || product.ingredient_fr (
                             <div>
                                 <ProductIngredientsHeadingContainer>
                                     <Divider> Ingredients </Divider>
                                 </ProductIngredientsHeadingContainer>
                                 <Typography variant="body2" style={{ padding: '10px', textTransform: 'capitalize' }}>
                                     {product.ingredient_en.toLowerCase()}
+                                </Typography>
+                                <Typography variant="body2" style={{ padding: '10px', textTransform: 'capitalize' }}>
+                                    {product.ingredient_fr.toLowerCase()}
                                 </Typography>
                             </div>
                             )}
