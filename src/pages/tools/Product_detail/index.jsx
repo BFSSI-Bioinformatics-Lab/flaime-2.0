@@ -52,6 +52,14 @@ const ProductDetail = () => {
         return <Typography>Error: Product not found.</Typography>;
     }
 
+    //Helper function for Allergens array formatting
+    const formatAllergens = (allergens) => {
+        if (Array.isArray(allergens) && allergens.length > 0) {
+            return allergens.join(", ");
+        }
+        return null;
+    };
+
     const productDescItems = [
         { name: "Product Name", value: product.site_name },
         { name: "Brand", value: product.raw_brand || product.product?.brand || "None" },
@@ -63,8 +71,16 @@ const ProductDetail = () => {
         { name: "Price", value: product.reading_price || "Not available" },
         { name: "Total Size", value: product.total_size || "Not specified" },
         { name: "Serving Size", value: product.raw_serving_size || "Not specified" },
+        { name: "Storage Condition", value: product.storage_condition }, 
+        { name: "Allergens", value: formatAllergens(product.allergens_warnings) },
+        { name: "Packaging (Primary)", value: product.primary_package_material }, 
+        
+        // There is no secondary packaging info in the current data model
+        { name: "Packaging (Secondary)", value: product.secondary_package_material },
+        // ---------------------------
+        
         { name: "URL", value: product.site_url ? <a href={product.site_url} target="_blank" rel="noopener noreferrer">{product.site_name}</a> : "Not available" }
-    ].filter(item => item.value);
+    ].filter(item => item.value); // null or undefined values are filtered out
 
     return (
         <div>
@@ -117,17 +133,29 @@ const ProductDetail = () => {
                                     <Divider> Ingredients </Divider>
                                 </ProductIngredientsHeadingContainer>
                                 {product.ingredient_en && (
-                                <Typography variant="body2" style={{ padding: '10px', textTransform: 'capitalize' }}>
-                                    {product.ingredient_en.toLowerCase()}
-                                </Typography>
+                                    <>
+                                        <Typography variant="subtitle2" style={{ padding: '10px 10px 0 10px', fontWeight: 'bold', color: '#555' }}>
+                                            English
+                                        </Typography>
+                                        <Typography variant="body2" style={{ padding: '0 10px 10px 10px', textTransform: 'capitalize' }}>
+                                            {product.ingredient_en.toLowerCase()}
+                                        </Typography>
+                                    </>
                                 )}
+                                
                                 {product.ingredient_fr && (
-                                <Typography variant="body2" style={{ padding: '10px', textTransform: 'capitalize' }}>
-                                    {product.ingredient_fr.toLowerCase()}
-                                </Typography>
+                                    <>
+                                        <Typography variant="subtitle2" style={{ padding: '10px 10px 0 10px', fontWeight: 'bold', color: '#555' }}>
+                                            French
+                                        </Typography>
+                                        <Typography variant="body2" style={{ padding: '0 10px 10px 10px', textTransform: 'capitalize' }}>
+                                            {product.ingredient_fr.toLowerCase()}
+                                        </Typography>
+                                    </>
                                 )}
                             </div>
                             )}
+                            
                             {product.product?.supplemented_food && product.label_flags && (
                                 <div style={{ marginTop: '20px' }}>
                                     <ProductIngredientsHeadingContainer>
