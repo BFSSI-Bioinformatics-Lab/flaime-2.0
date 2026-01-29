@@ -52,12 +52,22 @@ const ProductDetail = () => {
         return <Typography>Error: Product not found.</Typography>;
     }
 
-    //Helper function for Allergens array formatting
+    // Data structure: [{ contains_en: null... }, { contains_en: "Milk...", may_contain_en: "Soy..." }]
     const formatAllergens = (allergens) => {
-        if (Array.isArray(allergens) && allergens.length > 0) {
-            return allergens.join(", ");
-        }
-        return null;
+        if (!allergens || !Array.isArray(allergens)) return null;
+
+        const allergenStrings = allergens.map(item => {
+            let parts = [];
+            if (item.contains_en) {
+                parts.push(`Contains: ${item.contains_en}`);
+            }
+            if (item.may_contain_en) {
+                parts.push(`May contain: ${item.may_contain_en}`);
+            }
+            return parts.join(". ");
+        }).filter(str => str !== "");
+
+        return allergenStrings.length > 0 ? allergenStrings.join(" ") : null;
     };
 
     const productDescItems = [
@@ -74,7 +84,7 @@ const ProductDetail = () => {
         { name: "Storage Condition", value: product.storage_condition }, 
         { name: "Allergens", value: formatAllergens(product.allergens_warnings) },
         { name: "Packaging (Primary)", value: product.primary_package_material }, 
-        
+
         // There is no secondary packaging info in the current data model
         { name: "Packaging (Secondary)", value: product.secondary_package_material },
         // ---------------------------
