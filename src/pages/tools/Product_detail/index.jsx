@@ -52,6 +52,24 @@ const ProductDetail = () => {
         return <Typography>Error: Product not found.</Typography>;
     }
 
+    // Data structure: [{ contains_en: null... }, { contains_en: "Milk...", may_contain_en: "Soy..." }]
+    const formatAllergens = (allergens) => {
+        if (!allergens || !Array.isArray(allergens)) return null;
+
+        const allergenStrings = allergens.map(item => {
+            let parts = [];
+            if (item.contains_en) {
+                parts.push(`Contains: ${item.contains_en}`);
+            }
+            if (item.may_contain_en) {
+                parts.push(`May contain: ${item.may_contain_en}`);
+            }
+            return parts.join(". ");
+        }).filter(str => str !== "");
+
+        return allergenStrings.length > 0 ? allergenStrings.join(" ") : null;
+    };
+
     const productDescItems = [
         { name: "Product Name", value: product.site_name },
         { name: "Brand", value: product.raw_brand || product.product?.brand || "None" },
@@ -63,8 +81,11 @@ const ProductDetail = () => {
         { name: "Price", value: product.reading_price || "Not available" },
         { name: "Total Size", value: product.total_size || "Not specified" },
         { name: "Serving Size", value: product.raw_serving_size || "Not specified" },
+        { name: "Storage Condition", value: product.storage_condition || "Not available" }, 
+        { name: "Packaging (Primary)", value: product.primary_package_material || "Not available" }, 
+        { name: "Packaging (Secondary)", value: product.secondary_package_material || "Not available" },
         { name: "URL", value: product.site_url ? <a href={product.site_url} target="_blank" rel="noopener noreferrer">{product.site_name}</a> : "Not available" }
-    ].filter(item => item.value);
+    ].filter(item => item.value); // null or undefined values are filtered out
 
     return (
         <div>
@@ -117,17 +138,38 @@ const ProductDetail = () => {
                                     <Divider> Ingredients </Divider>
                                 </ProductIngredientsHeadingContainer>
                                 {product.ingredient_en && (
-                                <Typography variant="body2" style={{ padding: '10px', textTransform: 'capitalize' }}>
-                                    {product.ingredient_en.toLowerCase()}
-                                </Typography>
+                                    <>
+                                        <Typography variant="subtitle2" style={{ padding: '10px 10px 0 10px', fontWeight: 'bold', color: '#555' }}>
+                                            English
+                                        </Typography>
+                                        <Typography variant="body2" style={{ padding: '0 10px 10px 10px', textTransform: 'capitalize' }}>
+                                            {product.ingredient_en.toLowerCase()}
+                                        </Typography>
+                                    </>
                                 )}
+                                
                                 {product.ingredient_fr && (
-                                <Typography variant="body2" style={{ padding: '10px', textTransform: 'capitalize' }}>
-                                    {product.ingredient_fr.toLowerCase()}
-                                </Typography>
+                                    <>
+                                        <Typography variant="subtitle2" style={{ padding: '10px 10px 0 10px', fontWeight: 'bold', color: '#555' }}>
+                                            French
+                                        </Typography>
+                                        <Typography variant="body2" style={{ padding: '0 10px 10px 10px', textTransform: 'capitalize' }}>
+                                            {product.ingredient_fr.toLowerCase()}
+                                        </Typography>
+                                    </>
                                 )}
                             </div>
                             )}
+
+                            <div style={{ marginTop: '20px' }}>
+                                <ProductIngredientsHeadingContainer>
+                                    <Divider> Allergen Warnings </Divider>
+                                </ProductIngredientsHeadingContainer>
+                                <Typography variant="body2" style={{ padding: '10px' }}>
+                                    {formatAllergens(product.allergens_warnings) || "Not available"}
+                                </Typography>
+                            </div>
+                            
                             {product.product?.supplemented_food && product.label_flags && (
                                 <div style={{ marginTop: '20px' }}>
                                     <ProductIngredientsHeadingContainer>
