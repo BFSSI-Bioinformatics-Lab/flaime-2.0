@@ -52,23 +52,36 @@ const ProductDetail = () => {
         return <Typography>Error: Product not found.</Typography>;
     }
 
-    // Data structure: [{ contains_en: null... }, { contains_en: "Milk...", may_contain_en: "Soy..." }]
-    const formatAllergens = (allergens) => {
+    const getAllergenData = (allergens) => {
         if (!allergens || !Array.isArray(allergens)) return null;
 
-        const allergenStrings = allergens.map(item => {
-            let parts = [];
-            if (item.contains_en) {
-                parts.push(`Contains: ${item.contains_en}`);
-            }
-            if (item.may_contain_en) {
-                parts.push(`May contain: ${item.may_contain_en}`);
-            }
-            return parts.join(". ");
-        }).filter(str => str !== "");
+        let enList = [];
+        let frList = [];
 
-        return allergenStrings.length > 0 ? allergenStrings.join(" ") : null;
+        allergens.forEach(item => {
+            if (!item.contains_en && !item.may_contain_en && !item.contains_fr && !item.may_contain_fr) return;
+
+            // English Formatting
+            let enParts = [];
+            if (item.contains_en) enParts.push(`Contains: ${item.contains_en}`);
+            if (item.may_contain_en) enParts.push(`May contain: ${item.may_contain_en}`);
+            if (enParts.length > 0) enList.push(enParts.join(". "));
+
+            // French Formatting
+            let frParts = [];
+            if (item.contains_fr) frParts.push(`Contient : ${item.contains_fr}`);
+            if (item.may_contain_fr) frParts.push(`Peut contenir : ${item.may_contain_fr}`);
+            if (frParts.length > 0) frList.push(frParts.join(". "));
+        });
+
+        const enText = enList.length > 0 ? enList.join(" ") : null;
+        const frText = frList.length > 0 ? frList.join(" ") : null;
+
+        if (!enText && !frText) return null;
+
+        return { en: enText, fr: frText };
     };
+    const allergenData = getAllergenData(product.allergens_warnings);
 
     const productDescItems = [
         { name: "Product Name", value: product.site_name },
@@ -165,9 +178,34 @@ const ProductDetail = () => {
                                 <ProductIngredientsHeadingContainer>
                                     <Divider> Allergen Warnings </Divider>
                                 </ProductIngredientsHeadingContainer>
-                                <Typography variant="body2" style={{ padding: '10px' }}>
-                                    {formatAllergens(product.allergens_warnings) || "Not available"}
-                                </Typography>
+                                {allergenData ? (
+                                    <>
+                                        {allergenData.en && (
+                                            <>
+                                                <Typography variant="subtitle2" style={{ padding: '10px 10px 0 10px', fontWeight: 'bold', color: '#555' }}>
+                                                    English
+                                                </Typography>
+                                                <Typography variant="body2" style={{ padding: '0 10px 10px 10px' }}>
+                                                    {allergenData.en}
+                                                </Typography>
+                                            </>
+                                        )}
+                                        {allergenData.fr && (
+                                            <>
+                                                <Typography variant="subtitle2" style={{ padding: '10px 10px 0 10px', fontWeight: 'bold', color: '#555' }}>
+                                                    French
+                                                </Typography>
+                                                <Typography variant="body2" style={{ padding: '0 10px 10px 10px' }}>
+                                                    {allergenData.fr}
+                                                </Typography>
+                                            </>
+                                        )}
+                                    </>
+                                ) : (
+                                    <Typography variant="body2" style={{ padding: '10px' }}>
+                                        Not available
+                                    </Typography>
+                                )}
                             </div>
                             
                             {product.product?.supplemented_food && product.label_flags && (
