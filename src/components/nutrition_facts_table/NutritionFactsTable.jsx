@@ -3,33 +3,38 @@ import {
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
   Paper, Typography, Divider, Box
 } from '@mui/material';
-import { nft_order, nutrientMatches } from './nft_flaime_nutrients';
+import { BILINGUAL_LABELS } from './nft_flaime_nutrients';
 
 const paddingStyle = { padding: '10px' };
 const cellPaddingStyle = { padding: '0px' };
-const smallFontSizeStyle = { textTransform: 'capitalize', fontSize: 'smaller' };
+const smallFontSizeStyle = { fontSize: 'smaller' };
 
-const getLocalizedNutrients = (nutritionFacts, supplementedOnly = false) => nutritionFacts
-  .filter(nutritionFact => 
-    nutritionFact.nutrient.name !== "ENERGY (KILOCALORIES)" && 
-    nutritionFact.supplemented === supplementedOnly
-  )
-  .map(nutritionFact => ({
-    ...nutritionFact,
-    localizedKey: Object.keys(nutrientMatches).find(key =>
-      nutrientMatches[key].includes(nutritionFact.nutrient.name)
-    ) || nutritionFact.nutrient.name
-  }))
-  .sort((a, b) => {
-    const aOrder = nft_order[a.localizedKey] || 9999;
-    const bOrder = nft_order[b.localizedKey] || 9999;
-    return aOrder - bOrder;
-  });
+const getSortedNutrients = (nutritionFacts, supplementedOnly = false) => {
+  if (!nutritionFacts) return [];
+
+  return nutritionFacts
+    .filter(nutritionFact => 
+      // Filter out Energy (Calories) as it is displayed separately in the header
+      !['Energy (kcal)', 'Energy (kJ)', 'Energy'].includes(nutritionFact.nutrient.name) &&
+      // Filter by supplemented status
+      nutritionFact.supplemented === supplementedOnly
+    )
+    .sort((a, b) => {
+      // Sort using DB provided rank. If null, push to the bottom (9999).
+      const rankA = a.nutrient.display_rank ?? 9999;
+      const rankB = b.nutrient.display_rank ?? 9999;
+      return rankA - rankB;
+    });
+};
 
 const NutritionFactsTable = ({ product }) => {
   const isSupplemented = product.product?.supplemented_food === true;
-  const supplementedNutrients = isSupplemented ? 
-    getLocalizedNutrients(product.nutrition_facts, true) : [];
+  const standardNutrients = getSortedNutrients(product.nutrition_facts, false);
+  const supplementedNutrients = isSupplemented ? getSortedNutrients(product.nutrition_facts, true) : [];
+  const calorieFact = product.nutrition_facts?.find(nf => 
+    nf.nutrient.name === 'Energy (kcal)' || nf.nutrient.name === 'Energy'
+  );
+  
 
   return (
     <Box>
@@ -41,12 +46,9 @@ const NutritionFactsTable = ({ product }) => {
           <br />
           Total size: {product.total_size ?? "Not specified"}
         </Typography>
-        {product.nutrition_facts && (
+        {calorieFact && (
           <Typography variant="body2" style={paddingStyle}>
-            {product.nutrition_facts
-              .filter(nutritionFact => nutritionFact.nutrient.name === "ENERGY (KILOCALORIES)")
-              .map(nutritionFact => `Calories: ${nutritionFact.amount}${nutritionFact.amount_unit ? ` ${nutritionFact.amount_unit.name}` : ''}`)
-              .join(', ')}
+            Calories: {calorieFact.amount} {calorieFact.amount_unit?.name}
           </Typography>
         )}
         <Divider variant="middle" />
@@ -60,11 +62,11 @@ const NutritionFactsTable = ({ product }) => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {getLocalizedNutrients(product.nutrition_facts, false).map((nutritionFact) => (
+              {standardNutrients.map((nutritionFact) => (
                 <TableRow key={nutritionFact.nutrient.id}>
                   <TableCell>
                     <span style={smallFontSizeStyle}>
-                      {nutritionFact.localizedKey}
+                      {BILINGUAL_LABELS[nutritionFact.nutrient.name] || nutritionFact.nutrient.name}
                     </span>
                   </TableCell>
                   <TableCell>
@@ -96,7 +98,7 @@ const NutritionFactsTable = ({ product }) => {
                 <TableRow key={nutritionFact.nutrient.id}>
                   <TableCell>
                     <span style={smallFontSizeStyle}>
-                      {nutritionFact.localizedKey}
+                      {BILINGUAL_LABELS[nutritionFact.nutrient.name] || nutritionFact.nutrient.name}
                     </span>
                   </TableCell>
                   <TableCell>
