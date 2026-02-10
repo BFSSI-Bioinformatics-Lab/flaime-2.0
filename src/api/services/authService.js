@@ -5,6 +5,9 @@ const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
 
 const axiosInstance = axios.create({
   baseURL: API_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json'
+  },
 });
 
 
@@ -23,43 +26,25 @@ axiosInstance.interceptors.request.use(
 // Auth methods
 const login = async (username, password) => {
   try {
-    const response = await fetch(`${API_BASE_URL}/api/token-auth/`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ username, password }),
-      credentials: 'include'
-    });
-    
-    if (!response.ok) {
-      console.error('Response not OK:', response.status);
-      const text = await response.text();
-      console.error('Response text:', text);
-      throw new Error(`HTTP error ${response.status}: ${text}`);
-    }
-    
-    const data = await response.json();
-    
-    if (data.token) {
-      localStorage.setItem('token', data.token);
-      
-      const userResponse = await fetch(`${API_BASE_URL}/api/user-info/`, {
-        headers: {
-          'Authorization': `Token ${data.token}`
-        }
-      });
-      
-      if (userResponse.ok) {
-        const userData = await userResponse.json();
-        localStorage.setItem('user', JSON.stringify(userData));
-      }
+    // 1. Request token
+    const response = await axiosInstance.post('/api/token-auth/', { username, password });
+    const { token } = response.data;
+
+    if (token) {
+      localStorage.setItem('token', token);
+
+      // 2. Fetch user info and store it
+      const userResponse = await axiosInstance.get('/api/user-info/');
+      localStorage.setItem('user', JSON.stringify(userResponse.data));
+
+      // 3. Notify app about auth change
+      window.dispatchEvent(new Event('auth-change'));
       
       return true;
     }
     return false;
   } catch (error) {
-    console.error("Login failed:", error);
+    console.error("Login failed:", error.response ? error.response.data : error.message);
     throw error;
   }
 };
@@ -67,6 +52,8 @@ const login = async (username, password) => {
 const logout = () => {
   localStorage.removeItem('token');
   localStorage.removeItem('user');
+
+  window.dispatchEvent(new Event('auth-change'));
 };
 
 // API query function
