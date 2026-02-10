@@ -19,8 +19,8 @@ const Header = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [userData, setUserData] = useState(null);
 
-    // Check authentication status on component mount
-    useEffect(() => {
+    // Check authentication status on mount and when 'auth-change' event is triggered
+    const checkAuthStatus = () => {
         const token = localStorage.getItem('token');
         const user = localStorage.getItem('user');
 
@@ -29,7 +29,21 @@ const Header = () => {
             if (user) {
                 setUserData(JSON.parse(user));
             }
+        } else {
+            setIsAuthenticated(false);
+            setUserData(null);
         }
+    };
+
+    // Initial check and event listener setup
+    useEffect(() => {
+        checkAuthStatus();
+
+        window.addEventListener('auth-change', checkAuthStatus);
+
+        return () => {
+            window.removeEventListener('auth-change', checkAuthStatus);
+        };
     }, []);
 
     const handleClose = () => {
@@ -47,8 +61,6 @@ const Header = () => {
 
     const handleLogout = () => {
         logout();
-        setIsAuthenticated(false);
-        setUserData(null);
         handleClose();
         navigate('/login');
     };
