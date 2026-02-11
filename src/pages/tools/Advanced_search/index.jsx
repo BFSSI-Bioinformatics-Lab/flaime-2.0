@@ -26,6 +26,9 @@ const AdvancedSearch = () => {
         ExternalIDs: '',
         UPCs: '',
         NielsenUPCs: '',
+        Storage: '',
+        Packaging: '',
+        Allergens: '',
         Categories: { value: [] },
         Source: { value: null },
         Store: { value: null },
@@ -54,6 +57,9 @@ const AdvancedSearch = () => {
         date: true,
         region: true,
         categories: true,
+        storage_condition: false, // Default to hidden
+        primary_package_material: false,
+        allergens_warnings: false,
     });
     
     const [selectedColumns, setSelectedColumns] = useState(Object.keys(columnsVisibility));
@@ -248,6 +254,36 @@ const AdvancedSearch = () => {
                             variant="outlined"
                         />
                     </div>
+                </div>
+                <Divider style={{ width: '60vw', margin: '15px auto' }}/>
+                <Typography variant="h5" style={{ padding: '10px' }}>Additional Details</Typography>
+                
+                <div style={{ display: 'flex', justifyContent: 'space-around', paddingBottom: '25px', gap: '15px' }}>
+                    <TextField
+                        label="Storage Condition"
+                        placeholder="e.g. Refrigerated"
+                        value={searchInputs.Storage}
+                        onChange={handleTextFieldChange('Storage')}
+                        variant="outlined"
+                        fullWidth
+                    />
+                    <TextField
+                        label="Packaging Material"
+                        placeholder="e.g. Plastic"
+                        value={searchInputs.Packaging}
+                        onChange={handleTextFieldChange('Packaging')}
+                        variant="outlined"
+                        fullWidth
+                    />
+                    <TextField
+                        label="Allergens"
+                        placeholder="e.g. Peanuts"
+                        value={searchInputs.Allergens}
+                        onChange={handleTextFieldChange('Allergens')}
+                        variant="outlined"
+                        fullWidth
+                        helperText="Searches in 'Contains' and 'May Contain'"
+                    />
                 </div>
                 <Divider style={{ width: '60vw', margin: '10px auto' }}/>
                 <div style={{ display: 'flex', justifyContent: 'space-around', paddingBottom: '25px' }}>
