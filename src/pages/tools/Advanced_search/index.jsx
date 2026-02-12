@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import dayjs from 'dayjs';
-import { TextField, Button, Alert, Typography, Divider, Grid, Select, MenuItem, FormControl, InputLabel} from '@mui/material';
+import { TextField, Button, Alert, Typography, Divider, Grid, Select, MenuItem, FormControl, InputLabel, Box } from '@mui/material';
 import PageContainer from '../../../components/page/PageContainer';
 import StoreSelector from '../../../components/inputs/StoreSelector';
 import SourceSelector from '../../../components/inputs/SourceSelector';
@@ -227,171 +227,155 @@ const AdvancedSearch = () => {
 
     return (
         <PageContainer>
-            <div>
-                {errorMessage && <Alert severity="error">{errorMessage}</Alert>}
-                <Typography variant="h4" style={{ padding: '10px' }}>Advanced Search</Typography>
-                <Typography variant="body1" style={{ padding: '10px', width: '80vw', margin: '0 auto' }}>
-                Enter search terms in any or all of the fields. Note that some fields are only relevant for certain datasets; e.g. Region is only relevant for Web Scrape data, and Store is not recorded for Nielsen data.
-                </Typography>
-                <Divider style={{ width: '60vw', margin: '15px auto 5px auto' }}/>
-                <Typography variant="h5" style={{ padding: '10px' }}>Product Info</Typography>
-
-                <div style={{ display: 'flex', justifyContent: 'flex-start', paddingBottom: '15px', flexWrap: 'wrap', gap: '20px', paddingLeft: '10px' }}>
-                    <div style={{ maxWidth: '320px', minWidth: '280px' }}>
-                        <TextField
-                            label="Product Name"
-                            value={searchInputs.Names}
-                            onChange={handleTextFieldChange('Names')}
-                            variant="outlined"
-                            InputProps={{ style: { minWidth: '280px', overflow: 'hidden' } }}
-                        />
-                    </div>
-                    <div>
-                        <TextField
-                            label="Product ID"
-                            value={searchInputs.IDs}
-                            onChange={handleTextFieldChange('IDs')}
-                            variant="outlined"
-                        />
-                    </div>
-                    <div>
-                        <TextField
-                            label="External ID"
-                            value={searchInputs.ExternalIDs}
-                            onChange={handleTextFieldChange('ExternalIDs')}
-                            variant="outlined"
-                        />
-                    </div>
-                    <div>
-                        <TextField
-                            label="UPC"
-                            value={searchInputs.UPCs}
-                            onChange={handleTextFieldChange('UPCs')}
-                            variant="outlined"
-                        />
-                    </div>
-                    <div>
-                        <TextField
-                            label="Nielsen UPC"
-                            value={searchInputs.NielsenUPCs}
-                            onChange={handleTextFieldChange('NielsenUPCs')}
-                            variant="outlined"
-                        />
-                    </div>
-                </div>
-                <Divider style={{ width: '60vw', margin: '10px auto' }}/>
+            <div style={{ padding: '20px' }}>
+                {errorMessage && <Alert severity="error" sx={{ mb: 2 }}>{errorMessage}</Alert>}
                 
-                <Typography variant="h5" style={{ padding: '10px' }}>Attributes & Location</Typography>
-                <div style={{ display: 'flex', justifyContent: 'flex-start', paddingBottom: '25px', flexWrap: 'wrap', gap: '20px', paddingLeft: '10px' }}>
-                     
-                     <FormControl variant="outlined" style={{ minWidth: 200 }}>
-                        <InputLabel>Storage Condition</InputLabel>
-                        <Select
-                            value={searchInputs.Storage}
-                            onChange={handleSelectChange('Storage')}
-                            label="Storage Condition"
-                        >
-                            <MenuItem value=""><em>None</em></MenuItem>
-                            {storageOptions.map((option) => (
-                                <MenuItem key={option.value} value={option.value}>{option.label}</MenuItem>
-                            ))}
-                        </Select>
-                    </FormControl>
+                <Typography variant="h4" gutterBottom sx={{ fontWeight: 'bold' }}>Advanced Search</Typography>
+                <Typography variant="body2" color="textSecondary" sx={{ mb: 3 }}>
+                    Enter search terms in any or all of the fields. Note that some fields are only relevant for certain datasets.
+                </Typography>
+                
+                <Divider sx={{ mb: 4 }} />
 
-                    <FormControl variant="outlined" style={{ minWidth: 200 }}>
-                        <InputLabel>Packaging Material</InputLabel>
-                        <Select
-                            value={searchInputs.Packaging}
-                            onChange={handleSelectChange('Packaging')}
-                            label="Packaging Material"
-                        >
-                            <MenuItem value=""><em>None</em></MenuItem>
-                            {packagingOptions.map((option) => (
-                                <MenuItem key={option.value} value={option.value}>{option.label}</MenuItem>
-                            ))}
-                        </Select>
-                    </FormControl>
+                <Typography variant="h5" sx={{ mb: 2, fontWeight: 'medium' }}>Product Info</Typography>
+                <Grid container spacing={2} sx={{ mb: 4 }}>
+                    {[
+                        { label: "Product Name", field: "Names" },
+                        { label: "Product ID", field: "IDs" },
+                        { label: "External ID", field: "ExternalIDs" },
+                        { label: "UPC", field: "UPCs" },
+                        { label: "Nielsen UPC", field: "NielsenUPCs" }
+                    ].map((item) => (
+                        <Grid item xs={12} sm={6} md={2.4} key={item.field}>
+                            <TextField
+                                fullWidth
+                                label={item.label}
+                                value={searchInputs[item.field]}
+                                onChange={handleTextFieldChange(item.field)}
+                                variant="outlined"
+                            />
+                        </Grid>
+                    ))}
+                </Grid>
 
-                    <SourceSelector 
-                        value={searchInputs.Source.value} 
-                        onSelect={handleSelectorChange('Source')} 
-                        showTitle={true} 
-                        label="Select a source" 
-                    />
-                    <RegionSelector 
-                        value={searchInputs.Region.value} 
-                        onSelect={handleSelectorChange('Region')} 
-                    />
-                    <StoreSelector 
-                        value={searchInputs.Store.value} 
-                        onSelect={handleSelectorChange('Store')} 
-                    />
-               </div>
-                <Divider style={{ width: '60vw', margin: '10px auto' }}/>
-                <Grid container spacing={4} direction="row" justifyContent="space-between" >
+                <Divider sx={{ mb: 4 }} />
+
+                <Typography variant="h5" sx={{ mb: 2, fontWeight: 'medium' }}>Attributes & Location</Typography>
+                <Grid container spacing={2} sx={{ mb: 4 }} alignItems="flex-end">
+                    {/* Storage Condition */}
+                    <Grid item xs={12} sm={6} md={3} lg={2.4}>
+                        <FormControl variant="outlined" fullWidth>
+                            <InputLabel>Storage Condition</InputLabel>
+                            <Select
+                                value={searchInputs.Storage}
+                                onChange={handleSelectChange('Storage')}
+                                label="Storage Condition"
+                            >
+                                <MenuItem value=""><em>None</em></MenuItem>
+                                {storageOptions.map((opt) => <MenuItem key={opt.value} value={opt.value}>{opt.label}</MenuItem>)}
+                            </Select>
+                        </FormControl>
+                    </Grid>
+
+                    <Grid item xs={12} sm={6} md={3} lg={2.4}>
+                        <FormControl variant="outlined" fullWidth>
+                            <InputLabel>Packaging Material</InputLabel>
+                            <Select
+                                value={searchInputs.Packaging}
+                                onChange={handleSelectChange('Packaging')}
+                                label="Packaging Material"
+                            >
+                                <MenuItem value=""><em>None</em></MenuItem>
+                                {packagingOptions.map((opt) => <MenuItem key={opt.value} value={opt.value}>{opt.label}</MenuItem>)}
+                            </Select>
+                        </FormControl>
+                    </Grid>
+
+                    <Grid item xs={12} sm={6} md={3} lg={2.4}>
+                        <SourceSelector 
+                            value={searchInputs.Source.value} 
+                            onSelect={handleSelectorChange('Source')} 
+                            showTitle={false}
+                            label="Source" 
+                        />
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={3} lg={2.4}>
+                        <RegionSelector 
+                            value={searchInputs.Region.value} 
+                            onSelect={handleSelectorChange('Region')} 
+                        />
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={3} lg={2.4}>
+                        <StoreSelector 
+                            value={searchInputs.Store.value} 
+                            onSelect={handleSelectorChange('Store')} 
+                        />
+                    </Grid>
+                </Grid>
+
+                <Divider sx={{ mb: 4 }} />
+
+                <Grid container spacing={4}>
                     <Grid item xs={12} md={6}>
                         <CategorySelector key={resetKey} onChange={handleCategoryChange('Categories')} />
                     </Grid>
+                    
                     <Grid item xs={12} md={6}>
-                        <Typography variant="h5" style={{ padding: '10px 20px' }}>Select a date range</Typography>
-                        <div style={{ display: 'flex', justifyContent: 'flex-start', padding: '0 20px 20px 20px', gap: '20px' }}>
-                            <SingleDatePicker
-                                key={`start-${resetKey}`}
-                                label="Start Date"
-                                initialDate="1900-01-01"
-                                onChange={(date) => handleInputChange('StartDate', { value: date })}
-                            />
-                            <SingleDatePicker
-                                key={`end-${resetKey}`}
-                                label="End Date"
-                                initialDate={dayjs().format('YYYY-MM-DD')}
-                                onChange={(date) => handleInputChange('EndDate', { value: date })}
-                            />
-                        </div>
-                        <Divider style={{ width: '300px', margin: '10px auto' }}/>
-                        <div>
-                            <NutritionFilter
-                                value={searchInputs.Nutrition}
-                                onChange={handleNutritionChange}
-                            />
-                        </div>
-                        <div style={{ marginTop: '20px', padding: '0 20px' }}>
-                             <Typography variant="h6" style={{ marginBottom: '10px' }}>Allergens Filter</Typography>
-                             <TextField
+                        <Typography variant="h5" sx={{ mb: 2 }}>Search Filters</Typography>
+                        
+                        <Typography variant="subtitle2" sx={{ mb: 1 }}>Date Range</Typography>
+                        <Grid container spacing={2} sx={{ mb: 3 }}>
+                            <Grid item xs={6}>
+                                <SingleDatePicker
+                                    label="Start Date"
+                                    initialDate="1900-01-01"
+                                    onChange={(date) => handleInputChange('StartDate', { value: date })}
+                                />
+                            </Grid>
+                            <Grid item xs={6}>
+                                <SingleDatePicker
+                                    label="End Date"
+                                    initialDate={dayjs().format('YYYY-MM-DD')}
+                                    onChange={(date) => handleInputChange('EndDate', { value: date })}
+                                />
+                            </Grid>
+                        </Grid>
+
+                        <NutritionFilter value={searchInputs.Nutrition} onChange={handleNutritionChange} />
+
+                        <Box sx={{ mt: 3 }}>
+                            <Typography variant="subtitle2" sx={{ mb: 1 }}>Allergens</Typography>
+                            <TextField
+                                fullWidth
                                 label="Allergens (Text Search)"
                                 placeholder="e.g. Peanuts, Soy"
                                 value={searchInputs.Allergens}
                                 onChange={handleTextFieldChange('Allergens')}
                                 variant="outlined"
-                                fullWidth
                                 helperText="Searches 'Contains' and 'May Contain'"
                             />
-                        </div>
+                        </Box>
                     </Grid>
                 </Grid>
 
-                <div style={{ marginTop: '20px', display: 'flex', gap: '10px' }}>
-                    <Button variant="contained" onClick={() => handleSearch(0, rowsPerPage)} disabled={isLoading} >
+                <Box sx={{ mt: 4, display: 'flex', gap: 2, justifyContent: 'center', bgcolor: '#f5f5f5', p: 3, borderRadius: 2 }}>
+                    <Button variant="contained" size="large" onClick={() => handleSearch(0, rowsPerPage)} disabled={isLoading}>
                         Search
                     </Button>
-                    <ResetButton  variant="contained" onClick={handleReset}>Reset Search</ResetButton>
-                    <DownloadResultButton 
-                        queryBody={currentQueryBody} 
-                        totalProducts={totalProducts} 
-                        fileNamePrefix="advanced_search" 
-                    />
-                </div>
+                    <ResetButton onClick={handleReset} />
+                    <DownloadResultButton queryBody={currentQueryBody} totalProducts={totalProducts} />
+                </Box>
+
                 <SearchResultSummary totalProducts={totalProducts} />
-                <>
+                
+                <Box sx={{ mt: 2 }}>
                     <ColumnSelection
                         selectedColumns={selectedColumns}
                         setSelectedColumns={setSelectedColumns}
                         columnsVisibility={columnsVisibility}
                         handleColumnSelection={handleColumnSelection}
                     />
-                    {isLoading ? (
-                        <p>Loading...</p>
-                    ) : (
+                    {isLoading ? <Typography sx={{ p: 4, textAlign: 'center' }}>Loading...</Typography> : (
                         <ToolTable 
                             columns={selectedColumns}
                             data={searchResults}
@@ -402,7 +386,7 @@ const AdvancedSearch = () => {
                             onRowsPerPageChange={handleRowsPerPageChange}
                         />
                     )}
-                </>
+                </Box>
             </div>
         </PageContainer>
     );
