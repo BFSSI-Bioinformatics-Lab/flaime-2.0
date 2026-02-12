@@ -236,7 +236,7 @@ const AdvancedSearch = () => {
                 <Divider style={{ width: '60vw', margin: '15px auto 5px auto' }}/>
                 <Typography variant="h5" style={{ padding: '10px' }}>Product Info</Typography>
 
-                <div style={{ display: 'flex', justifyContent: 'space-around', paddingBottom: '15px' }}>
+                <div style={{ display: 'flex', justifyContent: 'flex-start', paddingBottom: '15px', flexWrap: 'wrap', gap: '20px', paddingLeft: '10px' }}>
                     <div style={{ maxWidth: '320px', minWidth: '280px' }}>
                         <TextField
                             label="Product Name"
@@ -282,7 +282,7 @@ const AdvancedSearch = () => {
                 <Divider style={{ width: '60vw', margin: '10px auto' }}/>
                 
                 <Typography variant="h5" style={{ padding: '10px' }}>Attributes & Location</Typography>
-                <div style={{ display: 'flex', justifyContent: 'space-around', paddingBottom: '25px', flexWrap: 'wrap', gap: '15px' }}>
+                <div style={{ display: 'flex', justifyContent: 'flex-start', paddingBottom: '25px', flexWrap: 'wrap', gap: '20px', paddingLeft: '10px' }}>
                      
                      <FormControl variant="outlined" style={{ minWidth: 200 }}>
                         <InputLabel>Storage Condition</InputLabel>
@@ -334,7 +334,7 @@ const AdvancedSearch = () => {
                     </Grid>
                     <Grid item xs={12} md={6}>
                         <Typography variant="h5" style={{ padding: '10px 20px' }}>Select a date range</Typography>
-                        <div style={{ display: 'flex', justifyContent: 'space-around', padding: '0 20px 20px 20px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'flex-start', padding: '0 20px 20px 20px', gap: '20px' }}>
                             <SingleDatePicker
                                 key={`start-${resetKey}`}
                                 label="Start Date"
