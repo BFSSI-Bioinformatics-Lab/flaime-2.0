@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import dayjs from 'dayjs';
-import { TextField, Button, Alert, Typography, Divider, Grid } from '@mui/material';
+import { TextField, Button, Alert, Typography, Divider, Grid, Select, MenuItem, FormControl, InputLabel} from '@mui/material';
 import PageContainer from '../../../components/page/PageContainer';
 import StoreSelector from '../../../components/inputs/StoreSelector';
 import SourceSelector from '../../../components/inputs/SourceSelector';
@@ -46,6 +46,8 @@ const AdvancedSearch = () => {
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(25);
     const [resetKey, setResetKey] = useState(0);
+    const [storageOptions, setStorageOptions] = useState([]);
+    const [packagingOptions, setPackagingOptions] = useState([]);
 
     const [columnsVisibility, setColumnsVisibility] = useState({
         id: true,
@@ -63,6 +65,24 @@ const AdvancedSearch = () => {
     });
     
     const [selectedColumns, setSelectedColumns] = useState(Object.keys(columnsVisibility));
+
+    useEffect(() => {
+        const fetchSearchOptions = async () => {
+            try {
+                const response = await fetch('/api/options/');
+                if (response.ok) {
+                    const data = await response.json();
+                    if(data.storage) setStorageOptions(data.storage);
+                    if(data.packaging) setPackagingOptions(data.packaging);
+                } else {
+                    console.warn("Failed to fetch search options");
+                }
+            } catch (error) {
+                console.error("Error fetching search options:", error);
+            }
+        };
+        fetchSearchOptions();
+    }, []);
 
     const handleReset = () => {
         Object.keys(initialFilters).forEach(key => {
@@ -86,6 +106,10 @@ const AdvancedSearch = () => {
     const handleTextFieldChange = (field) => (event) => {
         handleInputChange(field, event.target.value);
         if (errorMessage) setErrorMessage('');
+    };
+
+    const handleSelectChange = (field) => (event) => {
+        handleInputChange(field, event.target.value);
     };
     
     const buildQueryObject = useCallback(() => {
@@ -211,7 +235,7 @@ const AdvancedSearch = () => {
                 </Typography>
                 <Divider style={{ width: '60vw', margin: '15px auto 5px auto' }}/>
                 <Typography variant="h5" style={{ padding: '10px' }}>Product Info</Typography>
-                
+
                 <div style={{ display: 'flex', justifyContent: 'space-around', paddingBottom: '15px' }}>
                     <div style={{ maxWidth: '320px', minWidth: '280px' }}>
                         <TextField
@@ -255,38 +279,39 @@ const AdvancedSearch = () => {
                         />
                     </div>
                 </div>
-                <Divider style={{ width: '60vw', margin: '15px auto' }}/>
-                <Typography variant="h5" style={{ padding: '10px' }}>Additional Details</Typography>
-                
-                <div style={{ display: 'flex', justifyContent: 'space-around', paddingBottom: '25px', gap: '15px' }}>
-                    <TextField
-                        label="Storage Condition"
-                        placeholder="e.g. Refrigerated"
-                        value={searchInputs.Storage}
-                        onChange={handleTextFieldChange('Storage')}
-                        variant="outlined"
-                        fullWidth
-                    />
-                    <TextField
-                        label="Packaging Material"
-                        placeholder="e.g. Plastic"
-                        value={searchInputs.Packaging}
-                        onChange={handleTextFieldChange('Packaging')}
-                        variant="outlined"
-                        fullWidth
-                    />
-                    <TextField
-                        label="Allergens"
-                        placeholder="e.g. Peanuts"
-                        value={searchInputs.Allergens}
-                        onChange={handleTextFieldChange('Allergens')}
-                        variant="outlined"
-                        fullWidth
-                        helperText="Searches in 'Contains' and 'May Contain'"
-                    />
-                </div>
                 <Divider style={{ width: '60vw', margin: '10px auto' }}/>
-                <div style={{ display: 'flex', justifyContent: 'space-around', paddingBottom: '25px' }}>
+                
+                <Typography variant="h5" style={{ padding: '10px' }}>Attributes & Location</Typography>
+                <div style={{ display: 'flex', justifyContent: 'space-around', paddingBottom: '25px', flexWrap: 'wrap', gap: '15px' }}>
+                     
+                     <FormControl variant="outlined" style={{ minWidth: 200 }}>
+                        <InputLabel>Storage Condition</InputLabel>
+                        <Select
+                            value={searchInputs.Storage}
+                            onChange={handleSelectChange('Storage')}
+                            label="Storage Condition"
+                        >
+                            <MenuItem value=""><em>None</em></MenuItem>
+                            {storageOptions.map((option) => (
+                                <MenuItem key={option.value} value={option.value}>{option.label}</MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
+
+                    <FormControl variant="outlined" style={{ minWidth: 200 }}>
+                        <InputLabel>Packaging Material</InputLabel>
+                        <Select
+                            value={searchInputs.Packaging}
+                            onChange={handleSelectChange('Packaging')}
+                            label="Packaging Material"
+                        >
+                            <MenuItem value=""><em>None</em></MenuItem>
+                            {packagingOptions.map((option) => (
+                                <MenuItem key={option.value} value={option.value}>{option.label}</MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
+
                     <SourceSelector 
                         value={searchInputs.Source.value} 
                         onSelect={handleSelectorChange('Source')} 
@@ -302,15 +327,14 @@ const AdvancedSearch = () => {
                         onSelect={handleSelectorChange('Store')} 
                     />
                </div>
-
-                <Grid container spacing={1} direction="row" justifyContent="space-between" >
+                <Divider style={{ width: '60vw', margin: '10px auto' }}/>
+                <Grid container spacing={4} direction="row" justifyContent="space-between" >
                     <Grid item xs={12} md={6}>
                         <CategorySelector key={resetKey} onChange={handleCategoryChange('Categories')} />
                     </Grid>
                     <Grid item xs={12} md={6}>
-                        <Typography variant="h5" style={{ padding: '10px 20px 20px 20px' }}>Select a date range</Typography>
-                        <div style={{ display: 'flex', justifyContent: 'space-around', padding: '15px 20px' }}>
-                            
+                        <Typography variant="h5" style={{ padding: '10px 20px' }}>Select a date range</Typography>
+                        <div style={{ display: 'flex', justifyContent: 'space-around', padding: '0 20px 20px 20px' }}>
                             <SingleDatePicker
                                 key={`start-${resetKey}`}
                                 label="Start Date"
@@ -331,9 +355,21 @@ const AdvancedSearch = () => {
                                 onChange={handleNutritionChange}
                             />
                         </div>
+                        <div style={{ marginTop: '20px', padding: '0 20px' }}>
+                             <Typography variant="h6" style={{ marginBottom: '10px' }}>Allergens Filter</Typography>
+                             <TextField
+                                label="Allergens (Text Search)"
+                                placeholder="e.g. Peanuts, Soy"
+                                value={searchInputs.Allergens}
+                                onChange={handleTextFieldChange('Allergens')}
+                                variant="outlined"
+                                fullWidth
+                                helperText="Searches 'Contains' and 'May Contain'"
+                            />
+                        </div>
                     </Grid>
                 </Grid>
-                
+
                 <div style={{ marginTop: '20px', display: 'flex', gap: '10px' }}>
                     <Button variant="contained" onClick={() => handleSearch(0, rowsPerPage)} disabled={isLoading} >
                         Search
