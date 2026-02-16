@@ -174,6 +174,14 @@ export const useProductExport = (queryBody, totalProducts) => {
         });
       }
 
+      let allergenText = "";
+      if (product.allergens_warnings && Array.isArray(product.allergens_warnings)) {
+          const validTexts = product.allergens_warnings
+              .flatMap(w => [w.contains_en, w.may_contain_en])
+              .filter(text => text);
+          allergenText = [...new Set(validTexts)].join("; ");
+      }
+
       const baseData = [
         escapeCsvField(product.id),
         escapeCsvField(product.external_id),
@@ -186,7 +194,7 @@ export const useProductExport = (queryBody, totalProducts) => {
         escapeCsvField(extractTextValue(product.storage_condition)),
         escapeCsvField(extractTextValue(product.primary_package_material)),
         escapeCsvField(extractTextValue(product.secondary_package_material)),
-        escapeCsvField(extractTextValue(product.allergens_warnings)),
+        escapeCsvField(allergenText),
         escapeCsvField(product.total_size),
         escapeCsvField(product.raw_serving_size),
       ];
