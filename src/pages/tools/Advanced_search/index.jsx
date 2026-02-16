@@ -298,6 +298,9 @@ const AdvancedSearch = () => {
                         />
                     </div>
                </div>
+               <Divider style={{ width: '60vw', margin: '10px auto' }}/>
+
+               <Typography variant="h5" style={{ padding: '10px' }}>Physical Properties</Typography>
 
                <div style={{ display: 'flex', justifyContent: 'space-around', paddingBottom: '25px' }}>
                     <div style={{ width: '30%', minWidth: '280px' }}>
@@ -352,7 +355,6 @@ const AdvancedSearch = () => {
                     <Grid item xs={12} md={6}>
                         <Typography variant="h5" style={{ padding: '10px 20px 20px 20px' }}>Select a date range</Typography>
                         <div style={{ display: 'flex', justifyContent: 'space-around', padding: '15px 20px' }}>
-                            
                             <SingleDatePicker
                                 key={`start-${resetKey}`}
                                 label="Start Date"
