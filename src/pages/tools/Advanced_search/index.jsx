@@ -275,53 +275,64 @@ const AdvancedSearch = () => {
 
                 <Divider style={{ width: '60vw', margin: '10px auto' }}/>
                 
+                <Typography variant="h5" style={{ padding: '10px' }}>Attributes & Location</Typography>
                 <div style={{ display: 'flex', justifyContent: 'space-around', paddingBottom: '25px' }}>
-                    <SourceSelector 
-                        value={searchInputs.Source.value} 
-                        onSelect={handleSelectorChange('Source')} 
-                        showTitle={true} 
-                        label="Select a source" 
-                    />
-                    <RegionSelector 
-                        value={searchInputs.Region.value} 
-                        onSelect={handleSelectorChange('Region')} 
-                    />
-                    <StoreSelector 
-                        value={searchInputs.Store.value} 
-                        onSelect={handleSelectorChange('Store')} 
-                    />
+                    <div style={{ width: '30%', minWidth: '280px' }}>
+                        <SourceSelector 
+                            value={searchInputs.Source.value} 
+                            onSelect={handleSelectorChange('Source')} 
+                            showTitle={true} 
+                            label="Select a source" 
+                        />
+                    </div>
+                    <div style={{ width: '30%', minWidth: '280px' }}>
+                        <RegionSelector 
+                            value={searchInputs.Region.value} 
+                            onSelect={handleSelectorChange('Region')} 
+                        />
+                    </div>
+                    <div style={{ width: '30%', minWidth: '280px' }}>
+                        <StoreSelector 
+                            value={searchInputs.Store.value} 
+                            onSelect={handleSelectorChange('Store')} 
+                        />
+                    </div>
                </div>
+
                <div style={{ display: 'flex', justifyContent: 'space-around', paddingBottom: '25px' }}>
-                    
-                    <FormControl variant="outlined" style={{ minWidth: 250 }}>
-                        <InputLabel>Storage Condition</InputLabel>
-                        <Select
-                            value={searchInputs.Storage}
-                            onChange={handleSelectChange('Storage')}
-                            label="Storage Condition"
-                        >
-                            <MenuItem value=""><em>None</em></MenuItem>
-                            {STORAGE_OPTIONS.map((option) => (
-                                <MenuItem key={option.value} value={option.value}>{option.label}</MenuItem>
-                            ))}
-                        </Select>
-                    </FormControl>
+                    <div style={{ width: '30%', minWidth: '280px' }}>
+                        <FormControl variant="outlined" fullWidth>
+                            <InputLabel>Storage Condition</InputLabel>
+                            <Select
+                                value={searchInputs.Storage}
+                                onChange={handleSelectChange('Storage')}
+                                label="Storage Condition"
+                            >
+                                <MenuItem value=""><em>None</em></MenuItem>
+                                {STORAGE_OPTIONS.map((option) => (
+                                    <MenuItem key={option.value} value={option.value}>{option.label}</MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
+                    </div>
 
-                    <FormControl variant="outlined" style={{ minWidth: 250 }}>
-                        <InputLabel>Packaging Material</InputLabel>
-                        <Select
-                            value={searchInputs.Packaging}
-                            onChange={handleSelectChange('Packaging')}
-                            label="Packaging Material"
-                        >
-                            <MenuItem value=""><em>None</em></MenuItem>
-                            {PACKAGING_OPTIONS.map((option) => (
-                                <MenuItem key={option.value} value={option.value}>{option.label}</MenuItem>
-                            ))}
-                        </Select>
-                    </FormControl>
+                    <div style={{ width: '30%', minWidth: '280px' }}>
+                        <FormControl variant="outlined" fullWidth>
+                            <InputLabel>Packaging Material</InputLabel>
+                            <Select
+                                value={searchInputs.Packaging}
+                                onChange={handleSelectChange('Packaging')}
+                                label="Packaging Material"
+                            >
+                                <MenuItem value=""><em>None</em></MenuItem>
+                                {PACKAGING_OPTIONS.map((option) => (
+                                    <MenuItem key={option.value} value={option.value}>{option.label}</MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
+                    </div>
 
-                    <div style={{ minWidth: '250px' }}>
+                    <div style={{ width: '30%', minWidth: '280px' }}>
                         <TextField
                             label="Allergens (Text Search)"
                             placeholder="e.g. Peanuts, Soy"
