@@ -28,7 +28,7 @@ const COLUMN_ORDER = [
     'categories',
     'storage_condition',
     'primary_package_material',
-    'allergens'
+    'allergens_warnings'
 ];
 
 const AdvancedSearch = () => {
@@ -76,7 +76,7 @@ const AdvancedSearch = () => {
         categories: true,
         storage_condition: true,
         primary_package_material: true,
-        allergens: true,
+        allergens_warnings: true,
     });
     
     const [selectedColumns, setSelectedColumns] = useState(Object.keys(columnsVisibility));
