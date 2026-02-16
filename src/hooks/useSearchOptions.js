@@ -1,41 +1,42 @@
 import { useState, useEffect } from 'react';
+import { GetSearchOptions } from '../api/services/SearchOptionsService';
 
 const useSearchOptions = () => {
-    const [storageOptions, setStorageOptions] = useState([]);
-    const [packagingOptions, setPackagingOptions] = useState([]);
-    const [loading, setLoading] = useState(false);
+  const [storageOptions, setStorageOptions] = useState([]);
+  const [packagingOptions, setPackagingOptions] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-    useEffect(() => {
-        const fetchOptions = async () => {
-            setLoading(true);
-            try {
-                const response = await fetch('/api/options/', {
-                    headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include' 
-                });
+  useEffect(() => {
+    const fetchOptions = async () => {
+      setLoading(true);
+      try {
+        const result = await GetSearchOptions();
 
-                if (response.ok) {
-                    const data = await response.json();
-                    if (data.storage) {
-                        setStorageOptions(data.storage.map(item => ({ label: item.label, value: item.value })));
-                    }
-                    if (data.packaging) {
-                        setPackagingOptions(data.packaging.map(item => ({ label: item.label, value: item.value })));
-                    }
-                } else {
-                    console.error('Error fetching Options:', response.statusText);
-                }
-            } catch (e) {
-                console.error('Exception when fetching options', e);
-            } finally {
-                setLoading(false);
-            }
-        };
+        if (result.error) {
+          console.error('Error fetching Options:', result.message);
+          setStorageOptions([]);
+          setPackagingOptions([]);
+        } else {
+          const data = result.data;
 
-        fetchOptions();
-    }, []);
+          if (data.storage) {
+            setStorageOptions(data.storage.map(item => ({ label: item.label, value: item.value })));
+          }
+          if (data.packaging) {
+            setPackagingOptions(data.packaging.map(item => ({ label: item.label, value: item.value })));
+          }
+        }
+      } catch (e) {
+        console.error('Exception when fetching options', e);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    return { storageOptions, packagingOptions, loading };
+    fetchOptions();
+  }, []);
+
+  return { storageOptions, packagingOptions, loading };
 };
 
 export default useSearchOptions;
