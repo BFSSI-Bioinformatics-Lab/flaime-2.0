@@ -70,7 +70,13 @@ const AdvancedSearch = () => {
     useEffect(() => {
         const fetchSearchOptions = async () => {
             try {
-                const response = await fetch('/api/options/');
+                const response = await fetch('/api/options/', {
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include'
+                });
+
                 if (response.ok) {
                     const data = await response.json();
                     if(data.storage) setStorageOptions(data.storage);
