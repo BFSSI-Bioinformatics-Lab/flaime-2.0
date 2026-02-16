@@ -60,9 +60,9 @@ const AdvancedSearch = () => {
         date: true,
         region: true,
         categories: true,
-        storage_condition: false,
-        primary_package_material: false,
-        allergens_warnings: false,
+        storage_condition: true,
+        primary_package_material: true,
+        allergens: true,
     });
     
     const [selectedColumns, setSelectedColumns] = useState(Object.keys(columnsVisibility));
@@ -100,13 +100,13 @@ const AdvancedSearch = () => {
 
         if (searchInputs.Storage && searchInputs.Storage !== '-1') {
             textMustClauses.push({
-                term: { "storage_condition.keyword": searchInputs.Storage }
+                match: { "storage_condition.keyword": searchInputs.Storage }
             });
         }
 
         if (searchInputs.Packaging && searchInputs.Packaging !== '-1') {
             textMustClauses.push({
-                term: { "primary_package_material.keyword": searchInputs.Packaging }
+                match: { "primary_package_material.keyword": searchInputs.Packaging }
             });
         }
 
