@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import dayjs from 'dayjs';
-import { TextField, Button, Alert, Typography, Divider, Grid, Select, MenuItem, FormControl, InputLabel, Box } from '@mui/material';
+import { TextField, Button, Alert, Typography, Divider, Grid, Select, MenuItem, FormControl, InputLabel} from '@mui/material';
 import PageContainer from '../../../components/page/PageContainer';
 import StoreSelector from '../../../components/inputs/StoreSelector';
 import SourceSelector from '../../../components/inputs/SourceSelector';
@@ -14,6 +14,7 @@ import ToolTable  from '../../../components/table/ToolTable';
 import SearchResultSummary from '../../../components/misc/SearchResultSummary';
 import { ResetButton } from '../../../components/buttons/ResetButton';
 import { DownloadResultButton } from '../../../components/buttons/DownloadResultButton';
+import useSearchOptions from '../../../hooks/useSearchOptions';
 
 
 const AdvancedSearch = () => {
@@ -38,7 +39,8 @@ const AdvancedSearch = () => {
         EndDate: { value: null },
         Nutrition: { nutrient: '', minAmount: '', maxAmount: '' },
     };
-    
+
+    const { storageOptions, packagingOptions } = useSearchOptions();
     const [searchInputs, handleInputChange] = useSearchFilters(initialFilters);
     const [searchResults, setSearchResults] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
@@ -47,8 +49,6 @@ const AdvancedSearch = () => {
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(25);
     const [resetKey, setResetKey] = useState(0);
-    const [storageOptions, setStorageOptions] = useState([]);
-    const [packagingOptions, setPackagingOptions] = useState([]);
 
     const [columnsVisibility, setColumnsVisibility] = useState({
         id: true,
@@ -66,30 +66,6 @@ const AdvancedSearch = () => {
     });
     
     const [selectedColumns, setSelectedColumns] = useState(Object.keys(columnsVisibility));
-
-    useEffect(() => {
-        const fetchSearchOptions = async () => {
-            try {
-                const response = await fetch('/api/options/', {
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    credentials: 'include'
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    if(data.storage) setStorageOptions(data.storage);
-                    if(data.packaging) setPackagingOptions(data.packaging);
-                } else {
-                    console.warn("Failed to fetch search options");
-                }
-            } catch (error) {
-                console.error("Error fetching search options:", error);
-            }
-        };
-        fetchSearchOptions();
-    }, []);
 
     const handleReset = () => {
         Object.keys(initialFilters).forEach(key => {
@@ -122,13 +98,13 @@ const AdvancedSearch = () => {
     const buildQueryObject = useCallback(() => {
         const textMustClauses = buildTextMustClausesForAllFields(searchInputs);
 
-        if (searchInputs.Storage) {
+        if (searchInputs.Storage && searchInputs.Storage !== '-1') {
             textMustClauses.push({
                 term: { "storage_condition.keyword": searchInputs.Storage }
             });
         }
 
-        if (searchInputs.Packaging) {
+        if (searchInputs.Packaging && searchInputs.Packaging !== '-1') {
             textMustClauses.push({
                 term: { "primary_package_material.keyword": searchInputs.Packaging }
             });
@@ -351,11 +327,11 @@ const AdvancedSearch = () => {
                         <FormControl variant="outlined" fullWidth>
                             <InputLabel>Storage Condition</InputLabel>
                             <Select
-                                value={searchInputs.Storage}
+                                value={searchInputs.Storage || '-1'}
                                 onChange={handleSelectChange('Storage')}
                                 label="Storage Condition"
                             >
-                                <MenuItem value=""><em>None</em></MenuItem>
+                                <MenuItem value="-1">Use all storage conditions</MenuItem>
                                 {storageOptions.map((option) => (
                                     <MenuItem key={option.value} value={option.value}>{option.label}</MenuItem>
                                 ))}
@@ -367,11 +343,11 @@ const AdvancedSearch = () => {
                         <FormControl variant="outlined" fullWidth>
                             <InputLabel>Packaging Material</InputLabel>
                             <Select
-                                value={searchInputs.Packaging}
+                                value={searchInputs.Packaging || '-1'}
                                 onChange={handleSelectChange('Packaging')}
                                 label="Packaging Material"
                             >
-                                <MenuItem value=""><em>None</em></MenuItem>
+                                <MenuItem value="-1">Use all packaging materials</MenuItem>
                                 {packagingOptions.map((option) => (
                                     <MenuItem key={option.value} value={option.value}>{option.label}</MenuItem>
                                 ))}
