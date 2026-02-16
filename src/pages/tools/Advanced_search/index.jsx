@@ -16,6 +16,20 @@ import { ResetButton } from '../../../components/buttons/ResetButton';
 import { DownloadResultButton } from '../../../components/buttons/DownloadResultButton';
 import useSearchOptions from '../../../hooks/useSearchOptions';
 
+const COLUMN_ORDER = [
+    'id',
+    'external_id',
+    'name',
+    'price',
+    'source',
+    'store',
+    'date',
+    'region',
+    'categories',
+    'storage_condition',
+    'primary_package_material',
+    'allergens'
+];
 
 const AdvancedSearch = () => {
     useEffect(() => {
@@ -83,7 +97,10 @@ const AdvancedSearch = () => {
     };
 
     const handleColumnSelection = (event) => {
-        setSelectedColumns(event.target.value);
+        const value = event.target.value;
+        const sortedSelection = COLUMN_ORDER.filter(col => value.includes(col));
+        
+        setSelectedColumns(sortedSelection);
     };
 
     const handleTextFieldChange = (field) => (event) => {
@@ -100,13 +117,13 @@ const AdvancedSearch = () => {
 
         if (searchInputs.Storage && searchInputs.Storage !== '-1') {
             textMustClauses.push({
-                match: { "storage_condition.keyword": searchInputs.Storage }
+                match: { "storage_condition": searchInputs.Storage }
             });
         }
 
         if (searchInputs.Packaging && searchInputs.Packaging !== '-1') {
             textMustClauses.push({
-                match: { "primary_package_material.keyword": searchInputs.Packaging }
+                match: { "primary_package_material": searchInputs.Packaging }
             });
         }
 
@@ -199,7 +216,22 @@ const AdvancedSearch = () => {
             
             if (response.ok) {
                 console.log("Search successful, hits:", data.hits.hits.length);
-                setSearchResults(data.hits.hits);
+                const processedHits = data.hits.hits.map(hit => {
+                    const source = hit._source;
+                    let allergenText = "";
+                    if (source.allergens_warnings && Array.isArray(source.allergens_warnings)) {
+                        const validTexts = source.allergens_warnings
+                            .flatMap(w => [w.contains_en, w.may_contain_en])
+                            .filter(text => text);
+                        
+                        allergenText = [...new Set(validTexts)].join("; ");
+                    }
+                    hit._source.allergens_warnings = allergenText;
+                    
+                    return hit;
+                });
+
+                setSearchResults(processedHits);
                 setTotalProducts(data.hits.total.value);
             } else {
                 console.error('Search API error:', data.error || data);
