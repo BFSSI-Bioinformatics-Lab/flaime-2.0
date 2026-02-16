@@ -15,18 +15,6 @@ import SearchResultSummary from '../../../components/misc/SearchResultSummary';
 import { ResetButton } from '../../../components/buttons/ResetButton';
 import { DownloadResultButton } from '../../../components/buttons/DownloadResultButton';
 
-const STORAGE_OPTIONS = [
-    { value: 'shelf_stable', label: 'Shelf Stable' },
-    { value: 'fridge', label: 'Fridge' },
-    { value: 'freezer', label: 'Freezer' },
-];
-
-const PACKAGING_OPTIONS = [
-    { value: 'glass', label: 'Glass' },
-    { value: 'metal', label: 'Metal' },
-    { value: 'paper', label: 'Paper/Cardboard' },
-    { value: 'plastic', label: 'Plastic' },
-];
 
 const AdvancedSearch = () => {
     useEffect(() => {
@@ -59,6 +47,8 @@ const AdvancedSearch = () => {
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(25);
     const [resetKey, setResetKey] = useState(0);
+    const [storageOptions, setStorageOptions] = useState([]);
+    const [packagingOptions, setPackagingOptions] = useState([]);
 
     const [columnsVisibility, setColumnsVisibility] = useState({
         id: true,
@@ -70,12 +60,30 @@ const AdvancedSearch = () => {
         date: true,
         region: true,
         categories: true,
-        storage_condition: false, // Default to hidden
+        storage_condition: false,
         primary_package_material: false,
         allergens_warnings: false,
     });
     
     const [selectedColumns, setSelectedColumns] = useState(Object.keys(columnsVisibility));
+
+    useEffect(() => {
+        const fetchSearchOptions = async () => {
+            try {
+                const response = await fetch('/api/options/');
+                if (response.ok) {
+                    const data = await response.json();
+                    if(data.storage) setStorageOptions(data.storage);
+                    if(data.packaging) setPackagingOptions(data.packaging);
+                } else {
+                    console.warn("Failed to fetch search options");
+                }
+            } catch (error) {
+                console.error("Error fetching search options:", error);
+            }
+        };
+        fetchSearchOptions();
+    }, []);
 
     const handleReset = () => {
         Object.keys(initialFilters).forEach(key => {
@@ -107,6 +115,36 @@ const AdvancedSearch = () => {
     
     const buildQueryObject = useCallback(() => {
         const textMustClauses = buildTextMustClausesForAllFields(searchInputs);
+
+        if (searchInputs.Storage) {
+            textMustClauses.push({
+                term: { "storage_condition.keyword": searchInputs.Storage }
+            });
+        }
+
+        if (searchInputs.Packaging) {
+            textMustClauses.push({
+                term: { "primary_package_material.keyword": searchInputs.Packaging }
+            });
+        }
+
+        if (searchInputs.Allergens) {
+            textMustClauses.push({
+                nested: {
+                    path: "allergens_warnings",
+                    query: {
+                        multi_match: {
+                            query: searchInputs.Allergens,
+                            fields: [
+                                "allergens_warnings.contains_en", 
+                                "allergens_warnings.may_contain_en"
+                            ],
+                            type: "phrase_prefix"
+                        }
+                    }
+                }
+            });
+        }
         
         let nutrientQuery = {
             nested: {
@@ -312,7 +350,7 @@ const AdvancedSearch = () => {
                                 label="Storage Condition"
                             >
                                 <MenuItem value=""><em>None</em></MenuItem>
-                                {STORAGE_OPTIONS.map((option) => (
+                                {storageOptions.map((option) => (
                                     <MenuItem key={option.value} value={option.value}>{option.label}</MenuItem>
                                 ))}
                             </Select>
@@ -328,7 +366,7 @@ const AdvancedSearch = () => {
                                 label="Packaging Material"
                             >
                                 <MenuItem value=""><em>None</em></MenuItem>
-                                {PACKAGING_OPTIONS.map((option) => (
+                                {packagingOptions.map((option) => (
                                     <MenuItem key={option.value} value={option.value}>{option.label}</MenuItem>
                                 ))}
                             </Select>
