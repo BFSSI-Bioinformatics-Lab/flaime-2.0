@@ -11,30 +11,6 @@ const escapeCsvField = (field) => {
   return stringField;
 };
 
-// Extracts a human-readable string from various field formats (string, array, object).
-const extractTextValue = (val) => {
-  if (val === null || val === undefined) return "";
-  
-  // Array
-  if (Array.isArray(val)) {
-    return val.map(item => {
-      if (typeof item === 'object') {
-        // Try common fields for text representation, or fallback to JSON stringification
-        return item.contains_en || item.en || item.name || item.value || item.description || JSON.stringify(item);
-      }
-      return item;
-    }).filter(str => str && str !== "null").join(", ");
-  }
-
-  // Object
-  if (typeof val === 'object') {
-    return val.en || val.name || val.value || val.description || JSON.stringify(val);
-  }
-
-  // Simple value
-  return val;
-};
-
 // Generates a blob link and triggers the download in the browser
 const downloadCSV = (data, filename) => {
   if (!data || data.length === 0) {
@@ -191,9 +167,9 @@ export const useProductExport = (queryBody, totalProducts) => {
         escapeCsvField(product.categories?.map(c => c.name).join(' > ')),
         escapeCsvField(product.raw_upc),
         escapeCsvField(product.ingredients?.en),
-        escapeCsvField(extractTextValue(product.storage_condition)),
-        escapeCsvField(extractTextValue(product.primary_package_material)),
-        escapeCsvField(extractTextValue(product.secondary_package_material)),
+        escapeCsvField(product.storage_condition),
+        escapeCsvField(product.primary_package_material),
+        escapeCsvField(product.secondary_package_material),
         escapeCsvField(allergenText),
         escapeCsvField(product.total_size),
         escapeCsvField(product.raw_serving_size),
