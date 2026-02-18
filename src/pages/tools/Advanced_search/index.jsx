@@ -2,9 +2,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import dayjs from 'dayjs';
 import { TextField, Button, Alert, Typography, Divider, Grid, Select, MenuItem, FormControl, InputLabel} from '@mui/material';
 import PageContainer from '../../../components/page/PageContainer';
-import StoreSelector from '../../../components/inputs/StoreSelector';
-import SourceSelector from '../../../components/inputs/SourceSelector';
-import RegionSelector from '../../../components/inputs/RegionSelector';
 import SingleDatePicker from '../../../components/inputs/SingleDatePicker';
 import CategorySelector from '../../../components/inputs/CategorySelector';
 import NutritionFilter from '../../../components/inputs/NutritionFilter';
@@ -54,7 +51,7 @@ const AdvancedSearch = () => {
         Nutrition: { nutrient: '', minAmount: '', maxAmount: '' },
     };
 
-    const { storageOptions, packagingOptions } = useSearchOptions();
+    const { storageOptions, packagingOptions, sourceOptions, storeOptions, regionOptions } = useSearchOptions();
     const [searchInputs, handleInputChange] = useSearchFilters(initialFilters);
     const [searchResults, setSearchResults] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
@@ -217,10 +214,11 @@ const AdvancedSearch = () => {
             if (response.ok) {
                 console.log("Search successful, hits:", data.hits.hits.length);
                 const processedHits = data.hits.hits.map(hit => {
-                    const source = hit._source;
+                    const productData = hit._source; 
                     let allergenText = "";
-                    if (source.allergens_warnings && Array.isArray(source.allergens_warnings)) {
-                        const validTexts = source.allergens_warnings
+                    
+                    if (productData.allergens_warnings && Array.isArray(productData.allergens_warnings)) {
+                        const validTexts = productData.allergens_warnings
                             .flatMap(w => [w.contains_en, w.may_contain_en])
                             .filter(text => text);
                         
@@ -327,32 +325,59 @@ const AdvancedSearch = () => {
 
                 <Divider style={{ width: '60vw', margin: '10px auto' }}/>
                 
-                <Typography variant="h5" style={{ padding: '10px' }}>Attributes & Location</Typography>
-                <div style={{ display: 'flex', justifyContent: 'space-around', paddingBottom: '25px' }}>
-                    <div style={{ width: '30%', minWidth: '280px' }}>
-                        <SourceSelector 
-                            value={searchInputs.Source.value} 
-                            onSelect={handleSelectorChange('Source')} 
-                            showTitle={true} 
-                            label="Select a source" 
-                        />
+               <Typography variant="h5" style={{ padding: '10px' }}>Attributes & Location</Typography>
+               <div style={{ display: 'flex', justifyContent: 'space-around', paddingBottom: '25px', marginTop: '20px' }}>
+                    <div style={{ width: '30%', minWidth: '280px', maxWidth: '320px' }}>
+                        <FormControl variant="outlined" fullWidth>
+                            <InputLabel>Select a source</InputLabel>
+                            <Select
+                                value={searchInputs.Source.value || '-1'}
+                                onChange={(e) => handleSelectorChange('Source')(e.target.value)}
+                                label="Select a source"
+                            >
+                                <MenuItem value="-1">Use all sources</MenuItem>
+                                {sourceOptions.map((option) => (
+                                    <MenuItem key={option.value} value={option.value}>{option.label}</MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
                     </div>
-                    <div style={{ width: '30%', minWidth: '280px' }}>
-                        <RegionSelector 
-                            value={searchInputs.Region.value} 
-                            onSelect={handleSelectorChange('Region')} 
-                        />
+
+                    <div style={{ width: '30%', minWidth: '280px', maxWidth: '320px' }}>
+                        <FormControl variant="outlined" fullWidth>
+                            <InputLabel>Select a Region</InputLabel>
+                            <Select
+                                value={searchInputs.Region.value || '-1'}
+                                onChange={(e) => handleSelectorChange('Region')(e.target.value)}
+                                label="Select a Region"
+                            >
+                                <MenuItem value="-1">Use all regions</MenuItem>
+                                {regionOptions.map((option) => (
+                                    <MenuItem key={option.value} value={option.value}>{option.label}</MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
                     </div>
-                    <div style={{ width: '30%', minWidth: '280px' }}>
-                        <StoreSelector 
-                            value={searchInputs.Store.value} 
-                            onSelect={handleSelectorChange('Store')} 
-                        />
+
+                    <div style={{ width: '30%', minWidth: '280px', maxWidth: '320px' }}>
+                         <FormControl variant="outlined" fullWidth>
+                            <InputLabel>Select a Store</InputLabel>
+                            <Select
+                                value={searchInputs.Store.value || '-1'}
+                                onChange={(e) => handleSelectorChange('Store')(e.target.value)}
+                                label="Select a Store"
+                            >
+                                <MenuItem value="-1">Use all stores</MenuItem>
+                                {storeOptions.map((option) => (
+                                    <MenuItem key={option.value} value={option.value}>{option.label}</MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
                     </div>
                </div>
-               <Divider style={{ width: '60vw', margin: '10px auto' }}/>
+               {/* <Divider style={{ width: '60vw', margin: '10px auto' }}/>
 
-               <Typography variant="h5" style={{ padding: '10px' }}>Physical Properties</Typography>
+               <Typography variant="h5" style={{ padding: '10px' }}>Physical Properties</Typography> */}
 
                <div style={{ display: 'flex', justifyContent: 'space-around', paddingBottom: '25px' }}>
                     <div style={{ width: '30%', minWidth: '280px' }}>
