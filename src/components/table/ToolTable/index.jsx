@@ -32,13 +32,28 @@ const ToolTable = ({ columns, data, totalCount, page, rowsPerPage, onPageChange,
     }
   };
 
+  const headerMapping = {
+    id: 'ID',
+    external_id: 'External ID',
+    name: 'Product Name',
+    price: 'Price',
+    source: 'Source',
+    store: 'Store',
+    date: 'Date',
+    region: 'Region',
+    categories: 'Categories',
+    storage_condition: 'Storage Condition',
+    primary_package_material: 'Packaging Material',
+    allergens_warnings: 'Allergens',
+  };
+
   return (
     <TableContainer component={Paper}>
       <Table>
         <TableHead>
           <TableRow>
             {columns.map((column) => (
-              <StyledTableCell key={column}>{column}</StyledTableCell>
+              <StyledTableCell key={column}>{headerMapping[column] || column}</StyledTableCell>
             ))}
           </TableRow>
         </TableHead>
