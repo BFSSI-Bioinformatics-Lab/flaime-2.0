@@ -9,13 +9,18 @@ const paddingStyle = { padding: '10px' };
 const cellPaddingStyle = { padding: '0px' };
 const smallFontSizeStyle = { fontSize: 'smaller' };
 
+const toTitleCase = (str) => {
+  if (!str) return '';
+  return str.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+};
+
 const getSortedNutrients = (nutritionFacts, supplementedOnly = false) => {
   if (!nutritionFacts) return [];
 
   return nutritionFacts
     .filter(nutritionFact => 
       // Filter out Energy (Calories) as it is displayed separately in the header
-      !['Energy (kcal)', 'Energy (kJ)', 'Energy'].includes(nutritionFact.nutrient.name) &&
+      ![208, 268].includes(nutritionFact.nutrient.id) &&
       // Filter by supplemented status
       nutritionFact.supplemented === supplementedOnly
     )
@@ -32,7 +37,7 @@ const NutritionFactsTable = ({ product }) => {
   const standardNutrients = getSortedNutrients(product.nutrition_facts, false);
   const supplementedNutrients = isSupplemented ? getSortedNutrients(product.nutrition_facts, true) : [];
   const calorieFact = product.nutrition_facts?.find(nf => 
-    nf.nutrient.name === 'Energy (kcal)' || nf.nutrient.name === 'Energy'
+    nf.nutrient.id === 208 || nf.nutrient.id === 268
   );
   
 
@@ -66,7 +71,7 @@ const NutritionFactsTable = ({ product }) => {
                 <TableRow key={nutritionFact.nutrient.id}>
                   <TableCell>
                     <span style={smallFontSizeStyle}>
-                      {BILINGUAL_LABELS[nutritionFact.nutrient.name] || nutritionFact.nutrient.name}
+                      {BILINGUAL_LABELS[nutritionFact.nutrient.id] || toTitleCase(nutritionFact.nutrient.name)}
                     </span>
                   </TableCell>
                   <TableCell>
@@ -98,7 +103,7 @@ const NutritionFactsTable = ({ product }) => {
                 <TableRow key={nutritionFact.nutrient.id}>
                   <TableCell>
                     <span style={smallFontSizeStyle}>
-                      {BILINGUAL_LABELS[nutritionFact.nutrient.name] || nutritionFact.nutrient.name}
+                      {BILINGUAL_LABELS[nutritionFact.nutrient.id] || toTitleCase(nutritionFact.nutrient.name)}
                     </span>
                   </TableCell>
                   <TableCell>
