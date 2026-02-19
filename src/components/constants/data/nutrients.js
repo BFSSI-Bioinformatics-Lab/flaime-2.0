@@ -8,13 +8,13 @@ const flaime1nutrients = [
     'Monounsaturated Fat',
     'Polyunsaturated Fat',
     'Saturated Fat',
-    'Omega 3',
-    'Omega 6',
-    'Trans. Fat',
+    'Omega-3',
+    'Omega-6',
+    'Trans Fat',
     'Potassium',
     'Total Carbohydrate',
-    'Dietary Fiber',
-    'Sugar',
+    'Dietary Fibre',
+    'Sugars',
     'Protein',
     'Cholesterol',
     'Vitamin A',
@@ -57,7 +57,7 @@ const flaime1nutrients = [
 export const nutrientsList = [{
     id: 203,
     nutrient_code:  203,
-    name:  'PROTEIN',
+    name:  'Protein',
     symbol:  'PROT',
     usda_nutrient_code:  203,
     parent_id:  null 
@@ -65,7 +65,7 @@ export const nutrientsList = [{
 {
     id: 204,
     nutrient_code:  204,
-    name:  'FAT (TOTAL LIPIDS)',
+    name:  'Total Fat',
     symbol:  'FAT',
     usda_nutrient_code:  204,
     parent_id:  null 
@@ -73,7 +73,7 @@ export const nutrientsList = [{
 {
     id: 205,
     nutrient_code:  205,
-    name:  'CARBOHYDRATE, TOTAL (BY DIFFERENCE)',
+    name:  'Total Carbohydrate',
     symbol:  'CARB',
     usda_nutrient_code:  205,
     parent_id:  null
@@ -89,7 +89,7 @@ export const nutrientsList = [{
 {
     id: 208,
     nutrient_code:  208,
-    name:  'ENERGY (KILOCALORIES)',
+    name:  'Calories',
     symbol:  'KCAL',
     usda_nutrient_code:  208,
     parent_id:  null 
@@ -185,7 +185,7 @@ export const nutrientsList = [{
 {
     id: 268,
     nutrient_code:  268,
-    name:  'ENERGY (KILOJOULES)',
+    name:  'Kilojoules',
     symbol:  'KJ',
     usda_nutrient_code:  268,
     parent_id:  null 
@@ -193,7 +193,7 @@ export const nutrientsList = [{
 {
     id: 269,
     nutrient_code:  269,
-    name:  'SUGARS, TOTAL',
+    name:  'Sugars',
     symbol:  'TSUG',
     usda_nutrient_code:  269,
     parent_id:  null
@@ -209,7 +209,7 @@ export const nutrientsList = [{
 {
     id: 291,
     nutrient_code:  291,
-    name:  'FIBRE, TOTAL DIETARY',
+    name:  'Fibre',
     symbol:  'TDF',
     usda_nutrient_code:  291,
     parent_id:  null
@@ -217,7 +217,7 @@ export const nutrientsList = [{
 {
     id: 301,
     nutrient_code:  301,
-    name:  'CALCIUM',
+    name:  'Calcium',
     symbol:  'CA',
     usda_nutrient_code:  301,
     parent_id:  null 
@@ -225,7 +225,7 @@ export const nutrientsList = [{
 {
     id: 303,
     nutrient_code:  303,
-    name:  'IRON',
+    name:  'Iron',
     symbol:  'FE',
     usda_nutrient_code:  303,
     parent_id:  null 
@@ -233,7 +233,7 @@ export const nutrientsList = [{
 {
     id: 304,
     nutrient_code:  304,
-    name:  'MAGNESIUM',
+    name:  'Magnesium',
     symbol:  'MG',
     usda_nutrient_code:  304,
     parent_id:  null 
@@ -241,7 +241,7 @@ export const nutrientsList = [{
 {
     id: 305,
     nutrient_code:  305,
-    name:  'PHOSPHORUS',
+    name:  'Phosphorus',
     symbol:  'P',
     usda_nutrient_code:  305,
     parent_id:  null 
@@ -249,7 +249,7 @@ export const nutrientsList = [{
 {
     id: 306,
     nutrient_code:  306,
-    name:  'POTASSIUM',
+    name:  'Potassium',
     symbol:  'K',
     usda_nutrient_code:  306,
     parent_id:  null 
@@ -257,7 +257,7 @@ export const nutrientsList = [{
 {
     id: 307,
     nutrient_code:  307,
-    name:  'SODIUM',
+    name:  'Sodium',
     symbol:  'NA',
     usda_nutrient_code:  307,
     parent_id:  null 
@@ -265,7 +265,7 @@ export const nutrientsList = [{
 {
     id: 309,
     nutrient_code:  309,
-    name:  'ZINC',
+    name:  'Zinc',
     symbol:  'ZN',
     usda_nutrient_code:  309,
     parent_id:  null 
@@ -273,7 +273,7 @@ export const nutrientsList = [{
 {
     id: 312,
     nutrient_code:  312,
-    name:  'COPPER',
+    name:  'Copper',
     symbol:  'CU',
     usda_nutrient_code:  312,
     parent_id:  null 
@@ -281,7 +281,7 @@ export const nutrientsList = [{
 {
     id: 315,
     nutrient_code:  315,
-    name:  'MANGANESE',
+    name:  'Manganese',
     symbol:  'MN',
     usda_nutrient_code:  315,
     parent_id:  null 
@@ -289,7 +289,7 @@ export const nutrientsList = [{
 {
     id: 317,
     nutrient_code:  317,
-    name:  'SELENIUM',
+    name:  'Selenium',
     symbol:  'SE',
     usda_nutrient_code:  317,
     parent_id:  null 
@@ -319,17 +319,9 @@ export const nutrientsList = [{
     parent_id:  null 
 },
 {
-    id: 324,
-    nutrient_code:  324,
-    name:  'VITAMIN D (INTERNATIONAL UNITS)',
-    symbol:  'D3+D2-IU',
-    usda_nutrient_code:  324,
-    parent_id:  null 
-},
-{
     id: 339,
     nutrient_code:  328,
-    name:  'VITAMIN D (D2 + D3)',
+    name:  'Vitamin D',
     symbol:  'D3+D2-µg',
     usda_nutrient_code:  328,
     parent_id:  null 
@@ -337,7 +329,7 @@ export const nutrientsList = [{
 {
     id: 401,
     nutrient_code:  401,
-    name:  'VITAMIN C',
+    name:  'Vitamin C',
     symbol:  'VITC',
     usda_nutrient_code:  401,
     parent_id:  null 
@@ -345,7 +337,7 @@ export const nutrientsList = [{
 {
     id: 404,
     nutrient_code:  404,
-    name:  'THIAMINE',
+    name:  'Thiamine',
     symbol:  'THIA',
     usda_nutrient_code:  404,
     parent_id:  null 
@@ -353,7 +345,7 @@ export const nutrientsList = [{
 {
     id: 405,
     nutrient_code:  405,
-    name:  'RIBOFLAVIN',
+    name:  'Riboflavin',
     symbol:  'RIBO',
     usda_nutrient_code:  405,
     parent_id:  null 
@@ -361,23 +353,15 @@ export const nutrientsList = [{
 {
     id: 406,
     nutrient_code:  406,
-    name:  'NIACIN (NICOTINIC ACID) PREFORMED',
+    name:  'Niacin',
     symbol:  'N-MG',
     usda_nutrient_code:  406,
     parent_id:  null 
 },
 {
-    id: 409,
-    nutrient_code:  409,
-    name:  'TOTAL NIACIN EQUIVALENT',
-    symbol:  'N-NE',
-    usda_nutrient_code:  409,
-    parent_id:  null 
-},
-{
     id: 410,
     nutrient_code:  410,
-    name:  'PANTOTHENIC ACID',
+    name:  'Pantothenic Acid',
     symbol:  'PANT',
     usda_nutrient_code:  410,
     parent_id:  null 
@@ -385,7 +369,7 @@ export const nutrientsList = [{
 {
     id: 415,
     nutrient_code:  415,
-    name:  'VITAMIN B-6',
+    name:  'Vitamin B6',
     symbol:  'B6',
     usda_nutrient_code:  415,
     parent_id:  null 
@@ -393,7 +377,7 @@ export const nutrientsList = [{
 {
     id: 416,
     nutrient_code:  416,
-    name:  'BIOTIN',
+    name:  'Biotin',
     symbol:  'BIOT',
     usda_nutrient_code:  416,
     parent_id:  null 
@@ -409,17 +393,9 @@ export const nutrientsList = [{
 {
     id: 418,
     nutrient_code:  418,
-    name:  'VITAMIN B-12',
+    name:  'Vitamin B12',
     symbol:  'B12',
     usda_nutrient_code:  418,
-    parent_id:  null 
-},
-{
-    id: 430,
-    nutrient_code:  430,
-    name:  'VITAMIN K (MENAQUINONE-4)',
-    symbol:  'VITK',
-    usda_nutrient_code:  428,
     parent_id:  null 
 },
 {
@@ -585,7 +561,7 @@ export const nutrientsList = [{
 {
     id: 601,
     nutrient_code:  601,
-    name:  'CHOLESTEROL',
+    name:  'Cholesterol',
     symbol:  'CHOL',
     usda_nutrient_code:  601,
     parent_id:  null 
@@ -593,7 +569,7 @@ export const nutrientsList = [{
 {
     id: 605,
     nutrient_code:  605,
-    name:  'FATTY ACIDS, TRANS, TOTAL',
+    name:  'Trans Fat',
     symbol:  'TRFA',
     usda_nutrient_code:  605,
     parent_id:  null
@@ -601,7 +577,7 @@ export const nutrientsList = [{
 {
     id: 606,
     nutrient_code:  606,
-    name: 'FATTY ACIDS, SATURATED, TOTAL',
+    name: 'Saturated Fat',
     symbol:  'TSAT',
     usda_nutrient_code:  606,
     parent_id:  null 
@@ -801,7 +777,7 @@ export const nutrientsList = [{
 {
     id: 645,
     nutrient_code:  645,
-    name: 'FATTY ACIDS, MONOUNSATURATED, TOTAL',
+    name: 'Monounsaturated Fat',
     symbol:  'MUFA',
     usda_nutrient_code:  645,
     parent_id:  null 
@@ -809,7 +785,7 @@ export const nutrientsList = [{
 {
     id: 646,
     nutrient_code:  646,
-    name: 'FATTY ACIDS, POLYUNSATURATED, TOTAL',
+    name: 'Polyunsaturated Fat',
     symbol:  'PUFA',
     usda_nutrient_code:  646,
     parent_id:  null 
@@ -837,14 +813,6 @@ export const nutrientsList = [{
     symbol:  '24:0',
     usda_nutrient_code:  654,
     parent_id:  606 
-},
-{
-    id: 806,
-    nutrient_code:  432,
-    name:  'NATURALLY OCCURRING FOLATE',
-    symbol:  'FOLN',
-    usda_nutrient_code:  432,
-    parent_id:  null 
 },
 {
     id: 811,
@@ -881,7 +849,7 @@ export const nutrientsList = [{
 {
     id: 815,
     nutrient_code:  435,
-    name:  'DIETARY FOLATE EQUIVALENTS',
+    name:  'Folate',
     symbol:  'DFE',
     usda_nutrient_code:  435,
     parent_id:  null 
@@ -1295,14 +1263,6 @@ export const nutrientsList = [{
     parent_id:  646 
 },
 {
-    id: 911,
-    nutrient_code:  326,
-    name:  'VITAMIN D3, CHOLECALCIGEROL',
-    symbol:  'D3-µG',
-    usda_nutrient_code: 326,
-    parent_id:  326
-},
-{
     id: 912,
     nutrient_code:  329,
     name:  '25-HYDROXYCHOLECALCIFEROL',
@@ -1337,23 +1297,15 @@ export const nutrientsList = [{
 {
     id: 273,
     nutrient_code:  273,
-    name:  'FIBRE, INSOLUBLE DIETARY FIBRE',
+    name:  'Insoluble Fibre',
     symbol:  'NDF',
     usda_nutrient_code:  null,
     parent_id:  null
 },
 {
-    id: 318,
-    nutrient_code:  318,
-    name:  'VITAMIN A (INTERNATIONAL UNITS)',
-    symbol:  'A-IU',
-    usda_nutrient_code:  null,
-    parent_id:  null 
-},
-{
     id: 340,
     nutrient_code:  340,
-    name:  'VITAMIN E, TOTAL TOCOPHEROLS',
+    name:  'Vitamin E',
     symbol:  'VITE' ,
     usda_nutrient_code:  null,
     parent_id:  null
@@ -1361,7 +1313,7 @@ export const nutrientsList = [{
 {
     id: 810,
     nutrient_code:  209,
-    name:  'STARCH',
+    name:  'Starch',
     symbol:  'STAR',
     usda_nutrient_code:  null,
     parent_id:  null
@@ -1369,7 +1321,7 @@ export const nutrientsList = [{
 {
     id: 868,
     nutrient_code:  902,
-    name: 'FATTY ACIDS, POLYUNSATURATED, TOTAL OMEGA  N-3',
+    name: 'Omega-3',
     symbol:  'TOmega n-3',
     usda_nutrient_code:  null,
     parent_id:  null 
@@ -1377,7 +1329,7 @@ export const nutrientsList = [{
 {
     id: 869,
     nutrient_code:  903,
-    name: 'FATTY ACIDS, POLYUNSATURATED, TOTAL OMEGA   N-6',
+    name: 'Omega-6',
     symbol:  'TOmega n-6',
     usda_nutrient_code:  null,
     parent_id:  null
@@ -1385,7 +1337,7 @@ export const nutrientsList = [{
 {
     id: 2001,
     nutrient_code:  2001,
-    name:  'CHLORIDE',
+    name:  'Chloride',
     symbol:  'CHL',
     usda_nutrient_code:  null,
     parent_id:  null 
@@ -1393,7 +1345,7 @@ export const nutrientsList = [{
 {
     id: 2002,
     nutrient_code:  2002,
-    name:  'CHROMIUM',
+    name:  'Chromium',
     symbol:  'CR',
     usda_nutrient_code:  null,
     parent_id:  null 
@@ -1417,7 +1369,7 @@ export const nutrientsList = [{
 {
     id: 2005,
     nutrient_code:  2005,
-    name:  'IODIDE',
+    name:  'Iodide',
     symbol:  'IODI',
     usda_nutrient_code:  null,
     parent_id:  null
@@ -1441,7 +1393,7 @@ export const nutrientsList = [{
 {
     id: 2008,
     nutrient_code:  2008,
-    name:  'MOLYBDENUM',
+    name:  'Molybdenum',
     symbol:  'MLYB',
     usda_nutrient_code:  null,
     parent_id:  null
@@ -1465,7 +1417,7 @@ export const nutrientsList = [{
 {
     id: 2011,
     nutrient_code:  2011,
-    name:  'SUGAR_ALCOHOLS',
+    name:  'Sugar Alcohols',
     symbol:  'SUGL',
     usda_nutrient_code:  null,
     parent_id:  null
@@ -1477,5 +1429,29 @@ export const nutrientsList = [{
     symbol: 'XYL',
     usda_nutrient_code:  null,
     parent_id:  null
+},
+{
+    id: 2014,
+    nutrient_code:  2014,
+    name:  'Vitamin K',
+    symbol:  'VITK',
+    usda_nutrient_code:  null,
+    parent_id:  null
+},
+{
+    id: 2016,
+    nutrient_code:  2016,
+    name:  'Vitamin A',
+    symbol:  'VITA',
+    usda_nutrient_code:  null,
+    parent_id:  null
+},
+{
+    id: 862,
+    nutrient_code:  862,
+    name:  'Choline',
+    symbol:  'CHOLN',
+    usda_nutrient_code:  null,
+    parent_id:  null
 }
-]
+];
