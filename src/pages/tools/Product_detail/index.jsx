@@ -83,6 +83,15 @@ const ProductDetail = () => {
     };
     const allergenData = getAllergenData(product.allergens_warnings);
 
+    const getLinkedUpcs = (linkedProduct) => {
+        if (!linkedProduct?.upcs || !Array.isArray(linkedProduct.upcs)) {
+            return null;
+        }
+        return linkedProduct.upcs.map(item => item.code).join(", ");
+    };
+
+    const linkedUpcValue = getLinkedUpcs(product.product);
+
     const productDescItems = [
         { name: "Product Name", value: product.site_name },
         { name: "Brand", value: product.raw_brand || product.product?.brand || "None" },
@@ -90,7 +99,7 @@ const ProductDetail = () => {
         { name: "Source", value: product.source },
         { name: "External ID", value: product.external_id },
         { name: "Product Code", value: product.store_product_code || "None" },
-        { name: "UPC", value: product.raw_upc || "None" },
+        { name: "UPC", value: linkedUpcValue || "None" },
         { name: "Price", value: product.reading_price || "Not available" },
         { name: "Total Size", value: product.total_size || "Not specified" },
         { name: "Serving Size", value: product.raw_serving_size || "Not specified" },
