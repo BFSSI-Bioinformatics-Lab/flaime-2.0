@@ -30,7 +30,7 @@
     "react-dropdown-tree-select": "^2.8.0",
     "react-icons": "^5.1.0",
     "react-router": "^6.4.0",
-    "react-router-dom": "^6.4.0",
+    "react-router-dom": "^7.13.1",
     "react-scripts": "5.0.1",
     "web-vitals": "^2.1.4"
   },
