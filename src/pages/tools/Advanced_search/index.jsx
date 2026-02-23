@@ -1,10 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import dayjs from 'dayjs';
-import { TextField, Button, Alert, Typography, Divider, Grid } from '@mui/material';
+import { TextField, Button, Alert, Typography, Divider, Grid, Select, MenuItem, FormControl, InputLabel} from '@mui/material';
 import PageContainer from '../../../components/page/PageContainer';
-import StoreSelector from '../../../components/inputs/StoreSelector';
-import SourceSelector from '../../../components/inputs/SourceSelector';
-import RegionSelector from '../../../components/inputs/RegionSelector';
 import SingleDatePicker from '../../../components/inputs/SingleDatePicker';
 import CategorySelector from '../../../components/inputs/CategorySelector';
 import NutritionFilter from '../../../components/inputs/NutritionFilter';
@@ -14,6 +11,22 @@ import ToolTable  from '../../../components/table/ToolTable';
 import SearchResultSummary from '../../../components/misc/SearchResultSummary';
 import { ResetButton } from '../../../components/buttons/ResetButton';
 import { DownloadResultButton } from '../../../components/buttons/DownloadResultButton';
+import useSearchOptions from '../../../hooks/useSearchOptions';
+
+const COLUMN_ORDER = [
+    'id',
+    'external_id',
+    'name',
+    'price',
+    'source',
+    'store',
+    'date',
+    'region',
+    'categories',
+    'storage_condition',
+    'primary_package_material',
+    'allergens_warnings'
+];
 
 const AdvancedSearch = () => {
     useEffect(() => {
@@ -26,6 +39,9 @@ const AdvancedSearch = () => {
         ExternalIDs: '',
         UPCs: '',
         NielsenUPCs: '',
+        Storage: '',
+        Packaging: '',
+        Allergens: '',
         Categories: { value: [] },
         Source: { value: null },
         Store: { value: null },
@@ -34,7 +50,8 @@ const AdvancedSearch = () => {
         EndDate: { value: null },
         Nutrition: { nutrient: '', minAmount: '', maxAmount: '' },
     };
-    
+
+    const { storageOptions, packagingOptions, sourceOptions, storeOptions, regionOptions } = useSearchOptions();
     const [searchInputs, handleInputChange] = useSearchFilters(initialFilters);
     const [searchResults, setSearchResults] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
@@ -54,6 +71,9 @@ const AdvancedSearch = () => {
         date: true,
         region: true,
         categories: true,
+        storage_condition: true,
+        primary_package_material: true,
+        allergens_warnings: true,
     });
     
     const [selectedColumns, setSelectedColumns] = useState(Object.keys(columnsVisibility));
@@ -74,16 +94,53 @@ const AdvancedSearch = () => {
     };
 
     const handleColumnSelection = (event) => {
-        setSelectedColumns(event.target.value);
+        const value = event.target.value;
+        const sortedSelection = COLUMN_ORDER.filter(col => value.includes(col));
+        
+        setSelectedColumns(sortedSelection);
     };
 
     const handleTextFieldChange = (field) => (event) => {
         handleInputChange(field, event.target.value);
         if (errorMessage) setErrorMessage('');
     };
+
+    const handleSelectChange = (field) => (event) => {
+        handleInputChange(field, event.target.value);
+    };
     
     const buildQueryObject = useCallback(() => {
         const textMustClauses = buildTextMustClausesForAllFields(searchInputs);
+
+        if (searchInputs.Storage && searchInputs.Storage !== '-1') {
+            textMustClauses.push({
+                match: { "storage_condition": searchInputs.Storage }
+            });
+        }
+
+        if (searchInputs.Packaging && searchInputs.Packaging !== '-1') {
+            textMustClauses.push({
+                match: { "primary_package_material": searchInputs.Packaging }
+            });
+        }
+
+        if (searchInputs.Allergens) {
+            textMustClauses.push({
+                nested: {
+                    path: "allergens_warnings",
+                    query: {
+                        multi_match: {
+                            query: searchInputs.Allergens,
+                            fields: [
+                                "allergens_warnings.contains_en", 
+                                "allergens_warnings.may_contain_en"
+                            ],
+                            type: "phrase_prefix"
+                        }
+                    }
+                }
+            });
+        }
         
         let nutrientQuery = {
             nested: {
@@ -156,7 +213,23 @@ const AdvancedSearch = () => {
             
             if (response.ok) {
                 console.log("Search successful, hits:", data.hits.hits.length);
-                setSearchResults(data.hits.hits);
+                const processedHits = data.hits.hits.map(hit => {
+                    const productData = hit._source; 
+                    let allergenText = "";
+                    
+                    if (productData.allergens_warnings && Array.isArray(productData.allergens_warnings)) {
+                        const validTexts = productData.allergens_warnings
+                            .flatMap(w => [w.contains_en, w.may_contain_en])
+                            .filter(text => text);
+                        
+                        allergenText = [...new Set(validTexts)].join("; ");
+                    }
+                    hit._source.allergens_warnings = allergenText;
+                    
+                    return hit;
+                });
+
+                setSearchResults(processedHits);
                 setTotalProducts(data.hits.total.value);
             } else {
                 console.error('Search API error:', data.error || data);
@@ -249,22 +322,107 @@ const AdvancedSearch = () => {
                         />
                     </div>
                 </div>
+
                 <Divider style={{ width: '60vw', margin: '10px auto' }}/>
-                <div style={{ display: 'flex', justifyContent: 'space-around', paddingBottom: '25px' }}>
-                    <SourceSelector 
-                        value={searchInputs.Source.value} 
-                        onSelect={handleSelectorChange('Source')} 
-                        showTitle={true} 
-                        label="Select a source" 
-                    />
-                    <RegionSelector 
-                        value={searchInputs.Region.value} 
-                        onSelect={handleSelectorChange('Region')} 
-                    />
-                    <StoreSelector 
-                        value={searchInputs.Store.value} 
-                        onSelect={handleSelectorChange('Store')} 
-                    />
+                
+               <Typography variant="h5" style={{ padding: '10px' }}>Attributes & Location</Typography>
+               <div style={{ display: 'flex', justifyContent: 'space-around', paddingBottom: '25px', marginTop: '20px' }}>
+                    <div style={{ width: '30%', minWidth: '280px', maxWidth: '320px' }}>
+                        <FormControl variant="outlined" fullWidth>
+                            <InputLabel>Select a source</InputLabel>
+                            <Select
+                                value={searchInputs.Source.value || '-1'}
+                                onChange={(e) => handleSelectorChange('Source')(e.target.value)}
+                                label="Select a source"
+                            >
+                                <MenuItem value="-1">Use all sources</MenuItem>
+                                {sourceOptions.map((option) => (
+                                    <MenuItem key={option.value} value={option.value}>{option.label}</MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
+                    </div>
+
+                    <div style={{ width: '30%', minWidth: '280px', maxWidth: '320px' }}>
+                        <FormControl variant="outlined" fullWidth>
+                            <InputLabel>Select a Region</InputLabel>
+                            <Select
+                                value={searchInputs.Region.value || '-1'}
+                                onChange={(e) => handleSelectorChange('Region')(e.target.value)}
+                                label="Select a Region"
+                            >
+                                <MenuItem value="-1">Use all regions</MenuItem>
+                                {regionOptions.map((option) => (
+                                    <MenuItem key={option.value} value={option.value}>{option.label}</MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
+                    </div>
+
+                    <div style={{ width: '30%', minWidth: '280px', maxWidth: '320px' }}>
+                         <FormControl variant="outlined" fullWidth>
+                            <InputLabel>Select a Store</InputLabel>
+                            <Select
+                                value={searchInputs.Store.value || '-1'}
+                                onChange={(e) => handleSelectorChange('Store')(e.target.value)}
+                                label="Select a Store"
+                            >
+                                <MenuItem value="-1">Use all stores</MenuItem>
+                                {storeOptions.map((option) => (
+                                    <MenuItem key={option.value} value={option.value}>{option.label}</MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
+                    </div>
+               </div>
+               {/* <Divider style={{ width: '60vw', margin: '10px auto' }}/>
+
+               <Typography variant="h5" style={{ padding: '10px' }}>Physical Properties</Typography> */}
+
+               <div style={{ display: 'flex', justifyContent: 'space-around', paddingBottom: '25px' }}>
+                    <div style={{ width: '30%', minWidth: '280px' }}>
+                        <FormControl variant="outlined" fullWidth>
+                            <InputLabel>Storage Condition</InputLabel>
+                            <Select
+                                value={searchInputs.Storage || '-1'}
+                                onChange={handleSelectChange('Storage')}
+                                label="Storage Condition"
+                            >
+                                <MenuItem value="-1">Use all storage conditions</MenuItem>
+                                {storageOptions.map((option) => (
+                                    <MenuItem key={option.value} value={option.value}>{option.label}</MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
+                    </div>
+
+                    <div style={{ width: '30%', minWidth: '280px' }}>
+                        <FormControl variant="outlined" fullWidth>
+                            <InputLabel>Packaging Material</InputLabel>
+                            <Select
+                                value={searchInputs.Packaging || '-1'}
+                                onChange={handleSelectChange('Packaging')}
+                                label="Packaging Material"
+                            >
+                                <MenuItem value="-1">Use all packaging materials</MenuItem>
+                                {packagingOptions.map((option) => (
+                                    <MenuItem key={option.value} value={option.value}>{option.label}</MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
+                    </div>
+
+                    <div style={{ width: '30%', minWidth: '280px' }}>
+                        <TextField
+                            label="Allergens (Text Search)"
+                            placeholder="e.g. Peanuts, Soy"
+                            value={searchInputs.Allergens}
+                            onChange={handleTextFieldChange('Allergens')}
+                            variant="outlined"
+                            fullWidth
+                            helperText="Searches 'Contains' and 'May Contain'"
+                        />
+                    </div>
                </div>
 
                 <Grid container spacing={1} direction="row" justifyContent="space-between" >
@@ -274,7 +432,6 @@ const AdvancedSearch = () => {
                     <Grid item xs={12} md={6}>
                         <Typography variant="h5" style={{ padding: '10px 20px 20px 20px' }}>Select a date range</Typography>
                         <div style={{ display: 'flex', justifyContent: 'space-around', padding: '15px 20px' }}>
-                            
                             <SingleDatePicker
                                 key={`start-${resetKey}`}
                                 label="Start Date"

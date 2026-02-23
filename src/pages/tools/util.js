@@ -59,6 +59,40 @@ export const buildTextMustClausesForAllFields = (searchInputs) => {
     if (searchInputs.Region.value !== null) {
         mustClauses.push({ term: { "scrape_batch.region.keyword": searchInputs.Region.value } });
     }
+    if (searchInputs.Storage) {
+        mustClauses.push({
+            wildcard: {
+                "storage_condition": { value: `*${searchInputs.Storage}*` }
+            }
+        });
+    }
+    if (searchInputs.Packaging) {
+        mustClauses.push({
+            bool: {
+                should: [
+                    { wildcard: { "primary_package_material": { value: `*${searchInputs.Packaging}*` } } },
+                    { wildcard: { "secondary_package_material": { value: `*${searchInputs.Packaging}*` } } }
+                ],
+                minimum_should_match: 1
+            }
+        });
+    }
+    if (searchInputs.Allergens) {
+        mustClauses.push({
+            nested: {
+                path: "allergens_warnings",
+                query: {
+                    bool: {
+                        should: [
+                            { wildcard: { "allergens_warnings.contains_en": { value: `*${searchInputs.Allergens}*` } } },
+                            { wildcard: { "allergens_warnings.may_contain_en": { value: `*${searchInputs.Allergens}*` } } }
+                        ],
+                        minimum_should_match: 1
+                    }
+                }
+            }
+        });
+    }
     if (searchInputs.Categories.value && searchInputs.Categories.value.length > 0) {
         mustClauses.push({
             nested: {
