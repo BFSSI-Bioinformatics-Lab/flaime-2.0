@@ -3,8 +3,6 @@ import axios from 'axios';
 import { Grid, Paper, Dialog, DialogContent, DialogTitle, Box, IconButton, CircularProgress } from '@mui/material';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
-import Zoom from 'react-medium-image-zoom';
-import 'react-medium-image-zoom/dist/styles.css';
 
 const ProductImages = ({ product }) => {
     const [images, setImages] = useState([]);
@@ -13,6 +11,7 @@ const ProductImages = ({ product }) => {
     const [openDialog, setOpenDialog] = useState(false);
     const [selectedIndex, setSelectedIndex] = useState(null);
     const [isImageLoading, setIsImageLoading] = useState(true);
+    const [isZoomed, setIsZoomed] = useState(false);
   
     useEffect(() => {
         const fetchImages = async () => {
@@ -46,11 +45,13 @@ const ProductImages = ({ product }) => {
     };
 
     const handlePrev = () => {
+        setIsZoomed(false);
         setIsImageLoading(true);
         setSelectedIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
     };
 
     const handleNext = () => {
+        setIsZoomed(false);
         setIsImageLoading(true);
         setSelectedIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
     };
@@ -113,20 +114,22 @@ const ProductImages = ({ product }) => {
                                     </Box>
                                 )}
 
-                                <Zoom>
-                                    <img
-                                        src={imagePathToUrl(images[selectedIndex])}
-                                        alt={product.site_name}
-                                        style={{ 
-                                            maxWidth: '100%', 
-                                            maxHeight: '80vh', 
-                                            objectFit: 'contain',
-                                            display: isImageLoading ? 'none' : 'block' 
-                                        }} 
-                                        onLoad={() => setIsImageLoading(false)}
-                                        onError={handleImageError}
-                                    />
-                                </Zoom>
+                                <img
+                                    src={imagePathToUrl(images[selectedIndex])}
+                                    alt={product.site_name}
+                                    style={{ 
+                                        maxWidth: '100%', 
+                                        maxHeight: '80vh', 
+                                        objectFit: 'contain',
+                                        display: isImageLoading ? 'none' : 'block', 
+                                        transform: isZoomed ? 'scale(2)' : 'scale(1)',
+                                        cursor: isZoomed ? 'zoom-out' : 'zoom-in',
+                                        transition: 'transform 0.3s ease-in-out'
+                                    }} 
+                                    onClick={() => setIsZoomed(!isZoomed)}
+                                    onLoad={() => setIsImageLoading(false)}
+                                    onError={handleImageError}
+                                />
 
                                 {images.length > 1 && (
                                     <IconButton 
