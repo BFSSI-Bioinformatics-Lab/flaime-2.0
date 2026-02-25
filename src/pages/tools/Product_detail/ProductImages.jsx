@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Grid, Paper, Dialog, DialogContent, DialogTitle, Box, IconButton } from '@mui/material';
+import { Grid, Paper, Dialog, DialogContent, DialogTitle, Box, IconButton, CircularProgress } from '@mui/material';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
+import Zoom from 'react-medium-image-zoom';
+import 'react-medium-image-zoom/dist/styles.css';
 
 const ProductImages = ({ product }) => {
     const [images, setImages] = useState([]);
@@ -10,6 +12,7 @@ const ProductImages = ({ product }) => {
     const [error, setError] = useState(null);
     const [openDialog, setOpenDialog] = useState(false);
     const [selectedIndex, setSelectedIndex] = useState(null);
+    const [isImageLoading, setIsImageLoading] = useState(true);
   
     useEffect(() => {
         const fetchImages = async () => {
@@ -33,6 +36,7 @@ const ProductImages = ({ product }) => {
 
     const handleOpenDialog = (index) => {
         setSelectedIndex(index);
+        setIsImageLoading(true);
         setOpenDialog(true);
     };
 
@@ -42,10 +46,12 @@ const ProductImages = ({ product }) => {
     };
 
     const handlePrev = () => {
+        setIsImageLoading(true);
         setSelectedIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
     };
 
     const handleNext = () => {
+        setIsImageLoading(true);
         setSelectedIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
     };
 
@@ -59,6 +65,7 @@ const ProductImages = ({ product }) => {
 
     const handleImageError = (e) => {
         e.target.style.display = 'none';
+        setIsImageLoading(false);
     };
 
     return (
@@ -90,27 +97,41 @@ const ProductImages = ({ product }) => {
                             </span>
                         </DialogTitle>
                         <DialogContent>
-                            <Box display="flex" justifyContent="center" alignItems="center" position="relative">
+                            <Box display="flex" justifyContent="center" alignItems="center" position="relative" minHeight="300px">
                                 {images.length > 1 && (
                                     <IconButton 
                                         onClick={handlePrev} 
-                                        sx={{ position: 'absolute', left: 0, bgcolor: 'rgba(255,255,255,0.7)', '&:hover': { bgcolor: 'white' } }}
+                                        sx={{ position: 'absolute', left: 0, zIndex: 10, bgcolor: 'rgba(255,255,255,0.7)', '&:hover': { bgcolor: 'white' } }}
                                     >
                                         <ArrowBackIosNewIcon />
                                     </IconButton>
                                 )}
 
-                                <img
-                                    src={imagePathToUrl(images[selectedIndex])}
-                                    alt={product.site_name}
-                                    style={{ maxWidth: '100%', maxHeight: '80vh', objectFit: 'contain' }} 
-                                    onError={handleImageError}
-                                />
+                                {isImageLoading && (
+                                    <Box position="absolute" display="flex" justifyContent="center" alignItems="center" zIndex={5}>
+                                        <CircularProgress />
+                                    </Box>
+                                )}
+
+                                <Zoom>
+                                    <img
+                                        src={imagePathToUrl(images[selectedIndex])}
+                                        alt={product.site_name}
+                                        style={{ 
+                                            maxWidth: '100%', 
+                                            maxHeight: '80vh', 
+                                            objectFit: 'contain',
+                                            display: isImageLoading ? 'none' : 'block' 
+                                        }} 
+                                        onLoad={() => setIsImageLoading(false)}
+                                        onError={handleImageError}
+                                    />
+                                </Zoom>
 
                                 {images.length > 1 && (
                                     <IconButton 
                                         onClick={handleNext} 
-                                        sx={{ position: 'absolute', right: 0, bgcolor: 'rgba(255,255,255,0.7)', '&:hover': { bgcolor: 'white' } }}
+                                        sx={{ position: 'absolute', right: 0, zIndex: 10, bgcolor: 'rgba(255,255,255,0.7)', '&:hover': { bgcolor: 'white' } }}
                                     >
                                         <ArrowForwardIosIcon />
                                     </IconButton>
