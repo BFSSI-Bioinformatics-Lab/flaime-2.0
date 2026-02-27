@@ -23,6 +23,8 @@ const COLUMN_ORDER = [
     'date',
     'region',
     'categories',
+    'referenceAmount',
+    'sodium',
     'storage_condition',
     'primary_package_material',
     'allergens_warnings'
@@ -71,12 +73,16 @@ const AdvancedSearch = () => {
         date: true,
         region: true,
         categories: true,
+        referenceAmount: false,
+        sodium: false,
         storage_condition: true,
         primary_package_material: true,
         allergens_warnings: true,
     });
     
-    const [selectedColumns, setSelectedColumns] = useState(Object.keys(columnsVisibility));
+    const [selectedColumns, setSelectedColumns] = useState(
+        Object.keys(columnsVisibility).filter(key => columnsVisibility[key])
+    );
 
     const handleReset = () => {
         Object.keys(initialFilters).forEach(key => {
@@ -90,7 +96,7 @@ const AdvancedSearch = () => {
         setRowsPerPage(25);
         setErrorMessage('');
         setResetKey(prev => prev + 1);
-        setSelectedColumns(Object.keys(columnsVisibility));
+        setSelectedColumns(Object.keys(columnsVisibility).filter(key => columnsVisibility[key]));
     };
 
     const handleColumnSelection = (event) => {
