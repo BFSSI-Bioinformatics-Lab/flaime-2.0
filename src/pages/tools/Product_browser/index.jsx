@@ -220,6 +220,7 @@ const SearchField = React.memo(({ label, value, onChange, style = {} }) => (
   </Paper>
 ));
 
+
 const StoreCards = React.memo(({ aggregationResponse }) => {
   const stores = aggregationResponse?.group_by_store?.store_bucket?.buckets || [];
 
@@ -254,38 +255,55 @@ const SearchResults = React.memo(({ totalProducts }) => (
   </div>
 ));
 
-const ProductTable = React.memo(({ products }) => (
-  <TableContainer style={{ width: '80vw', margin: '0 auto' }}>
-    <Table>
-      <TableHead>
-        <TableRow>
-          {['Assigned Flaime ID', 'External ID', 'Store Name', 'Data Source', 'Product Name', 'Category Name'].map((header) => (
-            <TableCell key={header} style={{ fontWeight: 'bold', textAlign: 'center', letterSpacing: '1px' }}>{header}</TableCell>
-          ))}
-        </TableRow>
-      </TableHead>
-      <TableBody>
-        {products.map((product, index) => (
-          <TableRow key={product.id} style={{ background: index % 2 === 0 ? '#f2f2f2' : 'white' }}>
-            <TableCell style={{ width: '80px', textAlign: 'center' }}>
-              <Link to={`/tools/product-browser/${product.id}`} target="_blank">{product.id}</Link>
-            </TableCell>
-            <TableCell style={{ textAlign: 'center' }}>{product.external_id}</TableCell>
-            <TableCell style={{ textAlign: 'center' }}>{product.store.name}</TableCell>
-            <TableCell style={{ width: '140px', textAlign: 'center' }}>{product.source.name}</TableCell>
-            <TableCell style={{ width: '375px' }}>{product.site_name}</TableCell>
-            <TableCell style={{ textAlign: 'left' }}>
-              {product.categories && product.categories.length > 0
-                ? product.categories
-                    .sort((a, b) => a.level - b.level)
-                    .map(cat => cat.name)
-                    .join(' > ')
-                : 'No category'}
-            </TableCell>
+const ProductTable = React.memo(({ products }) => {
+  const getLeafCategories = (categories) => {
+    if (!categories || categories.length === 0) return 'No category';
+
+    const groupedByScheme = categories.reduce((acc, cat) => {
+      const schemeName = cat.scheme || 'Default'; 
+      if (!acc[schemeName]) acc[schemeName] = [];
+      acc[schemeName].push(cat);
+      return acc;
+    }, {});
+
+    const leafCategoryNames = Object.values(groupedByScheme).map(schemeCats => {
+      const highestLevelCat = schemeCats.sort((a, b) => b.level - a.level)[0];
+      return highestLevelCat.name;
+    });
+
+    return leafCategoryNames.join(', '); 
+  };
+
+  return (
+    <TableContainer style={{ width: '80vw', margin: '0 auto' }}>
+      <Table>
+        <TableHead>
+          <TableRow>
+            {['Assigned Flaime ID', 'External ID', 'Store Name', 'Data Source', 'Product Name', 'Category Name'].map((header) => (
+              <TableCell key={header} style={{ fontWeight: 'bold', textAlign: 'center', letterSpacing: '1px' }}>{header}</TableCell>
+            ))}
           </TableRow>
-        ))}
-      </TableBody>
-    </Table>
-  </TableContainer>
-));
+        </TableHead>
+        <TableBody>
+          {products.map((product, index) => (
+            <TableRow key={product.id} style={{ background: index % 2 === 0 ? '#f2f2f2' : 'white' }}>
+              <TableCell style={{ width: '80px', textAlign: 'center' }}>
+                <Link to={`/tools/product-browser/${product.id}`} target="_blank">{product.id}</Link>
+              </TableCell>
+              <TableCell style={{ textAlign: 'center' }}>{product.external_id}</TableCell>
+              <TableCell style={{ textAlign: 'center' }}>{product.store.name}</TableCell>
+              <TableCell style={{ width: '140px', textAlign: 'center' }}>{product.source.name}</TableCell>
+              <TableCell style={{ width: '375px' }}>{product.site_name}</TableCell>
+              
+              <TableCell style={{ textAlign: 'left' }}>
+                {getLeafCategories(product.categories)}
+              </TableCell>
+              
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
+  );
+});
 export default ProductBrowser;
