@@ -56,7 +56,9 @@ const ProductFinder = () => {
     sodium: false,
   });
 
-  const [selectedColumns, setSelectedColumns] = useState(Object.keys(columnsVisibility));
+  const [selectedColumns, setSelectedColumns] = useState(
+    Object.keys(columnsVisibility).filter(key => columnsVisibility[key])
+  );
 
   const handleColumnSelection = (event) => {
     setSelectedColumns(event.target.value);

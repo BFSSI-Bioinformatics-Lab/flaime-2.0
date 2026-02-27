@@ -34,12 +34,20 @@ const ToolTable = ({ columns, data, totalCount, page, rowsPerPage, onPageChange,
       case 'region':
         return item._source.scrape_batch.region;
       case 'categories':
-        return item._source.categories && item._source.categories.length > 0
-          ? item._source.categories
-              .sort((a, b) => a.level - b.level)
-              .map(cat => cat.name)
-              .join(' > ')
-          : 'No category';
+        if (!item._source.categories || item._source.categories.length === 0) {
+          return 'No category';
+        }
+        const remainingCategories = item._source.categories.filter(cat => {
+          const schemeName = (cat.scheme || '').toLowerCase();
+          return schemeName !== 'sodium' && schemeName !== 'reference amount';
+        });
+        if (remainingCategories.length === 0) {
+          return '-';
+        }
+        return remainingCategories
+            .sort((a, b) => a.level - b.level)
+            .map(cat => cat.name)
+            .join(' > ');
       case 'referenceAmount':
         return getLeafCategoryByScheme(item._source.categories, 'reference amount');
       case 'sodium':
