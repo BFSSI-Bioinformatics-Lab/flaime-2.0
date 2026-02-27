@@ -3,6 +3,19 @@ import { Table, TableHead, TableBody, TableRow, TableCell, TableContainer, Paper
 import { StyledTableCell } from './styles';
 import { Link } from 'react-router-dom';
 
+const getLeafCategoryByScheme = (categories, targetScheme) => {
+  if (!categories || !Array.isArray(categories) || categories.length === 0) return '-';
+
+  const schemeCats = categories.filter(
+    cat => cat.scheme && cat.scheme.toLowerCase() === targetScheme.toLowerCase()
+  );
+
+  if (schemeCats.length === 0) return '-';
+
+  const leafCat = schemeCats.sort((a, b) => b.level - a.level)[0];
+  return leafCat.name;
+};
+
 const ToolTable = ({ columns, data, totalCount, page, rowsPerPage, onPageChange, onRowsPerPageChange }) => {
   const renderCell = (column, item) => {
     switch (column) {
@@ -27,6 +40,10 @@ const ToolTable = ({ columns, data, totalCount, page, rowsPerPage, onPageChange,
               .map(cat => cat.name)
               .join(' > ')
           : 'No category';
+      case 'referenceAmount':
+        return getLeafCategoryByScheme(item._source.categories, 'reference amount');
+      case 'sodium':
+        return getLeafCategoryByScheme(item._source.categories, 'sodium');
       default:
         return item._source[column] || '';
     }
@@ -42,6 +59,8 @@ const ToolTable = ({ columns, data, totalCount, page, rowsPerPage, onPageChange,
     date: 'Date',
     region: 'Region',
     categories: 'Categories',
+    referenceAmount: 'Reference Amount',
+    sodium: 'Sodium',
     storage_condition: 'Storage Condition',
     primary_package_material: 'Packaging Material',
     allergens_warnings: 'Allergens',

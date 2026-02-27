@@ -52,6 +52,8 @@ const ProductFinder = () => {
     date: true,
     region: true,
     categories: true,
+    referenceAmount: false,
+    sodium: false,
   });
 
   const [selectedColumns, setSelectedColumns] = useState(Object.keys(columnsVisibility));
