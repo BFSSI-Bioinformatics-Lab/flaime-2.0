@@ -16,6 +16,21 @@ const getLeafCategoryByScheme = (categories, targetScheme) => {
   return leafCat.name;
 };
 
+const getLeafCategories = (categories) => {
+  if (!categories || categories.length === 0) return 'No category';
+  const groupedByScheme = categories.reduce((acc, cat) => {
+    const schemeName = cat.scheme || 'Default'; 
+    if (!acc[schemeName]) acc[schemeName] = [];
+    acc[schemeName].push(cat);
+    return acc;
+  }, {});
+  const leafCategoryNames = Object.values(groupedByScheme).map(schemeCats => {
+    const highestLevelCat = schemeCats.sort((a, b) => b.level - a.level)[0];
+    return highestLevelCat.name;
+  });
+  return leafCategoryNames.join(', '); 
+};
+
 const ToolTable = ({ columns, data, totalCount, page, rowsPerPage, onPageChange, onRowsPerPageChange }) => {
   const renderCell = (column, item) => {
     switch (column) {
@@ -33,25 +48,28 @@ const ToolTable = ({ columns, data, totalCount, page, rowsPerPage, onPageChange,
         return item._source.scrape_batch.datetime;
       case 'region':
         return item._source.scrape_batch.region;
-      case 'categories':
-        if (!item._source.categories || item._source.categories.length === 0) {
-          return 'No category';
-        }
-        const remainingCategories = item._source.categories.filter(cat => {
-          const schemeName = (cat.scheme || '').toLowerCase();
-          return schemeName !== 'sodium' && schemeName !== 'reference amount';
-        });
-        if (remainingCategories.length === 0) {
-          return '-';
-        }
-        return remainingCategories
-            .sort((a, b) => a.level - b.level)
-            .map(cat => cat.name)
-            .join(' > ');
       case 'referenceAmount':
         return getLeafCategoryByScheme(item._source.categories, 'reference amount');
       case 'sodium':
         return getLeafCategoryByScheme(item._source.categories, 'sodium');
+      case 'categories':
+        if (!item._source.categories || item._source.categories.length === 0) {
+          return 'No category';
+        }
+
+        const categoriesToShow = item._source.categories.filter(cat => {
+          const schemeName = (cat.scheme || '').toLowerCase();
+          
+          if (schemeName === 'sodium' && columns.includes('sodium')) return false;
+          if (schemeName === 'reference amount' && columns.includes('referenceAmount')) return false;
+          
+          return true;
+        });
+
+        if (categoriesToShow.length === 0) return '-';
+
+        return getLeafCategories(categoriesToShow);
+        
       default:
         return item._source[column] || '';
     }
