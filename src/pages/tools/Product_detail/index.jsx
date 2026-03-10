@@ -109,7 +109,10 @@ const ProductDetail = () => {
         { name: "URL", value: product.site_url ? <a href={product.site_url} target="_blank" rel="noopener noreferrer">{product.site_name}</a> : "Not available" }
     ].filter(item => item.value); // null or undefined values are filtered out
 
-    const showWarningBanner = product.needs_manual_verification === true && !product.verified_nft_ingredients;
+    const isFlagged = product.needs_manual_verification === true || product.needs_manual_verification === 'true';
+    const isVerified = product.verified_nft_ingredients === true || product.verified_nft_ingredients === 'true';
+
+    const showWarningBanner = isFlagged && !isVerified;
 
     return (
         <div>
