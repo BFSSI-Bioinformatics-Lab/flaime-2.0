@@ -113,6 +113,7 @@ const ProductDetail = () => {
     const isVerified = product.verified_nft_ingredients === true || product.verified_nft_ingredients === 'true';
 
     const showWarningBanner = isFlagged && !isVerified;
+    const showSuccessBanner = isVerified;
 
     return (
         <div>
@@ -126,6 +127,11 @@ const ProductDetail = () => {
                 {showWarningBanner && (
                     <Alert severity="warning" sx={{ mb: 3 }}>
                         Automated QC has detected that there may be errors in this product record, and this product has not yet been manually verified. Expect some data fields to contain errors, and compare with the photos
+                    </Alert>
+                )}
+                {showSuccessBanner && (
+                    <Alert severity="success" sx={{ mb: 3 }}>
+                        This product has been manually verified and all errors have been corrected.
                     </Alert>
                 )}
                 <ProductInfoBox>
