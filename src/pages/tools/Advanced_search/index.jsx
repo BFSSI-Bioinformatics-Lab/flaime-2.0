@@ -12,6 +12,9 @@ import SearchResultSummary from '../../../components/misc/SearchResultSummary';
 import { ResetButton } from '../../../components/buttons/ResetButton';
 import { DownloadResultButton } from '../../../components/buttons/DownloadResultButton';
 import useSearchOptions from '../../../hooks/useSearchOptions';
+import useElasticsearch from '../../../hooks/useElasticsearch';
+import usePagination from '../../../hooks/usePagination';
+import useColumnSelection from '../../../hooks/useColumnSelection';
 
 const COLUMN_ORDER = [
     'id',
@@ -28,11 +31,42 @@ const COLUMN_ORDER = [
     'allergens_warnings'
 ];
 
+const INITIAL_COLUMNS_VISIBILITY = {
+    id: true,
+    external_id: true,
+    name: true,
+    price: true,
+    source: true,
+    store: true,
+    date: true,
+    region: true,
+    categories: true,
+    storage_condition: true,
+    primary_package_material: true,
+    allergens_warnings: true,
+};
+
+const processAllergenHits = (hits) => hits.map(hit => {
+    const productData = hit._source;
+    let allergenText = "";
+
+    if (productData.allergens_warnings && Array.isArray(productData.allergens_warnings)) {
+        const validTexts = productData.allergens_warnings
+            .flatMap(w => [w.contains_en, w.may_contain_en])
+            .filter(text => text);
+
+        allergenText = [...new Set(validTexts)].join("; ");
+    }
+    hit._source.allergens_warnings = allergenText;
+
+    return hit;
+});
+
 const AdvancedSearch = () => {
     useEffect(() => {
         window.scrollTo(0, 0);
     }, []);
-    
+
     const initialFilters = {
         Names: '',
         IDs: '',
@@ -53,62 +87,12 @@ const AdvancedSearch = () => {
 
     const { storageOptions, packagingOptions, sourceOptions, storeOptions, regionOptions } = useSearchOptions();
     const [searchInputs, handleInputChange] = useSearchFilters(initialFilters);
-    const [searchResults, setSearchResults] = useState([]);
-    const [isLoading, setIsLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
-    const [totalProducts, setTotalProducts] = useState(0);
-    const [page, setPage] = useState(0);
-    const [rowsPerPage, setRowsPerPage] = useState(25);
     const [resetKey, setResetKey] = useState(0);
 
-    const [columnsVisibility, setColumnsVisibility] = useState({
-        id: true,
-        external_id: true,
-        name: true,
-        price: true,
-        source: true,
-        store: true,
-        date: true,
-        region: true,
-        categories: true,
-        storage_condition: true,
-        primary_package_material: true,
-        allergens_warnings: true,
-    });
-    
-    const [selectedColumns, setSelectedColumns] = useState(Object.keys(columnsVisibility));
+    const { results: searchResults, isLoading, totalProducts, setResults: setSearchResults, setTotalProducts, executeSearch } = useElasticsearch();
+    const { columnsVisibility, selectedColumns, setSelectedColumns, handleColumnSelection } = useColumnSelection(INITIAL_COLUMNS_VISIBILITY, COLUMN_ORDER);
 
-    const handleReset = () => {
-        Object.keys(initialFilters).forEach(key => {
-            handleInputChange(key, initialFilters[key]);
-        });
-        
-        setSearchResults([]);
-        setIsLoading(false);
-        setTotalProducts(0);
-        setPage(0);
-        setRowsPerPage(25);
-        setErrorMessage('');
-        setResetKey(prev => prev + 1);
-        setSelectedColumns(Object.keys(columnsVisibility));
-    };
-
-    const handleColumnSelection = (event) => {
-        const value = event.target.value;
-        const sortedSelection = COLUMN_ORDER.filter(col => value.includes(col));
-        
-        setSelectedColumns(sortedSelection);
-    };
-
-    const handleTextFieldChange = (field) => (event) => {
-        handleInputChange(field, event.target.value);
-        if (errorMessage) setErrorMessage('');
-    };
-
-    const handleSelectChange = (field) => (event) => {
-        handleInputChange(field, event.target.value);
-    };
-    
     const buildQueryObject = useCallback(() => {
         const textMustClauses = buildTextMustClausesForAllFields(searchInputs);
 
@@ -132,7 +116,7 @@ const AdvancedSearch = () => {
                         multi_match: {
                             query: searchInputs.Allergens,
                             fields: [
-                                "allergens_warnings.contains_en", 
+                                "allergens_warnings.contains_en",
                                 "allergens_warnings.may_contain_en"
                             ],
                             type: "phrase_prefix"
@@ -141,7 +125,7 @@ const AdvancedSearch = () => {
                 }
             });
         }
-        
+
         let nutrientQuery = {
             nested: {
                 path: "nutrition_details",
@@ -152,7 +136,7 @@ const AdvancedSearch = () => {
                 }
             }
         };
-        
+
         if (searchInputs.Nutrition.nutrient) {
             nutrientQuery.nested.query.bool.must.push({
                 term: {
@@ -160,7 +144,7 @@ const AdvancedSearch = () => {
                 }
             });
         }
-        
+
         let amountRange = {};
         if (searchInputs.Nutrition.minAmount) {
             amountRange.gte = parseFloat(searchInputs.Nutrition.minAmount);
@@ -168,7 +152,7 @@ const AdvancedSearch = () => {
         if (searchInputs.Nutrition.maxAmount) {
             amountRange.lte = parseFloat(searchInputs.Nutrition.maxAmount);
         }
-        
+
         if (Object.keys(amountRange).length > 0) {
             nutrientQuery.nested.query.bool.must.push({
                 range: {
@@ -176,7 +160,7 @@ const AdvancedSearch = () => {
                 }
             });
         }
-        
+
         return {
             bool: {
                 must: [
@@ -185,65 +169,38 @@ const AdvancedSearch = () => {
                 ]
             }
         };
-        
+
     }, [searchInputs]);
 
-    const handleSearch = async (newPage = page, currentRowsPerPage = rowsPerPage) => {
-        setIsLoading(true);
-        
-        const queryObject = buildQueryObject();
-        
-        const finalQuery = {
-            from: newPage * currentRowsPerPage,
-            size: currentRowsPerPage,
-            query: queryObject
-        };
-        
-        const elastic_url = `${process.env.REACT_APP_ELASTIC_URL}/_search`;
-        
-        try {
-            const response = await fetch(elastic_url, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(finalQuery)
-            });
-            
-            const data = await response.json();
-            console.log("Elasticsearch response:", JSON.stringify(data, null, 2));
-            
-            if (response.ok) {
-                console.log("Search successful, hits:", data.hits.hits.length);
-                const processedHits = data.hits.hits.map(hit => {
-                    const productData = hit._source; 
-                    let allergenText = "";
-                    
-                    if (productData.allergens_warnings && Array.isArray(productData.allergens_warnings)) {
-                        const validTexts = productData.allergens_warnings
-                            .flatMap(w => [w.contains_en, w.may_contain_en])
-                            .filter(text => text);
-                        
-                        allergenText = [...new Set(validTexts)].join("; ");
-                    }
-                    hit._source.allergens_warnings = allergenText;
-                    
-                    return hit;
-                });
+    const search = useCallback((page, rowsPerPage) => {
+        executeSearch(buildQueryObject(), page, rowsPerPage, processAllergenHits);
+    }, [buildQueryObject, executeSearch]);
 
-                setSearchResults(processedHits);
-                setTotalProducts(data.hits.total.value);
-            } else {
-                console.error('Search API error:', data.error || data);
-                setSearchResults([]);   
-            }
-        } catch (error) {
-            console.error('Search request failed:', error);
-            setSearchResults([]);
-        }
-        
-        setIsLoading(false);
+    const { page, setPage, rowsPerPage, setRowsPerPage, handlePageChange, handleRowsPerPageChange } = usePagination(search);
+
+    const handleReset = () => {
+        Object.keys(initialFilters).forEach(key => {
+            handleInputChange(key, initialFilters[key]);
+        });
+
+        setSearchResults([]);
+        setTotalProducts(0);
+        setErrorMessage('');
+        setPage(0);
+        setRowsPerPage(25);
+        setResetKey(prev => prev + 1);
+        setSelectedColumns(Object.keys(columnsVisibility));
     };
-    const currentQueryBody = buildQueryObject();
-      
+
+    const handleTextFieldChange = (field) => (event) => {
+        handleInputChange(field, event.target.value);
+        if (errorMessage) setErrorMessage('');
+    };
+
+    const handleSelectChange = (field) => (event) => {
+        handleInputChange(field, event.target.value);
+    };
+
     const handleSelectorChange = (field) => (value) => {
         handleInputChange(field, { value: value === '-1' ? null : value });
     };
@@ -256,17 +213,7 @@ const AdvancedSearch = () => {
         handleInputChange('Nutrition', nutrition);
     };
 
-    const handlePageChange = (event, newPage) => {
-        setPage(newPage);
-        handleSearch(newPage);
-    };
-
-    const handleRowsPerPageChange = (event) => {
-        const newRowsPerPage = parseInt(event.target.value, 10);
-        setRowsPerPage(newRowsPerPage);
-        setPage(0);
-        handleSearch(0, newRowsPerPage);
-    };
+    const currentQueryBody = buildQueryObject();
 
     return (
         <PageContainer>
@@ -278,7 +225,7 @@ const AdvancedSearch = () => {
                 </Typography>
                 <Divider style={{ width: '60vw', margin: '15px auto 5px auto' }}/>
                 <Typography variant="h5" style={{ padding: '10px' }}>Product Info</Typography>
-                
+
                 <div style={{ display: 'flex', justifyContent: 'space-around', paddingBottom: '15px' }}>
                     <div style={{ maxWidth: '320px', minWidth: '280px' }}>
                         <TextField
@@ -324,7 +271,7 @@ const AdvancedSearch = () => {
                 </div>
 
                 <Divider style={{ width: '60vw', margin: '10px auto' }}/>
-                
+
                <Typography variant="h5" style={{ padding: '10px' }}>Attributes & Location</Typography>
                <div style={{ display: 'flex', justifyContent: 'space-around', paddingBottom: '25px', marginTop: '20px' }}>
                     <div style={{ width: '30%', minWidth: '280px', maxWidth: '320px' }}>
@@ -454,16 +401,16 @@ const AdvancedSearch = () => {
                         </div>
                     </Grid>
                 </Grid>
-                
+
                 <div style={{ marginTop: '20px', display: 'flex', gap: '10px' }}>
-                    <Button variant="contained" onClick={() => handleSearch(0, rowsPerPage)} disabled={isLoading} >
+                    <Button variant="contained" onClick={() => { setPage(0); search(0, rowsPerPage); }} disabled={isLoading}>
                         Search
                     </Button>
-                    <ResetButton  variant="contained" onClick={handleReset}>Reset Search</ResetButton>
-                    <DownloadResultButton 
-                        queryBody={currentQueryBody} 
-                        totalProducts={totalProducts} 
-                        fileNamePrefix="advanced_search" 
+                    <ResetButton variant="contained" onClick={handleReset}>Reset Search</ResetButton>
+                    <DownloadResultButton
+                        queryBody={currentQueryBody}
+                        totalProducts={totalProducts}
+                        fileNamePrefix="advanced_search"
                     />
                 </div>
                 <SearchResultSummary totalProducts={totalProducts} />
@@ -477,7 +424,7 @@ const AdvancedSearch = () => {
                     {isLoading ? (
                         <p>Loading...</p>
                     ) : (
-                        <ToolTable 
+                        <ToolTable
                             columns={selectedColumns}
                             data={searchResults}
                             totalCount={totalProducts}

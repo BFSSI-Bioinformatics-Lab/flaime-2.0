@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import dayjs from 'dayjs';
-import { Button, FormControl, FormControlLabel, Radio, RadioGroup, Typography, Divider, TablePagination } from '@mui/material';
+import { Button, FormControl, FormControlLabel, Radio, RadioGroup, Typography, Divider } from '@mui/material';
 import PageContainer from '../../../components/page/PageContainer';
 import TextFileInput from '../../../components/inputs/TextFileInput';
 import StoreSelector from '../../../components/inputs/StoreSelector';
@@ -13,12 +13,26 @@ import { DownloadResultButton } from '../../../components/buttons/DownloadResult
 import ColumnSelection  from '../../../components/table/ColumnSelection';
 import ToolTable  from '../../../components/table/ToolTable';
 import SearchResultSummary from '../../../components/misc/SearchResultSummary';
+import useElasticsearch from '../../../hooks/useElasticsearch';
+import usePagination from '../../../hooks/usePagination';
+import useColumnSelection from '../../../hooks/useColumnSelection';
 
+
+const INITIAL_COLUMNS_VISIBILITY = {
+  id: true,
+  name: true,
+  price: true,
+  source: true,
+  store: true,
+  date: true,
+  region: true,
+  categories: true,
+};
 
 const ProductFinder = () => {
 
   useEffect(() => {
-    window.scrollTo(0, 0); // Scroll to the top of the page when the component mounts
+    window.scrollTo(0, 0);
   }, []);
 
   const initialFilters = {
@@ -30,97 +44,14 @@ const ProductFinder = () => {
     EndDate: { value: null }
   };
 
-  
-
   const [inputMode, setInputMode] = useState('Name');
   const [searchInputs, handleInputChange] = useSearchFilters(initialFilters);
-  const [searchResults, setSearchResults] = useState([]);
-  const [searchResultsIsLoading, setSearchResultsIsLoading] = useState(false);
-  const [totalProducts, setTotalProducts] = useState(0);
   const [inputError, setInputError] = useState(false);
 
-  // for pagination
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(25);
+  const { results: searchResults, isLoading: searchResultsIsLoading, totalProducts, setResults: setSearchResults, setTotalProducts, executeSearch } = useElasticsearch();
+  const { columnsVisibility, selectedColumns, setSelectedColumns, handleColumnSelection } = useColumnSelection(INITIAL_COLUMNS_VISIBILITY);
 
-  const [columnsVisibility, setColumnsVisibility] = useState({
-    id: true,
-    name: true,
-    price: true,
-    source: true,
-    store: true,
-    date: true,
-    region: true,
-    categories: true,
-  });
-
-  const [selectedColumns, setSelectedColumns] = useState(Object.keys(columnsVisibility));
-
-  const handleColumnSelection = (event) => {
-    setSelectedColumns(event.target.value);
-  };
-
-  // Reset button 
-  const handleReset = () => {
-    handleInputChange('TextEntries', { value: [] });
-    handleInputChange('Source', { value: null });
-    handleInputChange('Store', { value: null });
-    handleInputChange('Region', { value: null });
-    handleInputChange('StartDate', { value: '1900-01-01' }); 
-    handleInputChange('EndDate', { value: dayjs().format('YYYY-MM-DD') });
-    setSearchResults([]);
-    setInputMode('Name');
-    setTotalProducts(0);
-    setPage(0);
-  };
-  
-  // Handler for changing main input mode (radio buttons)
-  const handleInputModeChange = (event) => {
-    setInputMode(event.target.value);
-  };
-
-  // Handler for changes in text file input
-  const handleTextChange = (text) => {
-    if (inputError) setInputError(false);
-    handleInputChange('TextEntries', { value: text.split("\n") });  
-  };
-
-  // Handlers for selectors
-  const handleSourceChange = (selectedSource) => {
-    handleInputChange('Source', { value: selectedSource === '-1' ? null : selectedSource });
-  };
-  
-  const handleRegionChange = (selectedRegion) => {
-    handleInputChange('Region', { value: selectedRegion === '-1' ? null : selectedRegion });
-  };
-  
-  const handleStoreChange = (selectedStore) => {
-    handleInputChange('Store', { value: selectedStore === '-1' ? null : selectedStore });
-  };
-
-  // Handlers for date pickers
-  const handleStartDateChange = (date) => {
-    handleInputChange('StartDate', { value: date });
-  };
-  const handleEndDateChange = (date) => {
-    handleInputChange('EndDate', { value: date });
-  };
-
-  const handlePageChange = (event, newPage) => {
-    setPage(newPage);
-    handleSearch(newPage + 1, rowsPerPage);  // Add 1 because Elasticsearch uses 1-indexed pages
-  };
-
-  const handleRowsPerPageChange = (event) => {
-    const newRowsPerPage = parseInt(event.target.value, 10);
-    setRowsPerPage(newRowsPerPage);
-    setPage(0);
-    handleSearch(1, newRowsPerPage);
-  };
-
-// Separated function to build the query object
   const buildQueryObject = useCallback(() => {
-    // Input organization and cleaning
     const cleanTextEntries = [...new Set(
       searchInputs.TextEntries.value
         .map(line => line.trim())
@@ -129,12 +60,10 @@ const ProductFinder = () => {
 
     if (cleanTextEntries.length === 0) return null;
 
-    // Create filter and text query clauses
     const filters = buildFilterClauses(searchInputs);
     const fieldKey = getFieldKey(inputMode);
     const textQueries = buildTextMustClauses({ value: cleanTextEntries }, fieldKey);
 
-    // Return the final query object
     return {
       bool: {
         must: textQueries,
@@ -143,8 +72,7 @@ const ProductFinder = () => {
     };
   }, [searchInputs, inputMode]);
 
-  const handleSearch = async (newPage = 1, currentRowsPerPage = rowsPerPage) => {
-    // Check validity of text entries
+  const search = useCallback(async (page, rowsPerPage) => {
     const cleanTextEntries = [...new Set(
       searchInputs.TextEntries.value.map(line => line.trim()).filter(line => line !== "")
     )];
@@ -154,62 +82,63 @@ const ProductFinder = () => {
       return;
     }
     if (cleanTextEntries.length > 1000) return;
-    
-    setInputError(false);
-    setSearchResultsIsLoading(true);
 
-    // Retrieve the query object
-    const queryObject = buildQueryObject();
-    
-    // Construct the full query body with pagination
-    const queryBody = {
-      from: (newPage - 1) * currentRowsPerPage,
-      size: currentRowsPerPage,
-      query: queryObject // Use the built query object here
-    };
-  
-    const elastic_url = `${process.env.REACT_APP_ELASTIC_URL}/_search`;
-  
-    try {
-      const response = await fetch(elastic_url, {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify(queryBody)
-      });
-  
-      const data = await response.json();
-  
-      if (response.ok) {
-        setSearchResults(data.hits.hits);
-        setTotalProducts(data.hits.total.value);
-        setPage(newPage - 1);
-      } else {
-        console.error('Search API error:', data.error || data);
-        setSearchResults([]);
-        setTotalProducts(0);
-        setPage(0);
-      }
-    } catch (error) {
-      console.error('Search request failed:', error);
-      setSearchResults([]);
-      setTotalProducts(0);
-      setPage(0);
-    }
-  
-    setSearchResultsIsLoading(false);
+    setInputError(false);
+    await executeSearch(buildQueryObject(), page, rowsPerPage);
+  }, [buildQueryObject, executeSearch, searchInputs.TextEntries.value]);
+
+  const { page, setPage, rowsPerPage, setRowsPerPage, handlePageChange, handleRowsPerPageChange } = usePagination(search);
+
+  const handleReset = () => {
+    handleInputChange('TextEntries', { value: [] });
+    handleInputChange('Source', { value: null });
+    handleInputChange('Store', { value: null });
+    handleInputChange('Region', { value: null });
+    handleInputChange('StartDate', { value: '1900-01-01' });
+    handleInputChange('EndDate', { value: dayjs().format('YYYY-MM-DD') });
+    setSearchResults([]);
+    setTotalProducts(0);
+    setInputMode('Name');
+    setPage(0);
+    setRowsPerPage(25);
   };
 
-  // Build current query body for download button
-  const currentQueryBody = buildQueryObject();
-console.log(searchResults);
+  const handleInputModeChange = (event) => {
+    setInputMode(event.target.value);
+  };
 
+  const handleTextChange = (text) => {
+    if (inputError) setInputError(false);
+    handleInputChange('TextEntries', { value: text.split("\n") });
+  };
+
+  const handleSourceChange = (selectedSource) => {
+    handleInputChange('Source', { value: selectedSource === '-1' ? null : selectedSource });
+  };
+
+  const handleRegionChange = (selectedRegion) => {
+    handleInputChange('Region', { value: selectedRegion === '-1' ? null : selectedRegion });
+  };
+
+  const handleStoreChange = (selectedStore) => {
+    handleInputChange('Store', { value: selectedStore === '-1' ? null : selectedStore });
+  };
+
+  const handleStartDateChange = (date) => {
+    handleInputChange('StartDate', { value: date });
+  };
+  const handleEndDateChange = (date) => {
+    handleInputChange('EndDate', { value: date });
+  };
+
+  const currentQueryBody = buildQueryObject();
 
 return (
   <PageContainer>
     <div>
       <Typography variant="h4" style={{ padding: '10px' }}>Product Finder</Typography>
       <Typography variant="body1" style={{ padding: '10px', width: '80vw', margin: '0 auto' }}>
-        Here you can enter a list of product names or FLAIME IDs to search for. <br/> You can also further filter by source, region, and store. 
+        Here you can enter a list of product names or FLAIME IDs to search for. <br/> You can also further filter by source, region, and store.
       </Typography>
       <Divider style={{ width: '60vw', margin: '15px auto 15px auto' }}/>
       <FormControl style={{ margin: '0 25%' }}>
@@ -221,18 +150,17 @@ return (
         </RadioGroup>
       </FormControl>
       <Divider style={{ width: '60vw', margin: '15px auto 5px auto' }}/>
-      
+
       <div style={{ width: '75vw', margin: '10px auto'}}>
         <Typography variant="h5">Enter product names (or IDs) or upload a file</Typography>
         {(() => {
             const validItemCount = searchInputs.TextEntries.value.filter(line => line.trim() !== "").length;
-            
+
             return (
               <>
-                <TextFileInput 
+                <TextFileInput
                   text={searchInputs.TextEntries.value.join("\n")}
                   onTextChange={handleTextChange}
-                  // Indicate error state if valid item count exceeds 1000
                   error={validItemCount > 1000}
                 />
 
@@ -243,10 +171,9 @@ return (
                         </Typography>
                     )}
 
-                    {/* Display current count with dynamic styling based on validity */}
-                    <Typography 
-                        variant="caption" 
-                        style={{ 
+                    <Typography
+                        variant="caption"
+                        style={{
                             color: validItemCount > 1000 ? '#d32f2f' : 'gray',
                             fontWeight: validItemCount > 1000 ? 'bold' : 'normal'
                         }}
@@ -260,52 +187,52 @@ return (
       </div>
       <Divider style={{ width: '60vw', margin: '15px auto 5px auto' }}/>
       <div style={{ display: 'flex', justifyContent: 'space-around', paddingBottom: '25px' }}>
-        <SourceSelector 
-          value={searchInputs.Source.value} 
-          onSelect={handleSourceChange} 
-          showTitle={true} 
+        <SourceSelector
+          value={searchInputs.Source.value}
+          onSelect={handleSourceChange}
+          showTitle={true}
           label="Select a source"
         />
-        <RegionSelector 
-          value={searchInputs.Region.value} 
-          onSelect={handleRegionChange} 
+        <RegionSelector
+          value={searchInputs.Region.value}
+          onSelect={handleRegionChange}
         />
-        <StoreSelector 
-          value={searchInputs.Store.value} 
-          onSelect={handleStoreChange} 
+        <StoreSelector
+          value={searchInputs.Store.value}
+          onSelect={handleStoreChange}
         />
-      </div>      
+      </div>
       <Typography variant="h5">Select a date range</Typography>
       <div style={{ display: 'flex', justifyContent: 'space-around', margin: '15px 0', width: '45vw' }}>
-        <SingleDatePicker 
+        <SingleDatePicker
             label="Start Date"
-            initialDate="1900-01-01" // Very old date for start date
+            initialDate="1900-01-01"
             onChange={handleStartDateChange}
         />
-        <SingleDatePicker 
+        <SingleDatePicker
             label="End Date"
-            initialDate={dayjs().format('YYYY-MM-DD')} // Today's date for end date
+            initialDate={dayjs().format('YYYY-MM-DD')}
             onChange={handleEndDateChange}
         />
       </div>
       <div style={{ marginTop: '20px',display: 'flex', gap: '10px'}}>
         {inputError && (
-           <Typography 
-             color="error" 
-             variant="body2" 
+           <Typography
+             color="error"
+             variant="body2"
              style={{ display: 'block', marginBottom: '10px', fontWeight: 'bold' }}
            >
             Please enter at least one product name or ID.
            </Typography>
         )}
-        <Button variant="contained" onClick={() => handleSearch(1)}>
+        <Button variant="contained" onClick={() => { setPage(0); search(0, rowsPerPage); }}>
           Search
         </Button>
         <ResetButton variant="contained" onClick={handleReset}>Reset Search</ResetButton>
-        <DownloadResultButton 
-          queryBody={currentQueryBody} 
-          totalProducts={totalProducts} 
-          fileNamePrefix="product_finder" 
+        <DownloadResultButton
+          queryBody={currentQueryBody}
+          totalProducts={totalProducts}
+          fileNamePrefix="product_finder"
         />
       </div>
       <SearchResultSummary totalProducts={totalProducts} />
@@ -320,7 +247,7 @@ return (
           <p>Loading...</p>
         ) : (
           <>
-            <ToolTable 
+            <ToolTable
               columns={selectedColumns}
               data={searchResults}
               totalCount={totalProducts}

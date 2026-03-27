@@ -26,6 +26,41 @@ export const buildTextMustClauses = (textEntries, fieldKey) => {
     }];
 };
 
+// --- Shared clause helpers ---
+
+const buildSourceClause = (source) => {
+    if (!source || source.value === null) return null;
+    return { term: { "source.id": parseInt(source.value, 10) } };
+};
+
+const buildStoreClause = (store) => {
+    if (!store || store.value === null) return null;
+    return { term: { "store.id": parseInt(store.value, 10) } };
+};
+
+const buildRegionClause = (region) => {
+    if (!region || region.value === null) return null;
+    return { term: { "scrape_batch.region.keyword": region.value } };
+};
+
+const buildCategoriesClause = (categories) => {
+    if (!categories || !categories.value || categories.value.length === 0) return null;
+    return {
+        nested: {
+            path: "categories",
+            query: { terms: { "categories.id": categories.value } }
+        }
+    };
+};
+
+const buildDateRangeClause = (startDate, endDate) => {
+    const range = {};
+    if (startDate?.value) range.gte = startDate.value;
+    if (endDate?.value) range.lte = endDate.value;
+    if (Object.keys(range).length === 0) return null;
+    return { range: { "scrape_batch.datetime": range } };
+};
+
 export const buildTextMustClausesForAllFields = (searchInputs) => {
     const mustClauses = [];
 
@@ -50,15 +85,16 @@ export const buildTextMustClausesForAllFields = (searchInputs) => {
     if (searchInputs.NielsenUPCs) {
         mustClauses.push({ term: { "nielsen_upc.keyword": searchInputs.NielsenUPCs } });
     }
-    if (searchInputs.Source.value !== null) {
-        mustClauses.push({ term: { "source.id": parseInt(searchInputs.Source.value, 10) } });
-    }
-    if (searchInputs.Store.value !== null) {
-        mustClauses.push({ term: { "store.id": parseInt(searchInputs.Store.value, 10) } });
-    }
-    if (searchInputs.Region.value !== null) {
-        mustClauses.push({ term: { "scrape_batch.region.keyword": searchInputs.Region.value } });
-    }
+
+    const sourceClause = buildSourceClause(searchInputs.Source);
+    if (sourceClause) mustClauses.push(sourceClause);
+
+    const storeClause = buildStoreClause(searchInputs.Store);
+    if (storeClause) mustClauses.push(storeClause);
+
+    const regionClause = buildRegionClause(searchInputs.Region);
+    if (regionClause) mustClauses.push(regionClause);
+
     if (searchInputs.Storage) {
         mustClauses.push({
             wildcard: {
@@ -93,111 +129,38 @@ export const buildTextMustClausesForAllFields = (searchInputs) => {
             }
         });
     }
-    if (searchInputs.Categories.value && searchInputs.Categories.value.length > 0) {
-        mustClauses.push({
-            nested: {
-                path: "categories",
-                query: {
-                    terms: { "categories.id": searchInputs.Categories.value }
-                }
-            }
-        });
-    }
-    
-    // handle Date filters
-    if (searchInputs.StartDate.value && searchInputs.EndDate.value) {
-        mustClauses.push({
-            range: {
-                "scrape_batch.datetime": {
-                    gte: searchInputs.StartDate.value,
-                    lte: searchInputs.EndDate.value
-                }
-            }
-        });
-    } else if (searchInputs.StartDate.value) {
-        mustClauses.push({ range: { "scrape_batch.datetime": { gte: searchInputs.StartDate.value } } });
-    } else if (searchInputs.EndDate.value) {
-        mustClauses.push({ range: { "scrape_batch.datetime": { lte: searchInputs.EndDate.value } } });
-    }
-    
+
+    const categoriesClause = buildCategoriesClause(searchInputs.Categories);
+    if (categoriesClause) mustClauses.push(categoriesClause);
+
+    const dateClause = buildDateRangeClause(searchInputs.StartDate, searchInputs.EndDate);
+    if (dateClause) mustClauses.push(dateClause);
+
     return mustClauses;
 };
 
 export const buildFilterClauses = (searchInputs) => {
     const filters = [];
 
-    console.log('Building filters with inputs:', searchInputs);
-    
     try {
-        // Filter by source ID, only if source is not null
-        if (searchInputs.Source && searchInputs.Source.value !== null) {
-            filters.push({
-                term: {
-                    "source.id": parseInt(searchInputs.Source.value, 10)
-                }
-            });
-        }
-        
-        // Filter by store ID, only if store is not null
-        if (searchInputs.Store && searchInputs.Store.value !== null) {
-            filters.push({
-                term: {
-                    "store.id": parseInt(searchInputs.Store.value, 10)
-                }
-            });
-        }
-        
-        // Filter by region keyword, only if region is not null
-        if (searchInputs.Region && searchInputs.Region.value !== null) {
-            filters.push({
-                term: {
-                    "scrape_batch.region.keyword": searchInputs.Region.value
-                }
-            });
-        }
+        const sourceClause = buildSourceClause(searchInputs.Source);
+        if (sourceClause) filters.push(sourceClause);
 
-        // Filter by categories
-        if (searchInputs.Categories && searchInputs.Categories.value && searchInputs.Categories.value.length > 0) {
-            filters.push({
-                nested: {
-                    path: "categories",
-                    query: {
-                        terms: { "categories.id": searchInputs.Categories.value }
-                    }
-                }
-            });
-        }
-        
-        // Handle date range filters
-        const dateFilter = {};
-        if (searchInputs.StartDate && searchInputs.StartDate.value && searchInputs.EndDate && searchInputs.EndDate.value) {
-            dateFilter.range = {
-                "scrape_batch.datetime": {
-                    gte: searchInputs.StartDate.value,
-                    lte: searchInputs.EndDate.value
-                }
-            };
-        } else if (searchInputs.StartDate && searchInputs.StartDate.value) {
-            dateFilter.range = {
-                "scrape_batch.datetime": {
-                    gte: searchInputs.StartDate.value
-                }
-            };
-        } else if (searchInputs.EndDate && searchInputs.EndDate.value) {
-            dateFilter.range = {
-                "scrape_batch.datetime": {
-                    lte: searchInputs.EndDate.value
-                }
-            };
-        }
-        
-        if (Object.keys(dateFilter).length !== 0) {
-            filters.push(dateFilter);
-        }
-    } catch(error) {
+        const storeClause = buildStoreClause(searchInputs.Store);
+        if (storeClause) filters.push(storeClause);
+
+        const regionClause = buildRegionClause(searchInputs.Region);
+        if (regionClause) filters.push(regionClause);
+
+        const categoriesClause = buildCategoriesClause(searchInputs.Categories);
+        if (categoriesClause) filters.push(categoriesClause);
+
+        const dateClause = buildDateRangeClause(searchInputs.StartDate, searchInputs.EndDate);
+        if (dateClause) filters.push(dateClause);
+    } catch (error) {
         console.error('Error building filter clauses:', error);
     }
-    console.log('Built filters:', filters);
+
     return filters;
 };
 
@@ -212,6 +175,6 @@ export const getFieldKey = (inputMode) => {
         case 'Nielsen_UPC':
             return 'nielsen_upc.keyword';
         default:
-            return 'site_name.keyword'; // Default to product names if inputMode is unrecognized
+            return 'site_name.keyword';
     }
 };
