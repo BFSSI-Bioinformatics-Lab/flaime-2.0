@@ -215,16 +215,16 @@ return (
             onChange={handleEndDateChange}
         />
       </div>
-      <div style={{ marginTop: '20px',display: 'flex', gap: '10px'}}>
-        {inputError && (
-           <Typography
-             color="error"
-             variant="body2"
-             style={{ display: 'block', marginBottom: '10px', fontWeight: 'bold' }}
-           >
-            Please enter at least one product name or ID.
-           </Typography>
-        )}
+      {inputError && (
+        <Typography
+          color="error"
+          variant="body2"
+          style={{ marginTop: '20px', fontWeight: 'bold' }}
+        >
+          Please enter at least one product name or ID.
+        </Typography>
+      )}
+      <div style={{ marginTop: '10px', display: 'flex', gap: '10px'}}>
         <Button variant="contained" onClick={() => { setPage(0); search(0, rowsPerPage); }}>
           Search
         </Button>
