@@ -114,7 +114,7 @@ const ProductDetail = () => {
 
     const showWarningBanner = isFlagged && !isVerified;
     const showSuccessBanner = isVerified;
-    const isFrozenEntrees2025 = product.source === "2025 Frozen Entrees";
+    const isFrozenEntrees2025 = product.source === "2025 Frozen Entree collection";
 
     return (
         <div>
