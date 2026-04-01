@@ -114,6 +114,7 @@ const ProductDetail = () => {
 
     const showWarningBanner = isFlagged && !isVerified;
     const showSuccessBanner = isVerified;
+    const isFrozenEntrees2025 = product.source === "2025 Frozen Entrees";
 
     return (
         <div>
@@ -124,6 +125,11 @@ const ProductDetail = () => {
                 </Grid>
             </Band>
             <PageContainer>
+                {isFrozenEntrees2025 && (
+                    <Alert severity="warning" sx={{ mb: 3 }}>
+                        The list of ingredients data from this collection (2025 Frozen Entrees) has not been manually verified and contains errors
+                    </Alert>
+                )}
                 {showWarningBanner && (
                     <Alert severity="warning" sx={{ mb: 3 }}>
                         Automated QC has detected that there may be errors in this product record, and this product has not yet been manually verified. Expect some data fields to contain errors, and compare with the photos
