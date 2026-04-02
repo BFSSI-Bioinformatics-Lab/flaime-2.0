@@ -60,6 +60,7 @@ const CollectionStats = () => {
 
         return {
             size: 0,
+            track_total_hits: true,
             query: { bool: { filter } },
             aggs: nutrientAggs
         };
