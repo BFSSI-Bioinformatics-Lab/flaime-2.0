@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
     Typography, Divider, Button, Table, TableBody, TableCell,
     TableHead, TableRow, Paper, Grid, Card, CardContent,
@@ -7,35 +7,20 @@ import {
 import PageContainer from '../../../components/page/PageContainer';
 import SourceSelector from '../../../components/inputs/SourceSelector';
 import { GetSourceCollectionStats } from '../../../api/services/SourceService';
-import { GetAllNutrients } from '../../../api/services/NutrientService';
 
+// Nutrient IDs confirmed against the nutrients table in the database.
 const NUTRIENT_CONFIG = [
-    { label: 'Sodium',        names: ['Sodium'],                              unit: 'mg' },
-    { label: 'Total Sugars',  names: ['Total Sugars', 'Total Sugars (NLEA)'], unit: 'g'  },
-    { label: 'Saturated Fat', names: ['Saturated Fat'],                       unit: 'g'  },
+    { label: 'Sodium',        ids: [307],       unit: 'mg' },
+    { label: 'Total Sugars',  ids: [269, 917],  unit: 'g'  },
+    { label: 'Saturated Fat', ids: [606],        unit: 'g'  },
 ];
 
 const CollectionStats = () => {
-    const [sourceId, setSourceId]         = useState(null);
-    const [esStats, setEsStats]           = useState(null);
-    const [dbStats, setDbStats]           = useState(null);
-    const [nutrientIds, setNutrientIds]   = useState(null);
-    const [isLoading, setIsLoading]       = useState(false);
-    const [error, setError]               = useState('');
-
-    // Fetch nutrients once on mount and resolve IDs by name
-    useEffect(() => {
-        GetAllNutrients().then(result => {
-            if (result.error) return;
-            const resolved = NUTRIENT_CONFIG.map(config => ({
-                ...config,
-                ids: result.nutrients
-                    .filter(n => config.names.includes(n.name))
-                    .map(n => n.id),
-            }));
-            setNutrientIds(resolved);
-        });
-    }, []);
+    const [sourceId, setSourceId] = useState(null);
+    const [esStats, setEsStats]   = useState(null);
+    const [dbStats, setDbStats]   = useState(null);
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError]         = useState('');
 
     const handleSourceChange = (value) => {
         setSourceId(value === '-1' ? null : value);
@@ -44,14 +29,13 @@ const CollectionStats = () => {
         setError('');
     };
 
-    const buildEsQuery = (resolvedNutrients) => {
+    const buildEsQuery = () => {
         const filter = sourceId
             ? [{ term: { 'source.id': parseInt(sourceId, 10) } }]
             : [];
 
         const nutrientAggs = {};
-        resolvedNutrients.forEach(({ label, ids }) => {
-            if (ids.length === 0) return;
+        NUTRIENT_CONFIG.forEach(({ label, ids }) => {
             const key = label.toLowerCase().replace(/\s+/g, '_');
             nutrientAggs[key] = {
                 nested: { path: 'nutrition_details' },
@@ -82,7 +66,6 @@ const CollectionStats = () => {
     };
 
     const handleLoadStats = async () => {
-        if (!nutrientIds) return;
         setIsLoading(true);
         setError('');
         setEsStats(null);
@@ -95,7 +78,7 @@ const CollectionStats = () => {
                 fetch(elastic_url, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(buildEsQuery(nutrientIds))
+                    body: JSON.stringify(buildEsQuery())
                 }),
                 sourceId ? GetSourceCollectionStats(sourceId) : Promise.resolve(null)
             ]);
@@ -137,8 +120,7 @@ const CollectionStats = () => {
     const total       = esStats?.total ?? 0;
     const reviewed    = dbStats?.manually_reviewed ?? 0;
     const notReviewed = total - reviewed;
-
-    const hasResults = esStats && !isLoading;
+    const hasResults  = esStats && !isLoading;
 
     return (
         <PageContainer>
@@ -157,11 +139,7 @@ const CollectionStats = () => {
                     showTitle={false}
                     label="Select a collection"
                 />
-                <Button
-                    variant="contained"
-                    onClick={handleLoadStats}
-                    disabled={isLoading || !nutrientIds}
-                >
+                <Button variant="contained" onClick={handleLoadStats} disabled={isLoading}>
                     Load Statistics
                 </Button>
             </div>
@@ -250,15 +228,13 @@ const CollectionStats = () => {
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                {nutrientIds.map(({ label, unit, ids }) => {
+                                {NUTRIENT_CONFIG.map(({ label, unit }) => {
                                     const s = getNutrientStats(label);
                                     return (
                                         <TableRow key={label}>
                                             <TableCell>{label}</TableCell>
                                             <TableCell align="right">
-                                                {ids.length === 0
-                                                    ? 'Not found in DB'
-                                                    : s ? s.count.toLocaleString() : '—'}
+                                                {s ? s.count.toLocaleString() : '—'}
                                             </TableCell>
                                             <TableCell align="right">
                                                 {s ? `${fmt(s.mean)} ${unit}` : '—'}
