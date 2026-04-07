@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
     Typography, Divider, Button, Table, TableBody, TableCell,
     TableHead, TableRow, Paper, Grid, Card, CardContent,
@@ -29,7 +29,7 @@ const CollectionStats = () => {
         setError('');
     };
 
-    const buildEsQuery = () => {
+    const buildEsQuery = useCallback(() => {
         const filter = sourceId
             ? [{ term: { 'source.id': parseInt(sourceId, 10) } }]
             : [];
@@ -64,9 +64,9 @@ const CollectionStats = () => {
             query: { bool: { filter } },
             aggs: nutrientAggs
         };
-    };
+    }, [sourceId]);
 
-    const handleLoadStats = async () => {
+    const handleLoadStats = useCallback(async () => {
         setIsLoading(true);
         setError('');
         setEsStats(null);
@@ -100,7 +100,11 @@ const CollectionStats = () => {
         }
 
         setIsLoading(false);
-    };
+    }, [sourceId, buildEsQuery]);
+
+    useEffect(() => {
+        handleLoadStats();
+    }, [handleLoadStats]);
 
     const fmt = (val, decimals = 2) =>
         val != null && isFinite(val) ? val.toFixed(decimals) : '—';
@@ -215,6 +219,13 @@ const CollectionStats = () => {
                         Amounts per serving as recorded on the product label.
                         "Products with Data" reflects how many products have a recorded value for that nutrient.
                     </Typography>
+                    {esStats && total < 50000 && (
+                        <Alert severity="warning" sx={{ m: 1 }}>
+                            The search index (Elasticsearch) appears to be incomplete — only {total.toLocaleString()} products
+                            are indexed versus {dbStats ? dbStats.total.toLocaleString() : 'more'} in the database.
+                            Nutrient statistics below only reflect indexed products and may not be representative of the full collection.
+                        </Alert>
+                    )}
 
                     <Paper variant="outlined" style={{ margin: '10px', overflowX: 'auto' }}>
                         <Table>
