@@ -8,6 +8,20 @@ import PageContainer from '../../../components/page/PageContainer';
 import SourceSelector from '../../../components/inputs/SourceSelector';
 import { GetSourceCollectionStats } from '../../../api/services/SourceService';
 
+// First 10 anticaking agents from Health Canada's List of Permitted Anticaking Agents.
+const ADDITIVES = [
+    'Calcium Phosphate, Tribasic',
+    'Calcium Silicate',
+    'Calcium Stearate',
+    'Cellulose',
+    'Magnesium Carbonate',
+    'Magnesium Oxide',
+    'Magnesium Silicate',
+    'Magnesium Stearate',
+    'Microcrystalline Cellulose',
+    'Potassium Ferrocyanide',
+];
+
 // Nutrient IDs confirmed against the nutrients table in the database.
 const NUTRIENT_CONFIG = [
     { label: 'Sodium',        ids: [307],       unit: 'mg' },
@@ -58,11 +72,20 @@ const CollectionStats = () => {
             };
         });
 
+        const additiveFilters = {};
+        ADDITIVES.forEach(name => {
+            const key = name.toLowerCase().replace(/[^a-z0-9]+/g, '_');
+            additiveFilters[key] = { match_phrase: { ingredient_en: name } };
+        });
+
         return {
             size: 0,
             track_total_hits: true,
             query: { bool: { filter } },
-            aggs: nutrientAggs
+            aggs: {
+                ...nutrientAggs,
+                additives: { filters: { filters: additiveFilters } },
+            }
         };
     }, [sourceId]);
 
@@ -219,10 +242,10 @@ const CollectionStats = () => {
                         Amounts per serving as recorded on the product label.
                         "Products with Data" reflects how many products have a recorded value for that nutrient.
                     </Typography>
-                    {esStats && total < 50000 && (
+                    {dbStats && esStats && total < dbStats.total && (
                         <Alert severity="warning" sx={{ m: 1 }}>
                             The search index (Elasticsearch) appears to be incomplete — only {total.toLocaleString()} products
-                            are indexed versus {dbStats ? dbStats.total.toLocaleString() : 'more'} in the database.
+                            are indexed versus {dbStats.total.toLocaleString()} in the database.
                             Nutrient statistics below only reflect indexed products and may not be representative of the full collection.
                         </Alert>
                     )}
@@ -323,9 +346,37 @@ const CollectionStats = () => {
                     <Typography variant="h5" style={{ padding: '10px' }}>
                         Ingredient Prevalence &amp; Additives
                     </Typography>
-                    <Alert severity="info" sx={{ m: 1 }}>
-                        Ingredient search terms for Vitamin D and additive lists are pending. This section will be populated once the ingredient lists are provided.
-                    </Alert>
+                    <Typography variant="body2" color="text.secondary" style={{ padding: '0 10px 10px' }}>
+                        Anticaking agents (Health Canada List of Permitted Anticaking Agents).
+                        Counts reflect products whose English ingredient list contains the additive name.
+                    </Typography>
+                    <Paper variant="outlined" style={{ margin: '10px', overflowX: 'auto' }}>
+                        <Table>
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell><b>Additive</b></TableCell>
+                                    <TableCell align="right"><b>Products Containing</b></TableCell>
+                                    <TableCell align="right"><b>% of Total</b></TableCell>
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {ADDITIVES.map(name => {
+                                    const key = name.toLowerCase().replace(/[^a-z0-9]+/g, '_');
+                                    const count = esStats?.aggs?.additives?.buckets?.[key]?.doc_count ?? null;
+                                    const pct = count != null && total > 0
+                                        ? ((count / total) * 100).toFixed(2)
+                                        : null;
+                                    return (
+                                        <TableRow key={name}>
+                                            <TableCell>{name}</TableCell>
+                                            <TableCell align="right">{count != null ? count.toLocaleString() : '—'}</TableCell>
+                                            <TableCell align="right">{pct != null ? `${pct}%` : '—'}</TableCell>
+                                        </TableRow>
+                                    );
+                                })}
+                            </TableBody>
+                        </Table>
+                    </Paper>
                 </>
             )}
         </PageContainer>
