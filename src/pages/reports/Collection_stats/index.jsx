@@ -8,18 +8,18 @@ import PageContainer from '../../../components/page/PageContainer';
 import SourceSelector from '../../../components/inputs/SourceSelector';
 import { GetSourceCollectionStats } from '../../../api/services/SourceService';
 
-// First 10 anticaking agents from Health Canada's List of Permitted Anticaking Agents.
+// First 10 preservatives from Health Canada's List of Permitted Preservatives.
 const ADDITIVES = [
-    'Calcium Phosphate, Tribasic',
-    'Calcium Silicate',
-    'Calcium Stearate',
-    'Cellulose',
-    'Magnesium Carbonate',
-    'Magnesium Oxide',
-    'Magnesium Silicate',
-    'Magnesium Stearate',
-    'Microcrystalline Cellulose',
-    'Potassium Ferrocyanide',
+    'Acetic Acid',
+    'Ascorbic Acid',
+    'Ascorbyl Palmitate',
+    'Ascorbyl Stearate',
+    'Benzoic Acid',
+    'Butylated Hydroxyanisole',
+    'Butylated Hydroxytoluene',
+    'Calcium Ascorbate',
+    'Calcium Propionate',
+    'Calcium Sorbate',
 ];
 
 // Nutrient IDs confirmed against the nutrients table in the database.
@@ -347,7 +347,7 @@ const CollectionStats = () => {
                         Ingredient Prevalence &amp; Additives
                     </Typography>
                     <Typography variant="body2" color="text.secondary" style={{ padding: '0 10px 10px' }}>
-                        Anticaking agents (Health Canada List of Permitted Anticaking Agents).
+                        Preservatives (Health Canada List of Permitted Preservatives).
                         Counts reflect products whose English ingredient list contains the additive name.
                     </Typography>
                     <Paper variant="outlined" style={{ margin: '10px', overflowX: 'auto' }}>
