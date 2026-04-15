@@ -9,6 +9,16 @@ const GetAllSources = async () => {
   }
 };
 
+const GetSourceCollectionStats = async (sourceId) => {
+  try {
+    const data = await ApiQueryGet(`sources/${sourceId}/collection-stats/`);
+    return { error: false, ...data };
+  } catch (error) {
+    return { error: true, message: error.message };
+  }
+};
+
 export {
     GetAllSources,
+    GetSourceCollectionStats,
 };

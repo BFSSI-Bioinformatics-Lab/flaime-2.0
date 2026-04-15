@@ -138,6 +138,8 @@ const Header = () => {
                                 }
                             }}
                         >
+                            <MenuItem component={Link} to='/reports/collection-stats'
+                                onClick={handleClose}>Collection Statistics</MenuItem>
                         </Menu>
 
                         <Button
