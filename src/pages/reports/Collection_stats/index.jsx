@@ -75,7 +75,7 @@ const CollectionStats = () => {
         const additiveFilters = {};
         ADDITIVES.forEach(name => {
             const key = name.toLowerCase().replace(/[^a-z0-9]+/g, '_');
-            additiveFilters[key] = { match_phrase: { ingredient_en: name } };
+            additiveFilters[key] = { match_phrase: { 'ingredients.en': name } };
         });
 
         return {
