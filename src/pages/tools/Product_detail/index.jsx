@@ -31,6 +31,8 @@ const ProductDetail = () => {
                 setError(result.message);
             } else {
                 setProduct(result.data);
+                setProduct({ ...result.data, verified: true, needs_manual_verification: true });
+
             }
             setLoading(false);
         };
@@ -110,11 +112,11 @@ const ProductDetail = () => {
     ].filter(item => item.value); // null or undefined values are filtered out
 
     const isFlagged = product.needs_manual_verification === true || product.needs_manual_verification === 'true';
-    const isVerified = product.verified_nft_ingredients === true || product.verified_nft_ingredients === 'true';
+    const isVerified = product.verified === true || product.verified === 'true';
 
     const showWarningBanner = isFlagged && !isVerified;
     const showSuccessBanner = isVerified;
-    const isFrozenEntrees2025 = product.source === "2025 Frozen Entree collection";
+    const isFrozenEntrees2025 = product.source === "2025 Frozen Entree collection" && !isVerified;
 
     return (
         <div>
