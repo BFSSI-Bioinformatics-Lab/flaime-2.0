@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import {
     Typography, Divider, Button, Table, TableBody, TableCell,
     TableHead, TableRow, Paper, Grid, Card, CardContent,
@@ -36,12 +37,49 @@ const CollectionStats = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError]         = useState('');
 
+    const [selectedAdditive, setSelectedAdditive]       = useState(null);
+    const [additiveProducts, setAdditiveProducts]       = useState([]);
+    const [additiveProductsLoading, setAdditiveProductsLoading] = useState(false);
+
     const handleSourceChange = (value) => {
         setSourceId(value === '-1' ? null : value);
         setEsStats(null);
         setDbStats(null);
         setError('');
+        setSelectedAdditive(null);
+        setAdditiveProducts([]);
     };
+
+    const handleAdditiveClick = useCallback(async (name) => {
+        if (selectedAdditive === name) {
+            setSelectedAdditive(null);
+            setAdditiveProducts([]);
+            return;
+        }
+        setSelectedAdditive(name);
+        setAdditiveProducts([]);
+        setAdditiveProductsLoading(true);
+
+        const filter = [{ match_phrase: { 'ingredients.en': name } }];
+        if (sourceId) filter.push({ term: { 'source.id': parseInt(sourceId, 10) } });
+
+        try {
+            const response = await fetch(`${process.env.REACT_APP_ELASTIC_URL}/_search`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    size: 50,
+                    _source: ['id', 'site_name', 'store.name', 'source.name'],
+                    query: { bool: { filter } },
+                }),
+            });
+            const data = await response.json();
+            setAdditiveProducts(data.hits?.hits?.map(h => h._source) ?? []);
+        } catch {
+            setAdditiveProducts([]);
+        }
+        setAdditiveProductsLoading(false);
+    }, [selectedAdditive, sourceId]);
 
     const buildEsQuery = useCallback(() => {
         const filter = sourceId
@@ -366,8 +404,15 @@ const CollectionStats = () => {
                                     const pct = count != null && total > 0
                                         ? ((count / total) * 100).toFixed(2)
                                         : null;
+                                    const isSelected = selectedAdditive === name;
                                     return (
-                                        <TableRow key={name}>
+                                        <TableRow
+                                            key={name}
+                                            hover
+                                            selected={isSelected}
+                                            onClick={() => handleAdditiveClick(name)}
+                                            style={{ cursor: 'pointer' }}
+                                        >
                                             <TableCell>{name}</TableCell>
                                             <TableCell align="right">{count != null ? count.toLocaleString() : '—'}</TableCell>
                                             <TableCell align="right">{pct != null ? `${pct}%` : '—'}</TableCell>
@@ -377,6 +422,49 @@ const CollectionStats = () => {
                             </TableBody>
                         </Table>
                     </Paper>
+
+                    {selectedAdditive && (
+                        <>
+                            <Typography variant="h6" style={{ padding: '10px 10px 4px' }}>
+                                Products containing "{selectedAdditive}"
+                                {!additiveProductsLoading && ` (showing up to 50)`}
+                            </Typography>
+                            {additiveProductsLoading ? (
+                                <div style={{ textAlign: 'center', padding: '20px' }}>
+                                    <CircularProgress size={24} />
+                                </div>
+                            ) : (
+                                <Paper variant="outlined" style={{ margin: '10px', overflowX: 'auto' }}>
+                                    <Table size="small">
+                                        <TableHead>
+                                            <TableRow>
+                                                <TableCell><b>Product</b></TableCell>
+                                                <TableCell><b>Store</b></TableCell>
+                                                <TableCell><b>Collection</b></TableCell>
+                                            </TableRow>
+                                        </TableHead>
+                                        <TableBody>
+                                            {additiveProducts.length === 0 ? (
+                                                <TableRow>
+                                                    <TableCell colSpan={3} align="center">No products found.</TableCell>
+                                                </TableRow>
+                                            ) : additiveProducts.map(p => (
+                                                <TableRow key={p.id} hover>
+                                                    <TableCell>
+                                                        <Link to={`/tools/product-browser/${p.id}`} target="_blank">
+                                                            {p.site_name}
+                                                        </Link>
+                                                    </TableCell>
+                                                    <TableCell>{p.store?.name ?? '—'}</TableCell>
+                                                    <TableCell>{p.source?.name ?? '—'}</TableCell>
+                                                </TableRow>
+                                            ))}
+                                        </TableBody>
+                                    </Table>
+                                </Paper>
+                            )}
+                        </>
+                    )}
                 </>
             )}
         </PageContainer>
