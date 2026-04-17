@@ -31,8 +31,6 @@ const ProductDetail = () => {
                 setError(result.message);
             } else {
                 setProduct(result.data);
-                setProduct({ ...result.data, verified: true, needs_manual_verification: true });
-
             }
             setLoading(false);
         };
