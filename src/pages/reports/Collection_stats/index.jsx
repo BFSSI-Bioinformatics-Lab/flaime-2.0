@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import {
     Typography, Divider, Button, Table, TableBody, TableCell,
     TableHead, TableRow, Paper, Grid, Card, CardContent,
-    CircularProgress, Alert
+    CircularProgress, Alert, TextField
 } from '@mui/material';
 import PageContainer from '../../../components/page/PageContainer';
 import SourceSelector from '../../../components/inputs/SourceSelector';
@@ -40,6 +40,7 @@ const CollectionStats = () => {
     const [selectedAdditive, setSelectedAdditive]       = useState(null);
     const [additiveProducts, setAdditiveProducts]       = useState([]);
     const [additiveProductsLoading, setAdditiveProductsLoading] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
 
     const handleSourceChange = (value) => {
         setSourceId(value === '-1' ? null : value);
@@ -50,12 +51,7 @@ const CollectionStats = () => {
         setAdditiveProducts([]);
     };
 
-    const handleAdditiveClick = useCallback(async (name) => {
-        if (selectedAdditive === name) {
-            setSelectedAdditive(null);
-            setAdditiveProducts([]);
-            return;
-        }
+    const fetchAdditiveProducts = useCallback(async (name) => {
         setSelectedAdditive(name);
         setAdditiveProducts([]);
         setAdditiveProductsLoading(true);
@@ -79,7 +75,21 @@ const CollectionStats = () => {
             setAdditiveProducts([]);
         }
         setAdditiveProductsLoading(false);
-    }, [selectedAdditive, sourceId]);
+    }, [sourceId]);
+
+    const handleAdditiveClick = useCallback((name) => {
+        if (selectedAdditive === name) {
+            setSelectedAdditive(null);
+            setAdditiveProducts([]);
+        } else {
+            fetchAdditiveProducts(name);
+        }
+    }, [selectedAdditive, fetchAdditiveProducts]);
+
+    const handleSearch = useCallback(() => {
+        const term = searchTerm.trim();
+        if (term) fetchAdditiveProducts(term);
+    }, [searchTerm, fetchAdditiveProducts]);
 
     const buildEsQuery = useCallback(() => {
         const filter = sourceId
@@ -422,6 +432,20 @@ const CollectionStats = () => {
                             </TableBody>
                         </Table>
                     </Paper>
+
+                    <div style={{ display: 'flex', gap: '10px', padding: '10px 10px 0', alignItems: 'center' }}>
+                        <TextField
+                            size="small"
+                            label="Search any ingredient"
+                            value={searchTerm}
+                            onChange={e => setSearchTerm(e.target.value)}
+                            onKeyDown={e => e.key === 'Enter' && handleSearch()}
+                            style={{ width: '300px' }}
+                        />
+                        <Button variant="outlined" onClick={handleSearch} disabled={!searchTerm.trim()}>
+                            Search
+                        </Button>
+                    </div>
 
                     {selectedAdditive && (
                         <>
