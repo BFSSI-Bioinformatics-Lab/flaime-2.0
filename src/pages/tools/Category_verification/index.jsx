@@ -8,6 +8,7 @@ import {
   GetUserVerifications,
   GetAllUsers 
 } from '../../../api/services/CategoryVerificationService';
+import { GetAllCategories } from '../../../api/services/CategoryService';
 import {
   Table, TableBody, TableCell, TableContainer, TableHead,
   TableRow, Paper, Select, MenuItem, Checkbox, Button,
@@ -18,6 +19,7 @@ import {
 
 const CategoryVerification = () => {
   const [products, setProducts] = useState([]);
+  const [allCategories, setAllCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState('');
@@ -35,6 +37,8 @@ const CategoryVerification = () => {
   const source = searchParams.get('source');
   const view = searchParams.get('view') || 'verify';
   const preselectedUserId = searchParams.get('user');
+  const extraCategoryIds = (searchParams.get('extra_categories') || '')
+    .split(',').filter(Boolean).map(Number);
 
   const isVerificationView = () => view === 'verify';
   const isProblematicView = () => view === 'problematic';
@@ -49,9 +53,7 @@ const CategoryVerification = () => {
   };
 
   const getPageDesc = () => {
-    if (totalCount === 0) {
-      return 'No products to display';
-    }
+    if (totalCount === 0) return 'No products to display';
     const start = (currentPage - 1) * pageSize + 1;
     const end = Math.min(currentPage * pageSize, totalCount);
     return `Showing ${start}-${end} of ${totalCount} products`;
@@ -59,41 +61,24 @@ const CategoryVerification = () => {
 
   const getApiCall = () => {
     if (view === 'problematic') {
-      return GetProblematicVerifications(
-        parseInt(scheme), 
-        parseInt(source),
-        currentPage,
-        pageSize
-      );
+      return GetProblematicVerifications(parseInt(scheme), parseInt(source), currentPage, pageSize);
     }
     if (view === 'user-verifications') {
       const userId = preselectedUserId || selectedUser;
       return GetUserVerifications(
-        parseInt(scheme), 
-        parseInt(source), 
+        parseInt(scheme), parseInt(source),
         userId ? parseInt(userId) : null,
-        currentPage,
-        pageSize
+        currentPage, pageSize
       );
     }
-    return GetCategoriesToVerify(
-      parseInt(scheme), 
-      parseInt(source),
-      currentPage,
-      pageSize
-    );
+    return GetCategoriesToVerify(parseInt(scheme), parseInt(source), currentPage, pageSize);
   };
 
   const initializeVerificationData = (products, view) => {
     return products.reduce((acc, product) => {
       if (!acc[product.id]) {
         let category, problematicFlag, notes, verificationId;
-        if (view === 'user-verifications') {
-          category = product.category_id;
-          problematicFlag = product.problematic_flag || false;
-          notes = product.notes || '';
-          verificationId = product.id;
-        } else if (view === 'problematic') {
+        if (view === 'user-verifications' || view === 'problematic') {
           category = product.category_id;
           problematicFlag = product.problematic_flag || false;
           notes = product.notes || '';
@@ -109,9 +94,9 @@ const CategoryVerification = () => {
         }
         acc[product.id] = {
           product_id: product.product_id,
-          category: category,
+          category,
           problematic_flag: problematicFlag,
-          notes: notes,
+          notes,
           verification_id: verificationId,
           complete: false
         };
@@ -120,14 +105,23 @@ const CategoryVerification = () => {
     }, {});
   };
 
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const { categories } = await GetAllCategories();
+        setAllCategories(categories || []);
+      } catch (err) {
+        console.error('Error fetching categories:', err);
+      }
+    };
+    fetchCategories();
+  }, []);
+
   const fetchUsers = async () => {
     try {
       const { error, users, message } = await GetAllUsers();
-      if (error) {
-        console.error('Failed to fetch users:', message);
-      } else {
-        setUsers(users || []);
-      }
+      if (error) console.error('Failed to fetch users:', message);
+      else setUsers(users || []);
     } catch (err) {
       console.error('Error fetching users:', err);
     }
@@ -142,12 +136,10 @@ const CategoryVerification = () => {
       setProducts(result.products);
       setTotalCount(result.count);
       setTotalPages(Math.ceil(result.count / pageSize));
-      
-      setVerificationData(prev => {
-        const newData = initializeVerificationData(result.products, view);
-        return { ...prev, ...newData };
-      });
-      
+      setVerificationData(prev => ({
+        ...prev,
+        ...initializeVerificationData(result.products, view)
+      }));
       setLoading(false);
     } catch (err) {
       console.error('Fetch error:', err);
@@ -161,9 +153,7 @@ const CategoryVerification = () => {
       fetchProducts();
       if (view === 'user-verifications') {
         fetchUsers();
-        if (preselectedUserId) {
-          setSelectedUser(preselectedUserId);
-        }
+        if (preselectedUserId) setSelectedUser(preselectedUserId);
       }
     } else {
       setError('Missing required parameters: scheme and source');
@@ -173,164 +163,128 @@ const CategoryVerification = () => {
 
   const handlePageChange = (event, value) => {
     setCurrentPage(value);
-    requestAnimationFrame(() => {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    });
+    requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: 'smooth' }));
   };
 
   const handleCategoryChange = (productId, categoryId) => {
     setVerificationData(prev => ({
       ...prev,
-      [productId]: {
-        ...prev[productId],
-        category: parseInt(categoryId)
-      }
+      [productId]: { ...prev[productId], category: parseInt(categoryId) }
     }));
   };
 
   const handleProblematicToggle = (productId) => {
     setVerificationData(prev => ({
       ...prev,
-      [productId]: {
-        ...prev[productId],
-        problematic_flag: !prev[productId].problematic_flag
-      }
+      [productId]: { ...prev[productId], problematic_flag: !prev[productId].problematic_flag }
     }));
   };
 
   const handleCompleteToggle = (productId) => {
     setVerificationData(prev => ({
       ...prev,
-      [productId]: {
-        ...prev[productId],
-        complete: !prev[productId].complete
-      }
+      [productId]: { ...prev[productId], complete: !prev[productId].complete }
     }));
   };
 
   const handleNotesChange = (productId, notes) => {
     setVerificationData(prev => ({
       ...prev,
-      [productId]: {
-        ...prev[productId],
-        notes: notes
-      }
+      [productId]: { ...prev[productId], notes }
     }));
   };
 
   const handleSubmit = async () => {
     const isUpdateView = view === 'problematic' || view === 'user-verifications';
-    
-    const completedItems = Object.entries(verificationData)
-      .filter(([_, data]) => data.complete);
+    const completedItems = Object.entries(verificationData).filter(([_, data]) => data.complete);
 
     if (completedItems.length === 0) {
       setError('Please mark at least one item as complete before submitting');
       return false;
     }
 
-    if (isUpdateView) {
-      const updates = completedItems.map(([productId, data]) => ({
-        verification_id: data.verification_id,
-        updates: {
-          category: data.category,
-          problematic_flag: data.problematic_flag,
-          ...(view === 'problematic' && { notes: data.notes })
-        }
-      }));
-
-      try {
+    try {
+      if (isUpdateView) {
         const results = await Promise.all(
-          updates.map(({ verification_id, updates }) => 
-            UpdateCategoryVerification(verification_id, updates)
+          completedItems.map(([_, data]) =>
+            UpdateCategoryVerification(data.verification_id, {
+              category: data.category,
+              problematic_flag: data.problematic_flag,
+              ...(view === 'problematic' && { notes: data.notes })
+            })
           )
         );
-
-        if (results.every(result => !result.error)) {
-          setSuccessMessage(`${completedItems.length} verification(s) successfully updated!`);
-          
-          completedItems.forEach(([productId]) => {
-            setVerificationData(prev => {
-              const newData = { ...prev };
-              delete newData[productId];
-              return newData;
-            });
-          });
-          
-          setCurrentPage(1);
-          setTimeout(() => {
-            setSuccessMessage('');
-            fetchProducts();
-          }, 1500);
-          return true;
-        } else {
+        if (!results.every(r => !r.error)) {
           setError('Some verifications failed to update');
           return false;
         }
-      } catch (err) {
-        setError('Failed to update verifications');
-        return false;
-      }
-    } else {
-      const verifications = completedItems.map(([productId, data]) => ({
-        product: data.product_id,
-        category: data.category,
-        problematic_flag: data.problematic_flag
-      }));
-
-      try {
+        setSuccessMessage(`${completedItems.length} verification(s) successfully updated!`);
+      } else {
         const results = await Promise.all(
-          verifications.map(verification => 
-            SubmitCategoryVerification(verification)
+          completedItems.map(([_, data]) =>
+            SubmitCategoryVerification({
+              product: data.product_id,
+              category: data.category,
+              problematic_flag: data.problematic_flag
+            })
           )
         );
-
-        if (results.every(result => !result.error)) {
-          setSuccessMessage(`${completedItems.length} categor${completedItems.length === 1 ? 'y' : 'ies'} successfully verified!`);
-          
-          completedItems.forEach(([productId]) => {
-            setVerificationData(prev => {
-              const newData = { ...prev };
-              delete newData[productId];
-              return newData;
-            });
-          });
-          
-          setCurrentPage(1);
-          setTimeout(() => {
-            setSuccessMessage('');
-            fetchProducts();
-          }, 1500);
-          return true;
-        } else {
+        if (!results.every(r => !r.error)) {
           setError('Some verifications failed to submit');
           return false;
         }
-      } catch (err) {
-        setError('Failed to submit verifications');
-        return false;
+        setSuccessMessage(`${completedItems.length} categor${completedItems.length === 1 ? 'y' : 'ies'} successfully verified!`);
       }
+
+      completedItems.forEach(([productId]) => {
+        setVerificationData(prev => {
+          const newData = { ...prev };
+          delete newData[productId];
+          return newData;
+        });
+      });
+
+      setCurrentPage(1);
+      setTimeout(() => {
+        setSuccessMessage('');
+        fetchProducts();
+      }, 1500);
+      return true;
+    } catch (err) {
+      setError('Failed to submit verifications');
+      return false;
     }
   };
 
-  const getCompletedCount = () => {
-    return Object.values(verificationData).filter(data => data.complete).length;
+  const getCompletedCount = () => Object.values(verificationData).filter(d => d.complete).length;
+
+  const getDropdownOptions = (product) => {
+      const CONFIDENCE_THRESHOLD = 0.05;
+      const predictionCategoryIds = new Set((product.predictions || []).map(p => p.category_id));
+      const extras = allCategories
+          .filter(c => extraCategoryIds.includes(c.id) && !predictionCategoryIds.has(c.id))
+          .map(c => ({ category_id: c.id, category_name: c.name, category_code: c.code, confidence: null }));
+      return [
+          ...(product.predictions || []).sort((a, b) => {
+              const aLow = a.confidence < CONFIDENCE_THRESHOLD;
+              const bLow = b.confidence < CONFIDENCE_THRESHOLD;
+              if (aLow && bLow) return (a.category_code || '').localeCompare(b.category_code || '', undefined, { numeric: true, sensitivity: 'base' });
+              if (aLow) return 1;
+              if (bLow) return -1;
+              return b.confidence - a.confidence;
+          }),
+          ...extras
+      ];
   };
 
   if (loading) {
-    return (
-      <div className="flex justify-center p-8">
-        <CircularProgress />
-      </div>
-    );
+    return <div className="flex justify-center p-8"><CircularProgress /></div>;
   }
 
   if (!scheme || !source) {
     return (
       <div className="p-8">
-        <Typography variant="h4" className="mb-6">
-          Category Verification
-        </Typography>
+        <Typography variant="h4" className="mb-6">Category Verification</Typography>
         <Alert severity="error">
           Missing required parameters. Please access this page through the verification setup.
         </Alert>
@@ -340,14 +294,10 @@ const CategoryVerification = () => {
 
   return (
     <div className="p-4 md:p-8 max-w-full overflow-x-auto">
-      <Typography variant="h4" className="mb-4">
-        {getPageTitle()}
-      </Typography>
+      <Typography variant="h4" className="mb-4">{getPageTitle()}</Typography>
 
       <Box className="mb-6 flex justify-between items-center">
-        <Typography variant="body1">
-          {getPageDesc()}
-        </Typography>
+        <Typography variant="body1">{getPageDesc()}</Typography>
         {getCompletedCount() > 0 && (
           <Typography variant="body2" color="primary" sx={{ fontWeight: 'bold' }}>
             {getCompletedCount()} marked as complete
@@ -356,15 +306,11 @@ const CategoryVerification = () => {
       </Box>
 
       <Snackbar open={!!successMessage} autoHideDuration={3000} onClose={() => setSuccessMessage('')}>
-        <Alert severity="success" onClose={() => setSuccessMessage('')}>
-          {successMessage}
-        </Alert>
+        <Alert severity="success" onClose={() => setSuccessMessage('')}>{successMessage}</Alert>
       </Snackbar>
 
       <Snackbar open={!!error} autoHideDuration={6000} onClose={() => setError(null)}>
-        <Alert severity="error" onClose={() => setError(null)}>
-          {error}
-        </Alert>
+        <Alert severity="error" onClose={() => setError(null)}>{error}</Alert>
       </Snackbar>
 
       {products.length === 0 ? (
@@ -384,22 +330,16 @@ const CategoryVerification = () => {
               </TableHead>
               <TableBody>
                 {products.map((product) => {
-                  const topPrediction = product.predictions?.reduce((prev, current) =>
-                    prev.confidence > current.confidence ? prev : current
-                  ) || {};
-
+                  const options = getDropdownOptions(product);
                   return (
                     <TableRow key={product.id}>
                       <TableCell sx={{ minWidth: 200 }}>
-                        <Link 
-                          to={`/tools/product-browser/${product.store_product_id || product.id}`} 
+                        <Link
+                          to={`/tools/product-browser/${product.store_product_id || product.id}`}
                           target="_blank"
-                          style={{
-                            color: '#023466ff',
-                            textDecoration: 'none'
-                          }}
-                          onMouseEnter={(e) => e.target.style.textDecoration = 'underline'}
-                          onMouseLeave={(e) => e.target.style.textDecoration = 'none'}
+                          style={{ color: '#023466ff', textDecoration: 'none' }}
+                          onMouseEnter={e => e.target.style.textDecoration = 'underline'}
+                          onMouseLeave={e => e.target.style.textDecoration = 'none'}
                         >
                           {product.product_name}
                         </Link>
@@ -407,21 +347,19 @@ const CategoryVerification = () => {
                       <TableCell sx={{ minWidth: 250 }}>
                         <Select
                           value={verificationData[product.id]?.category || ''}
-                          onChange={(e) => handleCategoryChange(product.id, e.target.value)}
+                          onChange={e => handleCategoryChange(product.id, e.target.value)}
                           fullWidth
                           size="small"
                         >
-                          {(product.predictions || [])
-                            .sort((a, b) => b.confidence - a.confidence)
-                            .map((prediction) => (
-                              <MenuItem
-                                key={`${prediction.category_id}-${product.id}`}
-                                value={prediction.category_id}
-                              >
-                                {prediction.category_code} - {prediction.category_name} -
-                                {(prediction.confidence * 100).toFixed(1)}%
-                              </MenuItem>
-                            ))}
+                          {options.map(opt => (
+                            <MenuItem
+                              key={`${opt.category_id}-${product.id}`}
+                              value={opt.category_id}
+                            >
+                              {opt.category_code} - {opt.category_name}
+                              {opt.confidence !== null && ` - ${(opt.confidence * 100).toFixed(1)}%`}
+                            </MenuItem>
+                          ))}
                         </Select>
                       </TableCell>
                       <TableCell>
@@ -434,7 +372,7 @@ const CategoryVerification = () => {
                         <TableCell sx={{ minWidth: 200 }}>
                           <TextField
                             value={verificationData[product.id]?.notes || ''}
-                            onChange={(e) => handleNotesChange(product.id, e.target.value)}
+                            onChange={e => handleNotesChange(product.id, e.target.value)}
                             fullWidth
                             size="small"
                             multiline
@@ -459,9 +397,9 @@ const CategoryVerification = () => {
 
           {totalPages > 1 && (
             <Box className="mt-6 flex justify-center">
-              <Pagination 
-                count={totalPages} 
-                page={currentPage} 
+              <Pagination
+                count={totalPages}
+                page={currentPage}
                 onChange={handlePageChange}
                 color="primary"
                 size="large"
