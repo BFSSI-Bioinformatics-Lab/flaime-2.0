@@ -37,11 +37,10 @@ function App() {
             <Route path="/" element={<PrivateRoute><Home /></PrivateRoute>} />
             <Route path="tools/product-browser" element={<PrivateRoute requiredGroup="HC"><ProductBrowser /></PrivateRoute>} />
             <Route path="tools/product-finder" element={<PrivateRoute><ProductFinder /></PrivateRoute>} />
-            {/* <Route path="tools/advanced-search" element={<PrivateRoute requiredGroup="Staff"><AdvancedSearch /></PrivateRoute>} /> */}
             <Route path="tools/advanced-search" element={<PrivateRoute><AdvancedSearch /></PrivateRoute>} />
-            <Route path="tools/verify-categories" element={<PrivateRoute><CategoryVerification /></PrivateRoute>} />
-            {/* <Route path="tools/category-verification-setup" element={<PrivateRoute><CategoryVerificationSetup /></PrivateRoute>} /> */}
+            <Route path="tools/verify-categories" element={<PrivateRoute requiredGroup="staff"><CategoryVerification /></PrivateRoute>} />
             <Route path="reports/collection-stats" element={<PrivateRoute><CollectionStats /></PrivateRoute>} />
+            <Route path="tools/category-verification-setup" element={<PrivateRoute requiredGroup="Staff"><CategoryVerificationSetup /></PrivateRoute>} />
             <Route path="data/quality" element={<PrivateRoute><Quality /></PrivateRoute>} />
             <Route path="data/download" element={<PrivateRoute><Download /></PrivateRoute>} />
             <Route path="data/visualizations" element={<PrivateRoute><Visualizations /></PrivateRoute>} />
