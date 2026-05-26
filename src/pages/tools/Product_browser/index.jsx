@@ -55,7 +55,7 @@ const ProductBrowser = () => {
           external_id: { term: { external_id: value } },
           storeName: { match: { "store.name": { query: value, operator: "and" } } },
           sourceName: { term: { "source.id": value } },
-          siteName: { match: { site_name: { query: value, operator: "and" } } },
+          siteName: { match: { site_name: { query: value, operator: "and", fuzziness: "AUTO" } } },
           category: {
             nested: {
               path: "categories",
@@ -81,7 +81,7 @@ const ProductBrowser = () => {
           external_id: { term: { external_id: value } },
           storeName: { match: { "store.name": { query: value, operator: "and" } } },
           sourceName: { term: { "source.id": value } },
-          siteName: { match: { site_name: { query: value, operator: "and" } } },
+          siteName: { match: { site_name: { query: value, operator: "and", fuzziness: "AUTO" } } },
         category: {
           nested: {
             path: "categories",
@@ -151,7 +151,7 @@ const ProductBrowser = () => {
       <Typography variant="body1" style={{ padding: '10px', width: '80vw', margin: '0 auto' }}>
         Search for products by ID, external ID (e.g. FLIP product ID), store name, data source, product name or category. Use the form below to search for products. Note that you can also search by more than one search term at once.
         <ul>
-          <li>Please use full words when searching.</li>
+          <li>Product name search supports fuzzy matching (e.g. "cone" will also match "cones").</li>
           <li>If there are over 10000 products as a result of your search, only the first 10000 will be shown.</li>
         </ul>
       </Typography>
