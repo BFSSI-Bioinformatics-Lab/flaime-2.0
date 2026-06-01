@@ -7,7 +7,7 @@ const useElasticsearchSearch = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [totalProducts, setTotalProducts] = useState(0);
 
-    const executeSearch = useCallback(async (queryObject, page, rowsPerPage, processHits = null) => {
+    const executeSearch = useCallback(async (queryObject, page, rowsPerPage, processHits = null, sort = null) => {
         if (!queryObject) return;
 
         setIsLoading(true);
@@ -15,7 +15,8 @@ const useElasticsearchSearch = () => {
         const body = {
             from: page * rowsPerPage,
             size: rowsPerPage,
-            query: queryObject
+            query: queryObject,
+            ...(sort ? { sort } : {}),
         };
 
         try {
