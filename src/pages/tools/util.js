@@ -26,6 +26,22 @@ export const buildTextMustClauses = (textEntries, fieldKey) => {
     }];
 };
 
+// Builds a product-name clause that tolerates both typos and concatenated names.
+// Some products are stored with their names jammed into one token, e.g.
+// "DeepnDelicious" or "SchoolSafe". The standard analyzer indexes those as a
+// single token, so a fuzzy match for "School" can't reach "SchoolSafe". The
+// lowercased substring wildcard matches inside that token, while the fuzzy match
+// keeps typo tolerance and multi-word behaviour (e.g. "cone" -> "cones").
+export const buildProductNameClause = (value) => ({
+    bool: {
+        should: [
+            { match: { site_name: { query: value, operator: "and", fuzziness: "AUTO" } } },
+            { wildcard: { site_name: { value: `*${value.toLowerCase()}*` } } }
+        ],
+        minimum_should_match: 1
+    }
+});
+
 // --- Shared clause helpers ---
 
 const buildSourceClause = (source) => {
@@ -65,13 +81,7 @@ export const buildTextMustClausesForAllFields = (searchInputs) => {
     const mustClauses = [];
 
     if (searchInputs.Names) {
-        mustClauses.push({
-            wildcard: {
-                "site_name": {
-                    value: `*${searchInputs.Names}*`
-                }
-            }
-        });
+        mustClauses.push(buildProductNameClause(searchInputs.Names));
     }
     if (searchInputs.IDs) {
         mustClauses.push({ term: { "id": searchInputs.IDs } });

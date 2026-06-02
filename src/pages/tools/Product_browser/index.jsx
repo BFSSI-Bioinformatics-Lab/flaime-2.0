@@ -8,6 +8,7 @@ import { Link } from 'react-router-dom';
 import SourceSelector from '../../../components/inputs/SourceSelector';
 import { ResetButton } from '../../../components/buttons/ResetButton';
 import { DownloadResultButton } from '../../../components/buttons/DownloadResultButton';
+import { buildProductNameClause } from '../util';
 
 const ProductBrowser = () => {
   const [products, setProducts] = useState([]);
@@ -55,7 +56,7 @@ const ProductBrowser = () => {
           external_id: { term: { external_id: value } },
           storeName: { match: { "store.name": { query: value, operator: "and" } } },
           sourceName: { term: { "source.id": value } },
-          siteName: { match: { site_name: { query: value, operator: "and", fuzziness: "AUTO" } } },
+          siteName: buildProductNameClause(value),
           category: {
             nested: {
               path: "categories",
@@ -81,7 +82,7 @@ const ProductBrowser = () => {
           external_id: { term: { external_id: value } },
           storeName: { match: { "store.name": { query: value, operator: "and" } } },
           sourceName: { term: { "source.id": value } },
-          siteName: { match: { site_name: { query: value, operator: "and", fuzziness: "AUTO" } } },
+          siteName: buildProductNameClause(value),
         category: {
           nested: {
             path: "categories",
@@ -151,7 +152,7 @@ const ProductBrowser = () => {
       <Typography variant="body1" style={{ padding: '10px', width: '80vw', margin: '0 auto' }}>
         Search for products by ID, external ID (e.g. FLIP product ID), store name, data source, product name or category. Use the form below to search for products. Note that you can also search by more than one search term at once.
         <ul>
-          <li>Product name search supports fuzzy matching (e.g. "cone" will also match "cones").</li>
+          <li>Product name search supports fuzzy and partial matching (e.g. "cone" will also match "cones", and "School" will match "SchoolSafe").</li>
           <li>If there are over 10000 products as a result of your search, only the first 10000 will be shown.</li>
         </ul>
       </Typography>
