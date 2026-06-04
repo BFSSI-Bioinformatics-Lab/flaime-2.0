@@ -35,10 +35,8 @@ const CategoryVerificationSetup = () => {
   const [error, setError] = useState(null);
 
   const predefinedCombinations = [
-    { sourceId: 181, schemeId: 9, name: "Baked Goods - RA" },
-    { sourceId: 181, schemeId: 10, name: "Baked Goods - Sodium" },
     { sourceId: 183, schemeId: 9, name: "Snacks - RA" },
-    { sourceId: 183, schemeId: 10, name: "Snacks - Sodium" },
+    { sourceId: 185, schemeId: 9, name: "Refrig sides and apps - RA" },
   ];
 
   useEffect(() => {
