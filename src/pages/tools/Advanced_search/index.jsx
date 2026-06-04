@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import dayjs from 'dayjs';
 import { TextField, Button, Alert, Typography, Divider, Grid, Select, MenuItem, FormControl, InputLabel} from '@mui/material';
 import PageContainer from '../../../components/page/PageContainer';
@@ -15,6 +15,19 @@ import useSearchOptions from '../../../hooks/useSearchOptions';
 import useElasticsearch from '../../../hooks/useElasticsearch';
 import usePagination from '../../../hooks/usePagination';
 import useColumnSelection from '../../../hooks/useColumnSelection';
+
+const SORTABLE_ES_FIELDS = {
+    id: 'id',
+    external_id: 'external_id.keyword',
+    name: 'site_name.keyword',
+    price: 'reading_price.keyword',
+    source: 'source.name.keyword',
+    store: 'store.name.keyword',
+    date: 'scrape_batch.datetime',
+    region: 'scrape_batch.region.keyword',
+    storage_condition: 'storage_condition.keyword',
+    primary_package_material: 'primary_package_material.keyword',
+};
 
 const COLUMN_ORDER = [
     'id',
@@ -92,6 +105,9 @@ const AdvancedSearch = () => {
 
     const { results: searchResults, isLoading, totalProducts, setResults: setSearchResults, setTotalProducts, executeSearch } = useElasticsearch();
     const { columnsVisibility, selectedColumns, setSelectedColumns, handleColumnSelection } = useColumnSelection(INITIAL_COLUMNS_VISIBILITY, COLUMN_ORDER);
+
+    const [sortState, setSortState] = useState({ field: null, order: 'asc' });
+    const sortRef = useRef({ field: null, order: 'asc' });
 
     const buildQueryObject = useCallback(() => {
         const textMustClauses = buildTextMustClausesForAllFields(searchInputs);
@@ -173,7 +189,9 @@ const AdvancedSearch = () => {
     }, [searchInputs]);
 
     const search = useCallback((page, rowsPerPage) => {
-        executeSearch(buildQueryObject(), page, rowsPerPage, processAllergenHits);
+        const { field, order } = sortRef.current;
+        const sort = field ? [{ [SORTABLE_ES_FIELDS[field]]: { order } }] : null;
+        executeSearch(buildQueryObject(), page, rowsPerPage, processAllergenHits, sort);
     }, [buildQueryObject, executeSearch]);
 
     const { page, setPage, rowsPerPage, setRowsPerPage, handlePageChange, handleRowsPerPageChange } = usePagination(search);
@@ -190,6 +208,18 @@ const AdvancedSearch = () => {
         setRowsPerPage(25);
         setResetKey(prev => prev + 1);
         setSelectedColumns(Object.keys(columnsVisibility));
+        const resetSort = { field: null, order: 'asc' };
+        sortRef.current = resetSort;
+        setSortState(resetSort);
+    };
+
+    const handleSortChange = (column) => {
+        const newOrder = sortState.field === column && sortState.order === 'asc' ? 'desc' : 'asc';
+        const newSort = { field: column, order: newOrder };
+        sortRef.current = newSort;
+        setSortState(newSort);
+        setPage(0);
+        search(0, rowsPerPage);
     };
 
     const handleTextFieldChange = (field) => (event) => {
@@ -432,6 +462,9 @@ const AdvancedSearch = () => {
                             rowsPerPage={rowsPerPage}
                             onPageChange={handlePageChange}
                             onRowsPerPageChange={handleRowsPerPageChange}
+                            sortField={sortState.field}
+                            sortOrder={sortState.order}
+                            onSortChange={handleSortChange}
                         />
                     )}
                 </>

@@ -2,12 +2,20 @@ import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import {
   TableContainer, Table, TableHead, TableRow, TableCell, TableBody,
-  Pagination, TextField, Paper, Typography, Card, CardContent, Divider
+  Pagination, TextField, Paper, Typography, Card, CardContent, Divider, TableSortLabel
 } from '@mui/material';
 import { Link } from 'react-router-dom';
 import SourceSelector from '../../../components/inputs/SourceSelector';
 import { ResetButton } from '../../../components/buttons/ResetButton';
 import { DownloadResultButton } from '../../../components/buttons/DownloadResultButton';
+
+const SORTABLE_ES_FIELDS = {
+  id: 'id',
+  external_id: 'external_id.keyword',
+  store: 'store.name.keyword',
+  source: 'source.name.keyword',
+  name: 'site_name.keyword',
+};
 
 const ProductBrowser = () => {
   const [products, setProducts] = useState([]);
@@ -23,6 +31,7 @@ const ProductBrowser = () => {
   });
   const [aggregationResponse, setAggregationResponse] = useState(null);
   const [isSearching, setIsSearching] = useState(false);
+  const [sortState, setSortState] = useState({ field: null, order: 'asc' });
 
   const fetchData = useCallback(async (url, body) => {
     try {
@@ -111,14 +120,16 @@ const ProductBrowser = () => {
 
   const fetchProducts = useCallback(() => {
     const elasticUrl = `${process.env.REACT_APP_ELASTIC_URL}/_search`;
+    const sort = sortState.field ? [{ [SORTABLE_ES_FIELDS[sortState.field]]: { order: sortState.order } }] : undefined;
     const body = {
       query: buildQueryObject(),
       aggs: buildAggregations(),
       from: (page - 1) * rowsPerPage,
-      size: rowsPerPage
+      size: rowsPerPage,
+      ...(sort ? { sort } : {}),
     };
     fetchData(elasticUrl, body);
-  }, [fetchData, buildQueryObject, buildAggregations, page, rowsPerPage]);
+  }, [fetchData, buildQueryObject, buildAggregations, page, rowsPerPage, sortState]);
 
   useEffect(() => {
     fetchProducts();
@@ -136,12 +147,20 @@ const ProductBrowser = () => {
     setIsSearching(true);
   }, []);
 
+  const handleSortChange = useCallback((field) => {
+    setSortState(prev => {
+      const newOrder = prev.field === field && prev.order === 'asc' ? 'desc' : 'asc';
+      return { field, order: newOrder };
+    });
+    setPage(1);
+  }, []);
+
   const handleReset = useCallback(() => {
     setSearchTerms({ id: '', storeName: '', sourceName: '', siteName: '', category: '' });
     setPage(1);
     setIsSearching(false);
-    fetchProducts();
-  }, [fetchProducts]);
+    setSortState({ field: null, order: 'asc' });
+  }, []);
 
   const currentQueryBody = buildQueryObject();
 
@@ -172,7 +191,7 @@ const ProductBrowser = () => {
         <SearchResults totalProducts={totalProducts} />
       )}
 
-      <ProductTable products={products} />
+      <ProductTable products={products} sortField={sortState.field} sortOrder={sortState.order} onSortChange={handleSortChange} />
 
       <Pagination
         count={Math.ceil(totalProducts / rowsPerPage)}
@@ -254,13 +273,32 @@ const SearchResults = React.memo(({ totalProducts }) => (
   </div>
 ));
 
-const ProductTable = React.memo(({ products }) => (
+const BROWSER_COLUMNS = [
+  { header: 'Assigned Flaime ID', field: 'id' },
+  { header: 'External ID', field: 'external_id' },
+  { header: 'Store Name', field: 'store' },
+  { header: 'Data Source', field: 'source' },
+  { header: 'Product Name', field: 'name' },
+  { header: 'Category Name', field: null },
+];
+
+const ProductTable = React.memo(({ products, sortField, sortOrder, onSortChange }) => (
   <TableContainer style={{ width: '80vw', margin: '0 auto' }}>
     <Table>
       <TableHead>
         <TableRow>
-          {['Assigned Flaime ID', 'External ID', 'Store Name', 'Data Source', 'Product Name', 'Category Name'].map((header) => (
-            <TableCell key={header} style={{ fontWeight: 'bold', textAlign: 'center', letterSpacing: '1px' }}>{header}</TableCell>
+          {BROWSER_COLUMNS.map(({ header, field }) => (
+            <TableCell key={header} style={{ fontWeight: 'bold', textAlign: 'center', letterSpacing: '1px' }}>
+              {field && onSortChange ? (
+                <TableSortLabel
+                  active={sortField === field}
+                  direction={sortField === field ? sortOrder : 'asc'}
+                  onClick={() => onSortChange(field)}
+                >
+                  {header}
+                </TableSortLabel>
+              ) : header}
+            </TableCell>
           ))}
         </TableRow>
       </TableHead>

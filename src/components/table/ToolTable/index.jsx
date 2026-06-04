@@ -1,9 +1,22 @@
 import React from 'react';
-import { Table, TableHead, TableBody, TableRow, TableCell, TableContainer, Paper, TablePagination } from '@mui/material';
+import { Table, TableHead, TableBody, TableRow, TableCell, TableContainer, Paper, TablePagination, TableSortLabel } from '@mui/material';
 import { StyledTableCell } from './styles';
 import { Link } from 'react-router-dom';
 
-const ToolTable = ({ columns, data, totalCount, page, rowsPerPage, onPageChange, onRowsPerPageChange }) => {
+const SORTABLE_COLUMNS = {
+  id: 'id',
+  external_id: 'external_id.keyword',
+  name: 'site_name.keyword',
+  price: 'reading_price.keyword',
+  source: 'source.name.keyword',
+  store: 'store.name.keyword',
+  date: 'scrape_batch.datetime',
+  region: 'scrape_batch.region.keyword',
+  storage_condition: 'storage_condition.keyword',
+  primary_package_material: 'primary_package_material.keyword',
+};
+
+const ToolTable = ({ columns, data, totalCount, page, rowsPerPage, onPageChange, onRowsPerPageChange, sortField, sortOrder, onSortChange }) => {
   const renderCell = (column, item) => {
     switch (column) {
       case 'id':
@@ -53,7 +66,19 @@ const ToolTable = ({ columns, data, totalCount, page, rowsPerPage, onPageChange,
         <TableHead>
           <TableRow>
             {columns.map((column) => (
-              <StyledTableCell key={column}>{headerMapping[column] || column}</StyledTableCell>
+              <StyledTableCell key={column}>
+                {onSortChange && SORTABLE_COLUMNS[column] ? (
+                  <TableSortLabel
+                    active={sortField === column}
+                    direction={sortField === column ? sortOrder : 'asc'}
+                    onClick={() => onSortChange(column)}
+                  >
+                    {headerMapping[column] || column}
+                  </TableSortLabel>
+                ) : (
+                  headerMapping[column] || column
+                )}
+              </StyledTableCell>
             ))}
           </TableRow>
         </TableHead>

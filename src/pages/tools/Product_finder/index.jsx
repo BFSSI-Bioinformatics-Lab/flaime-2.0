@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import dayjs from 'dayjs';
 import { Button, FormControl, FormControlLabel, Radio, RadioGroup, Typography, Divider } from '@mui/material';
 import PageContainer from '../../../components/page/PageContainer';
@@ -17,6 +17,19 @@ import useElasticsearch from '../../../hooks/useElasticsearch';
 import usePagination from '../../../hooks/usePagination';
 import useColumnSelection from '../../../hooks/useColumnSelection';
 
+
+const SORTABLE_ES_FIELDS = {
+  id: 'id',
+  external_id: 'external_id.keyword',
+  name: 'site_name.keyword',
+  price: 'reading_price.keyword',
+  source: 'source.name.keyword',
+  store: 'store.name.keyword',
+  date: 'scrape_batch.datetime',
+  region: 'scrape_batch.region.keyword',
+  storage_condition: 'storage_condition.keyword',
+  primary_package_material: 'primary_package_material.keyword',
+};
 
 const INITIAL_COLUMNS_VISIBILITY = {
   id: true,
@@ -51,6 +64,9 @@ const ProductFinder = () => {
   const { results: searchResults, isLoading: searchResultsIsLoading, totalProducts, setResults: setSearchResults, setTotalProducts, executeSearch } = useElasticsearch();
   const { columnsVisibility, selectedColumns, setSelectedColumns, handleColumnSelection } = useColumnSelection(INITIAL_COLUMNS_VISIBILITY);
 
+  const [sortState, setSortState] = useState({ field: null, order: 'asc' });
+  const sortRef = useRef({ field: null, order: 'asc' });
+
   const buildQueryObject = useCallback(() => {
     const cleanTextEntries = [...new Set(
       searchInputs.TextEntries.value
@@ -84,7 +100,9 @@ const ProductFinder = () => {
     if (cleanTextEntries.length > 1000) return;
 
     setInputError(false);
-    await executeSearch(buildQueryObject(), page, rowsPerPage);
+    const { field, order } = sortRef.current;
+    const sort = field ? [{ [SORTABLE_ES_FIELDS[field]]: { order } }] : null;
+    await executeSearch(buildQueryObject(), page, rowsPerPage, null, sort);
   }, [buildQueryObject, executeSearch, searchInputs.TextEntries.value]);
 
   const { page, setPage, rowsPerPage, setRowsPerPage, handlePageChange, handleRowsPerPageChange } = usePagination(search);
@@ -101,6 +119,18 @@ const ProductFinder = () => {
     setInputMode('Name');
     setPage(0);
     setRowsPerPage(25);
+    const resetSort = { field: null, order: 'asc' };
+    sortRef.current = resetSort;
+    setSortState(resetSort);
+  };
+
+  const handleSortChange = (column) => {
+    const newOrder = sortState.field === column && sortState.order === 'asc' ? 'desc' : 'asc';
+    const newSort = { field: column, order: newOrder };
+    sortRef.current = newSort;
+    setSortState(newSort);
+    setPage(0);
+    search(0, rowsPerPage);
   };
 
   const handleInputModeChange = (event) => {
@@ -255,6 +285,9 @@ return (
               rowsPerPage={rowsPerPage}
               onPageChange={handlePageChange}
               onRowsPerPageChange={handleRowsPerPageChange}
+              sortField={sortState.field}
+              sortOrder={sortState.order}
+              onSortChange={handleSortChange}
             />
           </>
         )}
