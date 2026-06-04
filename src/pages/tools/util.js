@@ -129,6 +129,18 @@ export const buildTextMustClausesForAllFields = (searchInputs) => {
             }
         });
     }
+    if (searchInputs.Ingredients) {
+        // ingredients is a plain object (not a nested type), so its sub-fields are queried directly. A hit in either language satisfies the clause.
+        mustClauses.push({
+            bool: {
+                should: [
+                    { wildcard: { "ingredients.en": { value: `*${searchInputs.Ingredients}*` } } },
+                    { wildcard: { "ingredients.fr": { value: `*${searchInputs.Ingredients}*` } } }
+                ],
+                minimum_should_match: 1
+            }
+        });
+    }
 
     const categoriesClause = buildCategoriesClause(searchInputs.Categories);
     if (categoriesClause) mustClauses.push(categoriesClause);
