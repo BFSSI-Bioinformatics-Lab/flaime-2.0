@@ -26,21 +26,31 @@ export const buildTextMustClauses = (textEntries, fieldKey) => {
     }];
 };
 
-// Builds a product-name clause that tolerates both typos and concatenated names.
-// Some products are stored with their names jammed into one token, e.g.
-// "DeepnDelicious" or "SchoolSafe". The standard analyzer indexes those as a
-// single token, so a fuzzy match for "School" can't reach "SchoolSafe". The
-// lowercased substring wildcard matches inside that token, while the fuzzy match
-// keeps typo tolerance and multi-word behaviour (e.g. "cone" -> "cones").
-export const buildProductNameClause = (value) => ({
-    bool: {
-        should: [
-            { match: { site_name: { query: value, operator: "and", fuzziness: "AUTO" } } },
-            { wildcard: { site_name: { value: `*${value.toLowerCase()}*` } } }
-        ],
-        minimum_should_match: 1
+//   FUZZY     - This PRE-DATES the concatenated-name fix and is the usual cause of noisy
+//               results. Set FUZZY: false to fall back to an exact (non-fuzzy) match.
+//   SUBSTRING - lowercased wildcard so names stored as one token are reachable,
+//               e.g. "School" -> "SchoolSafe", "Deep" -> "DeepnDelicious". This is
+//               the part that closes issue. Set SUBSTRING: false to drop it.
+//
+// To fully revert to the original behaviour: FUZZY true, SUBSTRING false.
+const PRODUCT_NAME_MATCH = {
+    FUZZY: true,
+    SUBSTRING: true,
+};
+
+export const buildProductNameClause = (value) => {
+    const should = [
+        PRODUCT_NAME_MATCH.FUZZY
+            ? { match: { site_name: { query: value, operator: "and", fuzziness: "AUTO" } } }
+            : { match: { site_name: { query: value, operator: "and" } } },
+    ];
+
+    if (PRODUCT_NAME_MATCH.SUBSTRING) {
+        should.push({ wildcard: { site_name: { value: `*${value.toLowerCase()}*` } } });
     }
-});
+
+    return { bool: { should, minimum_should_match: 1 } };
+};
 
 // --- Shared clause helpers ---
 
