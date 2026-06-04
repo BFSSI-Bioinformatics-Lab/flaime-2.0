@@ -89,6 +89,7 @@ const AdvancedSearch = () => {
         Storage: '',
         Packaging: '',
         Allergens: '',
+        Ingredients: '',
         Categories: { value: [] },
         Source: { value: null },
         Store: { value: null },
@@ -357,7 +358,7 @@ const AdvancedSearch = () => {
                <Typography variant="h5" style={{ padding: '10px' }}>Physical Properties</Typography> */}
 
                <div style={{ display: 'flex', justifyContent: 'space-around', paddingBottom: '25px' }}>
-                    <div style={{ width: '30%', minWidth: '280px' }}>
+                    <div style={{ width: '45%', minWidth: '280px' }}>
                         <FormControl variant="outlined" fullWidth>
                             <InputLabel>Storage Condition</InputLabel>
                             <Select
@@ -373,7 +374,7 @@ const AdvancedSearch = () => {
                         </FormControl>
                     </div>
 
-                    <div style={{ width: '30%', minWidth: '280px' }}>
+                    <div style={{ width: '45%', minWidth: '280px' }}>
                         <FormControl variant="outlined" fullWidth>
                             <InputLabel>Packaging Material</InputLabel>
                             <Select
@@ -388,8 +389,10 @@ const AdvancedSearch = () => {
                             </Select>
                         </FormControl>
                     </div>
+               </div>
 
-                    <div style={{ width: '30%', minWidth: '280px' }}>
+               <div style={{ display: 'flex', justifyContent: 'space-around', paddingBottom: '25px' }}>
+                    <div style={{ width: '45%', minWidth: '280px' }}>
                         <TextField
                             label="Allergens (Text Search)"
                             placeholder="e.g. Peanuts, Soy"
@@ -398,6 +401,18 @@ const AdvancedSearch = () => {
                             variant="outlined"
                             fullWidth
                             helperText="Searches 'Contains' and 'May Contain'"
+                        />
+                    </div>
+
+                    <div style={{ width: '45%', minWidth: '280px' }}>
+                        <TextField
+                            label="Ingredients (Text Search)"
+                            placeholder="e.g. Sugar, Wheat Flour"
+                            value={searchInputs.Ingredients}
+                            onChange={handleTextFieldChange('Ingredients')}
+                            variant="outlined"
+                            fullWidth
+                            helperText="Searches English and French ingredient lists"
                         />
                     </div>
                </div>

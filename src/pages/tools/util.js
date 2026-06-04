@@ -129,6 +129,28 @@ export const buildTextMustClausesForAllFields = (searchInputs) => {
             }
         });
     }
+    if (searchInputs.Ingredients) {
+        // ingredients is a plain object (not a nested type), so its sub-fields are queried directly.
+        // Split on commas so each ingredient is matched independently. match_phrase analyzes the
+        // query (lowercasing + tokenizing), so multi-word ingredients like "wheat flour" and any
+        // letter case both work. Every listed ingredient must appear (AND), in either language.
+        const ingredientTerms = searchInputs.Ingredients
+            .split(',')
+            .map(term => term.trim())
+            .filter(Boolean);
+
+        ingredientTerms.forEach(term => {
+            mustClauses.push({
+                bool: {
+                    should: [
+                        { match_phrase: { "ingredients.en": term } },
+                        { match_phrase: { "ingredients.fr": term } }
+                    ],
+                    minimum_should_match: 1
+                }
+            });
+        });
+    }
 
     const categoriesClause = buildCategoriesClause(searchInputs.Categories);
     if (categoriesClause) mustClauses.push(categoriesClause);
