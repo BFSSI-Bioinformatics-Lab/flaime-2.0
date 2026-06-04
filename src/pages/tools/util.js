@@ -26,6 +26,32 @@ export const buildTextMustClauses = (textEntries, fieldKey) => {
     }];
 };
 
+//   FUZZY     - This PRE-DATES the concatenated-name fix and is the usual cause of noisy
+//               results. Set FUZZY: false to fall back to an exact (non-fuzzy) match.
+//   SUBSTRING - lowercased wildcard so names stored as one token are reachable,
+//               e.g. "School" -> "SchoolSafe", "Deep" -> "DeepnDelicious". This is
+//               the part that closes issue. Set SUBSTRING: false to drop it.
+//
+// To fully revert to the original behaviour: FUZZY true, SUBSTRING false.
+const PRODUCT_NAME_MATCH = {
+    FUZZY: true,
+    SUBSTRING: true,
+};
+
+export const buildProductNameClause = (value) => {
+    const should = [
+        PRODUCT_NAME_MATCH.FUZZY
+            ? { match: { site_name: { query: value, operator: "and", fuzziness: "AUTO" } } }
+            : { match: { site_name: { query: value, operator: "and" } } },
+    ];
+
+    if (PRODUCT_NAME_MATCH.SUBSTRING) {
+        should.push({ wildcard: { site_name: { value: `*${value.toLowerCase()}*` } } });
+    }
+
+    return { bool: { should, minimum_should_match: 1 } };
+};
+
 // --- Shared clause helpers ---
 
 const buildSourceClause = (source) => {
@@ -65,13 +91,7 @@ export const buildTextMustClausesForAllFields = (searchInputs) => {
     const mustClauses = [];
 
     if (searchInputs.Names) {
-        mustClauses.push({
-            wildcard: {
-                "site_name": {
-                    value: `*${searchInputs.Names}*`
-                }
-            }
-        });
+        mustClauses.push(buildProductNameClause(searchInputs.Names));
     }
     if (searchInputs.IDs) {
         mustClauses.push({ term: { "id": searchInputs.IDs } });
