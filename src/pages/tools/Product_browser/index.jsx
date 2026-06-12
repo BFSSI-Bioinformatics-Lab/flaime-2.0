@@ -18,6 +18,33 @@ const SORTABLE_ES_FIELDS = {
   name: 'site_name.keyword',
 };
 
+// Returns the ES clause for a single search field. Evaluated lazily per key so
+// that e.g. buildProductNameClause (which lowercases its input) is never called
+// with a non-string value such as the numeric source id.
+const buildFieldClause = (key, value) => {
+  switch (key) {
+    case 'id':
+      return { term: { id: value } };
+    case 'external_id':
+      return { term: { external_id: value } };
+    case 'storeName':
+      return { match: { "store.name": { query: value, operator: "and" } } };
+    case 'sourceName':
+      return { term: { "source.id": value } };
+    case 'siteName':
+      return buildProductNameClause(value);
+    case 'category':
+      return {
+        nested: {
+          path: "categories",
+          query: { match: { "categories.name": { query: value, operator: "and" } } }
+        }
+      };
+    default:
+      return null;
+  }
+};
+
 const ProductBrowser = () => {
   const [products, setProducts] = useState([]);
   const [page, setPage] = useState(1);
@@ -60,49 +87,18 @@ const ProductBrowser = () => {
 
     Object.entries(searchTerms).forEach(([key, value]) => {
       if (value) {
-        const fieldMapping = {
-          id: { term: { id: value } },
-          external_id: { term: { external_id: value } },
-          storeName: { match: { "store.name": { query: value, operator: "and" } } },
-          sourceName: { term: { "source.id": value } },
-          siteName: buildProductNameClause(value),
-          category: {
-            nested: {
-              path: "categories",
-              query: {
-                match: { "categories.name": { query: value, operator: "and" } }
-              }
-            }
-          }
-        };
-        queryObject.bool.must.push(fieldMapping[key]);
+        const clause = buildFieldClause(key, value);
+        if (clause) queryObject.bool.must.push(clause);
       }
     });
-    console.log(queryObject);
     return queryObject;
   }, [searchTerms]);
 
   const buildAggregations = useCallback(() => {
     const filters = Object.entries(searchTerms)
       .filter(([, value]) => value)
-      .map(([key, value]) => {
-        const fieldMapping = {
-          id: { term: { id: value } },
-          external_id: { term: { external_id: value } },
-          storeName: { match: { "store.name": { query: value, operator: "and" } } },
-          sourceName: { term: { "source.id": value } },
-          siteName: buildProductNameClause(value),
-        category: {
-          nested: {
-            path: "categories",
-            query: {
-              match: { "categories.name": { query: value, operator: "and" } }
-            }
-          }
-        }
-      };
-        return fieldMapping[key];
-      });
+      .map(([key, value]) => buildFieldClause(key, value))
+      .filter(Boolean);
 
     return {
       group_by_store: {
@@ -310,8 +306,8 @@ const ProductTable = React.memo(({ products, sortField, sortOrder, onSortChange 
               <Link to={`/tools/product-browser/${product.id}`} target="_blank">{product.id}</Link>
             </TableCell>
             <TableCell style={{ textAlign: 'center' }}>{product.external_id}</TableCell>
-            <TableCell style={{ textAlign: 'center' }}>{product.store.name}</TableCell>
-            <TableCell style={{ width: '140px', textAlign: 'center' }}>{product.source.name}</TableCell>
+            <TableCell style={{ textAlign: 'center' }}>{product.store?.name ?? '—'}</TableCell>
+            <TableCell style={{ width: '140px', textAlign: 'center' }}>{product.source?.name ?? '—'}</TableCell>
             <TableCell style={{ width: '375px' }}>{product.site_name}</TableCell>
             <TableCell style={{ textAlign: 'left' }}>
               {product.categories && product.categories.length > 0
