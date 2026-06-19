@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import dayjs from 'dayjs';
-import { TextField, Button, Alert, Typography, Divider, Grid, Select, MenuItem, FormControl, InputLabel} from '@mui/material';
+import { TextField, Button, Alert, Typography, Divider, Grid, Select, MenuItem, FormControl, InputLabel, ToggleButton, ToggleButtonGroup} from '@mui/material';
 import PageContainer from '../../../components/page/PageContainer';
 import SingleDatePicker from '../../../components/inputs/SingleDatePicker';
 import CategorySelector from '../../../components/inputs/CategorySelector';
@@ -77,6 +77,7 @@ const AdvancedSearch = () => {
         Packaging: '',
         Allergens: '',
         Ingredients: '',
+        IngredientsMatch: 'all',
         Categories: { value: [] },
         Source: { value: null },
         Store: { value: null },
@@ -382,8 +383,23 @@ const AdvancedSearch = () => {
                             onChange={handleTextFieldChange('Ingredients')}
                             variant="outlined"
                             fullWidth
-                            helperText="Searches English and French ingredient lists"
+                            helperText={
+                                searchInputs.IngredientsMatch === 'any'
+                                    ? "Matches products with any of the listed ingredients (English & French)"
+                                    : "Matches products with all of the listed ingredients (English & French)"
+                            }
                         />
+                        <ToggleButtonGroup
+                            value={searchInputs.IngredientsMatch}
+                            exclusive
+                            size="small"
+                            onChange={(e, value) => { if (value) handleInputChange('IngredientsMatch', value); }}
+                            aria-label="Ingredient match mode"
+                            style={{ marginTop: '8px' }}
+                        >
+                            <ToggleButton value="all" aria-label="Match all ingredients">Match all</ToggleButton>
+                            <ToggleButton value="any" aria-label="Match any ingredient">Match any</ToggleButton>
+                        </ToggleButtonGroup>
                     </div>
                </div>
 
