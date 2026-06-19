@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import dayjs from 'dayjs';
-import { TextField, Button, Alert, Typography, Divider, Grid, Select, MenuItem, FormControl, InputLabel} from '@mui/material';
+import { TextField, Button, Alert, Typography, Divider, Grid, Select, MenuItem, FormControl, InputLabel, ToggleButton, ToggleButtonGroup} from '@mui/material';
 import PageContainer from '../../../components/page/PageContainer';
 import SingleDatePicker from '../../../components/inputs/SingleDatePicker';
 import CategorySelector from '../../../components/inputs/CategorySelector';
@@ -89,6 +89,8 @@ const AdvancedSearch = () => {
         Storage: '',
         Packaging: '',
         Allergens: '',
+        Ingredients: '',
+        IngredientsMatch: 'all',
         Categories: { value: [] },
         Source: { value: null },
         Store: { value: null },
@@ -357,7 +359,7 @@ const AdvancedSearch = () => {
                <Typography variant="h5" style={{ padding: '10px' }}>Physical Properties</Typography> */}
 
                <div style={{ display: 'flex', justifyContent: 'space-around', paddingBottom: '25px' }}>
-                    <div style={{ width: '30%', minWidth: '280px' }}>
+                    <div style={{ width: '45%', minWidth: '280px' }}>
                         <FormControl variant="outlined" fullWidth>
                             <InputLabel>Storage Condition</InputLabel>
                             <Select
@@ -373,7 +375,7 @@ const AdvancedSearch = () => {
                         </FormControl>
                     </div>
 
-                    <div style={{ width: '30%', minWidth: '280px' }}>
+                    <div style={{ width: '45%', minWidth: '280px' }}>
                         <FormControl variant="outlined" fullWidth>
                             <InputLabel>Packaging Material</InputLabel>
                             <Select
@@ -388,8 +390,10 @@ const AdvancedSearch = () => {
                             </Select>
                         </FormControl>
                     </div>
+               </div>
 
-                    <div style={{ width: '30%', minWidth: '280px' }}>
+               <div style={{ display: 'flex', justifyContent: 'space-around', paddingBottom: '25px' }}>
+                    <div style={{ width: '45%', minWidth: '280px' }}>
                         <TextField
                             label="Allergens (Text Search)"
                             placeholder="e.g. Peanuts, Soy"
@@ -399,6 +403,33 @@ const AdvancedSearch = () => {
                             fullWidth
                             helperText="Searches 'Contains' and 'May Contain'"
                         />
+                    </div>
+
+                    <div style={{ width: '45%', minWidth: '280px' }}>
+                        <TextField
+                            label="Ingredients (Text Search)"
+                            placeholder="e.g. Sugar, Wheat Flour"
+                            value={searchInputs.Ingredients}
+                            onChange={handleTextFieldChange('Ingredients')}
+                            variant="outlined"
+                            fullWidth
+                            helperText={
+                                searchInputs.IngredientsMatch === 'any'
+                                    ? "Matches products with any of the listed ingredients (English & French)"
+                                    : "Matches products with all of the listed ingredients (English & French)"
+                            }
+                        />
+                        <ToggleButtonGroup
+                            value={searchInputs.IngredientsMatch}
+                            exclusive
+                            size="small"
+                            onChange={(e, value) => { if (value) handleInputChange('IngredientsMatch', value); }}
+                            aria-label="Ingredient match mode"
+                            style={{ marginTop: '8px' }}
+                        >
+                            <ToggleButton value="all" aria-label="Match all ingredients">Match all</ToggleButton>
+                            <ToggleButton value="any" aria-label="Match any ingredient">Match any</ToggleButton>
+                        </ToggleButtonGroup>
                     </div>
                </div>
 
