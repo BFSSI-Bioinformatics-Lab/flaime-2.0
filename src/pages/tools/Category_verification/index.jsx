@@ -17,6 +17,16 @@ import {
 } from '@mui/material';
 
 
+const flattenCategories = (categories) => {
+    return categories.reduce((flat, cat) => {
+      flat.push(cat);
+      if (cat.children?.length) {
+        flat.push(...flattenCategories(cat.children));
+      }
+      return flat;
+    }, []);
+};
+
 const CategoryVerification = () => {
   const [products, setProducts] = useState([]);
   const [allCategories, setAllCategories] = useState([]);
@@ -106,15 +116,15 @@ const CategoryVerification = () => {
   };
 
   useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const { categories } = await GetAllCategories();
-        setAllCategories(categories || []);
-      } catch (err) {
-        console.error('Error fetching categories:', err);
-      }
-    };
-    fetchCategories();
+      const fetchCategories = async () => {
+        try {
+          const { categories } = await GetAllCategories();
+          setAllCategories(categories || []);
+        } catch (err) {
+          console.error('Error fetching categories:', err);
+        }
+      };
+      fetchCategories();
   }, []);
 
   const fetchUsers = async () => {
@@ -259,22 +269,23 @@ const CategoryVerification = () => {
   const getCompletedCount = () => Object.values(verificationData).filter(d => d.complete).length;
 
   const getDropdownOptions = (product) => {
-      const CONFIDENCE_THRESHOLD = 0.05;
-      const predictionCategoryIds = new Set((product.predictions || []).map(p => p.category_id));
-      const extras = allCategories
-          .filter(c => extraCategoryIds.includes(c.id) && !predictionCategoryIds.has(c.id))
-          .map(c => ({ category_id: c.id, category_name: c.name, category_code: c.code, confidence: null }));
-      return [
-          ...(product.predictions || []).sort((a, b) => {
-              const aLow = a.confidence < CONFIDENCE_THRESHOLD;
-              const bLow = b.confidence < CONFIDENCE_THRESHOLD;
-              if (aLow && bLow) return (a.category_code || '').localeCompare(b.category_code || '', undefined, { numeric: true, sensitivity: 'base' });
-              if (aLow) return 1;
-              if (bLow) return -1;
-              return b.confidence - a.confidence;
-          }),
-          ...extras
-      ];
+        const CONFIDENCE_THRESHOLD = 0.05;
+        const predictionCategoryIds = new Set((product.predictions || []).map(p => p.category_id));
+        const flatCategories = flattenCategories(allCategories);
+        const extras = flatCategories
+            .filter(c => extraCategoryIds.includes(c.id) && !predictionCategoryIds.has(c.id))
+            .map(c => ({ category_id: c.id, category_name: c.name, category_code: c.code, confidence: null }));
+        return [
+            ...(product.predictions || []).sort((a, b) => {
+                const aLow = a.confidence < CONFIDENCE_THRESHOLD;
+                const bLow = b.confidence < CONFIDENCE_THRESHOLD;
+                if (aLow && bLow) return (a.category_code || '').localeCompare(b.category_code || '', undefined, { numeric: true, sensitivity: 'base' });
+                if (aLow) return 1;
+                if (bLow) return -1;
+                return b.confidence - a.confidence;
+            }),
+            ...extras
+        ];
   };
 
   if (loading) {

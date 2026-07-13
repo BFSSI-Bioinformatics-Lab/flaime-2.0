@@ -35,8 +35,8 @@ const CategoryVerificationSetup = () => {
   const [error, setError] = useState(null);
 
   const predefinedCombinations = [
-    { sourceId: 183, schemeId: 9, name: "Snacks - RA" },
-    { sourceId: 181, schemeId: 10, name: "Baked Goods - Sodium" },
+      { sourceId: 183, schemeId: 9, name: "Snacks - RA", extraCategoryIds: [349, 366, 397] },
+      { sourceId: 181, schemeId: 10, name: "Baked Goods - Sodium", extraCategoryIds: [] },
   ];
 
   useEffect(() => {
@@ -108,21 +108,27 @@ const CategoryVerificationSetup = () => {
   const getSourceById = (id) => sources.find(source => source.id === id);
 
   const handleLaunchVerification = (sourceId, schemeId) => {
-    navigate(`/tools/verify-categories?scheme=${schemeId}&source=${sourceId}`);
+      const combo = predefinedCombinations.find(c => c.sourceId === sourceId && c.schemeId === schemeId);
+      const extraParam = combo?.extraCategoryIds?.length ? `&extra_categories=${combo.extraCategoryIds.join(',')}` : '';
+      navigate(`/tools/verify-categories?scheme=${schemeId}&source=${sourceId}${extraParam}`);
   };
 
   const handleLaunchProblematic = (sourceId, schemeId) => {
-    navigate(`/tools/verify-categories?scheme=${schemeId}&source=${sourceId}&view=problematic`);
+      const combo = predefinedCombinations.find(c => c.sourceId === sourceId && c.schemeId === schemeId);
+      const extraParam = combo?.extraCategoryIds?.length ? `&extra_categories=${combo.extraCategoryIds.join(',')}` : '';
+      navigate(`/tools/verify-categories?scheme=${schemeId}&source=${sourceId}&view=problematic${extraParam}`);
   };
 
   const handleLaunchUserVerifications = (sourceId, schemeId) => {
-    const comboKey = `${sourceId}-${schemeId}`;
-    const userId = selectedUsers[comboKey];
-    if (userId) {
-      navigate(`/tools/verify-categories?scheme=${schemeId}&source=${sourceId}&view=user-verifications&user=${userId}`);
-    }
+      const comboKey = `${sourceId}-${schemeId}`;
+      const userId = selectedUsers[comboKey];
+      if (userId) {
+        const combo = predefinedCombinations.find(c => c.sourceId === sourceId && c.schemeId === schemeId);
+        const extraParam = combo?.extraCategoryIds?.length ? `&extra_categories=${combo.extraCategoryIds.join(',')}` : '';
+        navigate(`/tools/verify-categories?scheme=${schemeId}&source=${sourceId}&view=user-verifications&user=${userId}${extraParam}`);
+      }
   };
-
+  
   const handleUserSelection = (comboKey, event) => {
     const userId = event.target.value;
     setSelectedUsers(prev => ({
