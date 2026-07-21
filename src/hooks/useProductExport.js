@@ -83,7 +83,7 @@ const buildFullExportRows = (allData) => {
   const header = [
     'Assigned Flaime ID', 'External ID', 'Store Name', 'Data Source', 'Product Name',
     'Category Name', 'UPC', 'Ingredients (EN)', 'Total Size', 'Serving Size',
-    ...nutrientColumns
+    ...nutrientColumns.map(escapeCsvField)
   ];
 
   const rows = allData.map(product => {
