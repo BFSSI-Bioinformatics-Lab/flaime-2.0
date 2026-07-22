@@ -9,18 +9,18 @@ import PageContainer from '../../../components/page/PageContainer';
 import SourceSelector from '../../../components/inputs/SourceSelector';
 import { GetSourceCollectionStats } from '../../../api/services/SourceService';
 
-// First 10 preservatives from Health Canada's List of Permitted Preservatives.
+// Additives of interest (EU E-numbers shown for reference) — some research
+// associates these with negative health outcomes. `label` is the display text;
+// `term` is the phrase matched against ingredients.en (must omit the E-number).
 const ADDITIVES = [
-    'Acetic Acid',
-    'Ascorbic Acid',
-    'Ascorbyl Palmitate',
-    'Ascorbyl Stearate',
-    'Benzoic Acid',
-    'Butylated Hydroxyanisole',
-    'Butylated Hydroxytoluene',
-    'Calcium Ascorbate',
-    'Calcium Propionate',
-    'Calcium Sorbate',
+    { label: 'Potassium Sorbate (E202)',        term: 'Potassium Sorbate'        },
+    { label: 'Potassium Metabisulphite (E224)', term: 'Potassium Metabisulphite' },
+    { label: 'Sodium Nitrite (E250)',           term: 'Sodium Nitrite'           },
+    { label: 'Ascorbic Acid (E300)',            term: 'Ascorbic Acid'            },
+    { label: 'Sodium Ascorbate (E301)',         term: 'Sodium Ascorbate'         },
+    { label: 'Sodium Erythorbate (E316)',       term: 'Sodium Erythorbate'       },
+    { label: 'Citric Acid (E330)',              term: 'Citric Acid'              },
+    { label: 'Extracts of Rosemary (E392)',     term: 'Rosemary Extract'         },
 ];
 
 // Nutrient IDs confirmed against the nutrients table in the database.
@@ -121,9 +121,9 @@ const CollectionStats = () => {
         });
 
         const additiveFilters = {};
-        ADDITIVES.forEach(name => {
-            const key = name.toLowerCase().replace(/[^a-z0-9]+/g, '_');
-            additiveFilters[key] = { match_phrase: { 'ingredients.en': name } };
+        ADDITIVES.forEach(({ term }) => {
+            const key = term.toLowerCase().replace(/[^a-z0-9]+/g, '_');
+            additiveFilters[key] = { match_phrase: { 'ingredients.en': term } };
         });
 
         return {
@@ -395,7 +395,7 @@ const CollectionStats = () => {
                         Ingredient Prevalence &amp; Additives
                     </Typography>
                     <Typography variant="body2" color="text.secondary" style={{ padding: '0 10px 10px' }}>
-                        Preservatives (Health Canada List of Permitted Preservatives).
+                        Additives with research associating them with negative health outcomes (EU E-numbers shown for reference).
                         Counts reflect products whose English ingredient list contains the additive name.
                     </Typography>
                     <Paper variant="outlined" style={{ margin: '10px', overflowX: 'auto' }}>
@@ -408,22 +408,22 @@ const CollectionStats = () => {
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                {ADDITIVES.map(name => {
-                                    const key = name.toLowerCase().replace(/[^a-z0-9]+/g, '_');
+                                {ADDITIVES.map(({ label, term }) => {
+                                    const key = term.toLowerCase().replace(/[^a-z0-9]+/g, '_');
                                     const count = esStats?.aggs?.additives?.buckets?.[key]?.doc_count ?? null;
                                     const pct = count != null && total > 0
                                         ? ((count / total) * 100).toFixed(2)
                                         : null;
-                                    const isSelected = selectedAdditive === name;
+                                    const isSelected = selectedAdditive === term;
                                     return (
                                         <TableRow
-                                            key={name}
+                                            key={term}
                                             hover
                                             selected={isSelected}
-                                            onClick={() => handleAdditiveClick(name)}
+                                            onClick={() => handleAdditiveClick(term)}
                                             style={{ cursor: 'pointer' }}
                                         >
-                                            <TableCell>{name}</TableCell>
+                                            <TableCell>{label}</TableCell>
                                             <TableCell align="right">{count != null ? count.toLocaleString() : '—'}</TableCell>
                                             <TableCell align="right">{pct != null ? `${pct}%` : '—'}</TableCell>
                                         </TableRow>
