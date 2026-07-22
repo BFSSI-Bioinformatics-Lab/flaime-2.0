@@ -3,13 +3,14 @@ import { Button, Menu, MenuItem } from '@mui/material';
 import { useProductExport } from '../../../hooks/useProductExport';
 
 export const DownloadResultButton = ({ queryBody, totalProducts, fileNamePrefix = 'export' }) => {
-  const { 
-    anchorEl, 
-    openDownloadMenu, 
-    handleDownloadClick, 
-    handleDownloadClose, 
-    handleDownloadSimple, 
-    handleDownloadFull 
+  const {
+    anchorEl,
+    openDownloadMenu,
+    handleDownloadClick,
+    handleDownloadClose,
+    handleDownloadSimple,
+    handleDownloadFull,
+    handleDownloadSupplemented
   } = useProductExport(queryBody, totalProducts);
 
   return (
@@ -33,6 +34,9 @@ export const DownloadResultButton = ({ queryBody, totalProducts, fileNamePrefix 
         </MenuItem>
         <MenuItem onClick={() => handleDownloadFull(fileNamePrefix)}>
           Full CSV (All Data)
+        </MenuItem>
+        <MenuItem onClick={() => handleDownloadSupplemented(fileNamePrefix)}>
+          Full CSV + Supplemented Food Flags
         </MenuItem>
       </Menu>
     </>
