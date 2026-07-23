@@ -114,7 +114,7 @@ const ProductDetail = () => {
 
     const showWarningBanner = isFlagged && !isVerified;
     const showSuccessBanner = isVerified;
-    const isFrozenEntrees2025 = product.source === "2025 Frozen Entree collection" && !isVerified;
+    const isTDS = product.source === "2025 Total Diet Study" && !isVerified;
 
     return (
         <div>
@@ -125,9 +125,9 @@ const ProductDetail = () => {
                 </Grid>
             </Band>
             <PageContainer>
-                {isFrozenEntrees2025 && (
+                {isTDS && (
                     <Alert severity="warning" sx={{ mb: 3 }}>
-                        The list of ingredients data from this collection (2025 Frozen Entrees) has not been manually verified and contains errors
+                        This product is part of the 2025 Total Diet study. The TDS products have not been completely entered into FLAIME or undergone quality control; may contain errors
                     </Alert>
                 )}
                 {showWarningBanner && (
