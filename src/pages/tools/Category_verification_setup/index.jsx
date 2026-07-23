@@ -37,6 +37,8 @@ const CategoryVerificationSetup = () => {
   const predefinedCombinations = [
       { sourceId: 183, schemeId: 9, name: "Snacks - RA", extraCategoryIds: [349, 366, 397] },
       { sourceId: 181, schemeId: 10, name: "Baked Goods - Sodium", extraCategoryIds: [] },
+      { sourceId: 186, schemeId: 9, name: "Meat and Alternatives - RA", extraCategoryIds: [] },
+      { sourceId: 187, schemeId: 9, name: "Fish and Seafood - RA", extraCategoryIds: [] },
   ];
 
   useEffect(() => {
