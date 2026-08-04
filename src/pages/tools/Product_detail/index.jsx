@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Grid, Typography, Divider, Collapse } from '@mui/material';
+import { Grid, Typography, Divider, Collapse, Alert } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import PageContainer from '../../../components/page/PageContainer';
 import Band from '../../../components/page/Band';
@@ -109,6 +109,13 @@ const ProductDetail = () => {
         { name: "URL", value: product.site_url ? <a href={product.site_url} target="_blank" rel="noopener noreferrer">{product.site_name}</a> : "Not available" }
     ].filter(item => item.value); // null or undefined values are filtered out
 
+    const isFlagged = product.needs_manual_verification === true || product.needs_manual_verification === 'true';
+    const isVerified = product.verified === true || product.verified === 'true';
+
+    const showWarningBanner = isFlagged && !isVerified;
+    const showSuccessBanner = isVerified;
+    const isTDS = product.source === "2025 Total Diet Study" && !isVerified;
+
     return (
         <div>
             <Band>
@@ -118,6 +125,21 @@ const ProductDetail = () => {
                 </Grid>
             </Band>
             <PageContainer>
+                {isTDS && (
+                    <Alert severity="warning" sx={{ mb: 3 }}>
+                        This product is part of the 2025 Total Diet study. The TDS products have not been completely entered into FLAIME or undergone quality control; may contain errors
+                    </Alert>
+                )}
+                {showWarningBanner && (
+                    <Alert severity="warning" sx={{ mb: 3 }}>
+                        Automated QC has detected that there may be errors in this product record, and this product has not yet been manually verified. Expect some data fields to contain errors, and compare with the photos
+                    </Alert>
+                )}
+                {showSuccessBanner && (
+                    <Alert severity="success" sx={{ mb: 3 }}>
+                        This product has been manually verified and all errors have been corrected.
+                    </Alert>
+                )}
                 <ProductInfoBox>
                     <Grid container spacing={6} alignItems="flex-start">
                         <Grid item xs={12} md={6}>

@@ -36,8 +36,7 @@ const NutritionFactsTable = ({ product }) => {
       <TableContainer component={Paper}>
         <Typography variant="h6" style={paddingStyle}>Nutrition Facts</Typography>
         <Typography variant="body2" style={paddingStyle}>
-          Serving Size: {product.serving_size ? `${product.serving_size} ${product.serving_size_unit?.name ?? ""}` :
-            (product.raw_serving_size ? `${product.raw_serving_size}` : "Not specified")}
+          Serving Size: Per {product.serving_size ? `${product.serving_size} ${product.serving_size_unit ?? ""}` : (product.raw_serving_size || "unit not specified")}
           <br />
           Total size: {product.total_size ?? "Not specified"}
         </Typography>

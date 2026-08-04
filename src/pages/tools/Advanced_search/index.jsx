@@ -1,10 +1,7 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import dayjs from 'dayjs';
-import { TextField, Button, Alert, Typography, Divider, Grid } from '@mui/material';
+import { TextField, Button, Alert, Typography, Divider, Grid, Select, MenuItem, FormControl, InputLabel, ToggleButton, ToggleButtonGroup} from '@mui/material';
 import PageContainer from '../../../components/page/PageContainer';
-import StoreSelector from '../../../components/inputs/StoreSelector';
-import SourceSelector from '../../../components/inputs/SourceSelector';
-import RegionSelector from '../../../components/inputs/RegionSelector';
 import SingleDatePicker from '../../../components/inputs/SingleDatePicker';
 import CategorySelector from '../../../components/inputs/CategorySelector';
 import NutritionFilter from '../../../components/inputs/NutritionFilter';
@@ -14,18 +11,86 @@ import ToolTable  from '../../../components/table/ToolTable';
 import SearchResultSummary from '../../../components/misc/SearchResultSummary';
 import { ResetButton } from '../../../components/buttons/ResetButton';
 import { DownloadResultButton } from '../../../components/buttons/DownloadResultButton';
+import useSearchOptions from '../../../hooks/useSearchOptions';
+import useElasticsearch from '../../../hooks/useElasticsearch';
+import usePagination from '../../../hooks/usePagination';
+import useColumnSelection from '../../../hooks/useColumnSelection';
+
+const SORTABLE_ES_FIELDS = {
+    id: 'id',
+    external_id: 'external_id.keyword',
+    name: 'site_name.keyword',
+    price: 'reading_price.keyword',
+    source: 'source.name.keyword',
+    store: 'store.name.keyword',
+    date: 'scrape_batch.datetime',
+    region: 'scrape_batch.region.keyword',
+    storage_condition: 'storage_condition.keyword',
+    primary_package_material: 'primary_package_material.keyword',
+};
+
+const COLUMN_ORDER = [
+    'id',
+    'external_id',
+    'name',
+    'price',
+    'source',
+    'store',
+    'date',
+    'region',
+    'categories',
+    'storage_condition',
+    'primary_package_material',
+    'allergens_warnings'
+];
+
+const INITIAL_COLUMNS_VISIBILITY = {
+    id: true,
+    external_id: true,
+    name: true,
+    price: true,
+    source: true,
+    store: true,
+    date: true,
+    region: true,
+    categories: true,
+    storage_condition: true,
+    primary_package_material: true,
+    allergens_warnings: true,
+};
+
+const processAllergenHits = (hits) => hits.map(hit => {
+    const productData = hit._source;
+    let allergenText = "";
+
+    if (productData.allergens_warnings && Array.isArray(productData.allergens_warnings)) {
+        const validTexts = productData.allergens_warnings
+            .flatMap(w => [w.contains_en, w.may_contain_en])
+            .filter(text => text);
+
+        allergenText = [...new Set(validTexts)].join("; ");
+    }
+    hit._source.allergens_warnings = allergenText;
+
+    return hit;
+});
 
 const AdvancedSearch = () => {
     useEffect(() => {
         window.scrollTo(0, 0);
     }, []);
-    
+
     const initialFilters = {
         Names: '',
         IDs: '',
         ExternalIDs: '',
         UPCs: '',
         NielsenUPCs: '',
+        Storage: '',
+        Packaging: '',
+        Allergens: '',
+        Ingredients: '',
+        IngredientsMatch: 'all',
         Categories: { value: [] },
         Source: { value: null },
         Store: { value: null },
@@ -34,57 +99,51 @@ const AdvancedSearch = () => {
         EndDate: { value: null },
         Nutrition: { nutrient: '', minAmount: '', maxAmount: '' },
     };
-    
+
+    const { storageOptions, packagingOptions, sourceOptions, storeOptions, regionOptions } = useSearchOptions();
     const [searchInputs, handleInputChange] = useSearchFilters(initialFilters);
-    const [searchResults, setSearchResults] = useState([]);
-    const [isLoading, setIsLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
-    const [totalProducts, setTotalProducts] = useState(0);
-    const [page, setPage] = useState(0);
-    const [rowsPerPage, setRowsPerPage] = useState(25);
     const [resetKey, setResetKey] = useState(0);
 
-    const [columnsVisibility, setColumnsVisibility] = useState({
-        id: true,
-        external_id: true,
-        name: true,
-        price: true,
-        source: true,
-        store: true,
-        date: true,
-        region: true,
-        categories: true,
-    });
-    
-    const [selectedColumns, setSelectedColumns] = useState(Object.keys(columnsVisibility));
+    const { results: searchResults, isLoading, totalProducts, setResults: setSearchResults, setTotalProducts, executeSearch } = useElasticsearch();
+    const { columnsVisibility, selectedColumns, setSelectedColumns, handleColumnSelection } = useColumnSelection(INITIAL_COLUMNS_VISIBILITY, COLUMN_ORDER);
 
-    const handleReset = () => {
-        Object.keys(initialFilters).forEach(key => {
-            handleInputChange(key, initialFilters[key]);
-        });
-        
-        setSearchResults([]);
-        setIsLoading(false);
-        setTotalProducts(0);
-        setPage(0);
-        setRowsPerPage(25);
-        setErrorMessage('');
-        setResetKey(prev => prev + 1);
-        setSelectedColumns(Object.keys(columnsVisibility));
-    };
+    const [sortState, setSortState] = useState({ field: null, order: 'asc' });
+    const sortRef = useRef({ field: null, order: 'asc' });
 
-    const handleColumnSelection = (event) => {
-        setSelectedColumns(event.target.value);
-    };
-
-    const handleTextFieldChange = (field) => (event) => {
-        handleInputChange(field, event.target.value);
-        if (errorMessage) setErrorMessage('');
-    };
-    
     const buildQueryObject = useCallback(() => {
         const textMustClauses = buildTextMustClausesForAllFields(searchInputs);
-        
+
+        if (searchInputs.Storage && searchInputs.Storage !== '-1') {
+            textMustClauses.push({
+                match: { "storage_condition": searchInputs.Storage }
+            });
+        }
+
+        if (searchInputs.Packaging && searchInputs.Packaging !== '-1') {
+            textMustClauses.push({
+                match: { "primary_package_material": searchInputs.Packaging }
+            });
+        }
+
+        if (searchInputs.Allergens) {
+            textMustClauses.push({
+                nested: {
+                    path: "allergens_warnings",
+                    query: {
+                        multi_match: {
+                            query: searchInputs.Allergens,
+                            fields: [
+                                "allergens_warnings.contains_en",
+                                "allergens_warnings.may_contain_en"
+                            ],
+                            type: "phrase_prefix"
+                        }
+                    }
+                }
+            });
+        }
+
         let nutrientQuery = {
             nested: {
                 path: "nutrition_details",
@@ -95,7 +154,7 @@ const AdvancedSearch = () => {
                 }
             }
         };
-        
+
         if (searchInputs.Nutrition.nutrient) {
             nutrientQuery.nested.query.bool.must.push({
                 term: {
@@ -103,7 +162,7 @@ const AdvancedSearch = () => {
                 }
             });
         }
-        
+
         let amountRange = {};
         if (searchInputs.Nutrition.minAmount) {
             amountRange.gte = parseFloat(searchInputs.Nutrition.minAmount);
@@ -111,7 +170,7 @@ const AdvancedSearch = () => {
         if (searchInputs.Nutrition.maxAmount) {
             amountRange.lte = parseFloat(searchInputs.Nutrition.maxAmount);
         }
-        
+
         if (Object.keys(amountRange).length > 0) {
             nutrientQuery.nested.query.bool.must.push({
                 range: {
@@ -119,7 +178,7 @@ const AdvancedSearch = () => {
                 }
             });
         }
-        
+
         return {
             bool: {
                 must: [
@@ -128,49 +187,52 @@ const AdvancedSearch = () => {
                 ]
             }
         };
-        
+
     }, [searchInputs]);
 
-    const handleSearch = async (newPage = page, currentRowsPerPage = rowsPerPage) => {
-        setIsLoading(true);
-        
-        const queryObject = buildQueryObject();
-        
-        const finalQuery = {
-            from: newPage * currentRowsPerPage,
-            size: currentRowsPerPage,
-            query: queryObject
-        };
-        
-        const elastic_url = `${process.env.REACT_APP_ELASTIC_URL}/_search`;
-        
-        try {
-            const response = await fetch(elastic_url, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(finalQuery)
-            });
-            
-            const data = await response.json();
-            console.log("Elasticsearch response:", JSON.stringify(data, null, 2));
-            
-            if (response.ok) {
-                console.log("Search successful, hits:", data.hits.hits.length);
-                setSearchResults(data.hits.hits);
-                setTotalProducts(data.hits.total.value);
-            } else {
-                console.error('Search API error:', data.error || data);
-                setSearchResults([]);   
-            }
-        } catch (error) {
-            console.error('Search request failed:', error);
-            setSearchResults([]);
-        }
-        
-        setIsLoading(false);
+    const search = useCallback((page, rowsPerPage) => {
+        const { field, order } = sortRef.current;
+        const sort = field ? [{ [SORTABLE_ES_FIELDS[field]]: { order } }] : null;
+        executeSearch(buildQueryObject(), page, rowsPerPage, processAllergenHits, sort);
+    }, [buildQueryObject, executeSearch]);
+
+    const { page, setPage, rowsPerPage, setRowsPerPage, handlePageChange, handleRowsPerPageChange } = usePagination(search);
+
+    const handleReset = () => {
+        Object.keys(initialFilters).forEach(key => {
+            handleInputChange(key, initialFilters[key]);
+        });
+
+        setSearchResults([]);
+        setTotalProducts(0);
+        setErrorMessage('');
+        setPage(0);
+        setRowsPerPage(25);
+        setResetKey(prev => prev + 1);
+        setSelectedColumns(Object.keys(columnsVisibility));
+        const resetSort = { field: null, order: 'asc' };
+        sortRef.current = resetSort;
+        setSortState(resetSort);
     };
-    const currentQueryBody = buildQueryObject();
-      
+
+    const handleSortChange = (column) => {
+        const newOrder = sortState.field === column && sortState.order === 'asc' ? 'desc' : 'asc';
+        const newSort = { field: column, order: newOrder };
+        sortRef.current = newSort;
+        setSortState(newSort);
+        setPage(0);
+        search(0, rowsPerPage);
+    };
+
+    const handleTextFieldChange = (field) => (event) => {
+        handleInputChange(field, event.target.value);
+        if (errorMessage) setErrorMessage('');
+    };
+
+    const handleSelectChange = (field) => (event) => {
+        handleInputChange(field, event.target.value);
+    };
+
     const handleSelectorChange = (field) => (value) => {
         handleInputChange(field, { value: value === '-1' ? null : value });
     };
@@ -183,17 +245,7 @@ const AdvancedSearch = () => {
         handleInputChange('Nutrition', nutrition);
     };
 
-    const handlePageChange = (event, newPage) => {
-        setPage(newPage);
-        handleSearch(newPage);
-    };
-
-    const handleRowsPerPageChange = (event) => {
-        const newRowsPerPage = parseInt(event.target.value, 10);
-        setRowsPerPage(newRowsPerPage);
-        setPage(0);
-        handleSearch(0, newRowsPerPage);
-    };
+    const currentQueryBody = buildQueryObject();
 
     return (
         <PageContainer>
@@ -205,7 +257,7 @@ const AdvancedSearch = () => {
                 </Typography>
                 <Divider style={{ width: '60vw', margin: '15px auto 5px auto' }}/>
                 <Typography variant="h5" style={{ padding: '10px' }}>Product Info</Typography>
-                
+
                 <div style={{ display: 'flex', justifyContent: 'space-around', paddingBottom: '15px' }}>
                     <div style={{ maxWidth: '320px', minWidth: '280px' }}>
                         <TextField
@@ -249,22 +301,136 @@ const AdvancedSearch = () => {
                         />
                     </div>
                 </div>
+
                 <Divider style={{ width: '60vw', margin: '10px auto' }}/>
-                <div style={{ display: 'flex', justifyContent: 'space-around', paddingBottom: '25px' }}>
-                    <SourceSelector 
-                        value={searchInputs.Source.value} 
-                        onSelect={handleSelectorChange('Source')} 
-                        showTitle={true} 
-                        label="Select a source" 
-                    />
-                    <RegionSelector 
-                        value={searchInputs.Region.value} 
-                        onSelect={handleSelectorChange('Region')} 
-                    />
-                    <StoreSelector 
-                        value={searchInputs.Store.value} 
-                        onSelect={handleSelectorChange('Store')} 
-                    />
+
+               <Typography variant="h5" style={{ padding: '10px' }}>Attributes & Location</Typography>
+               <div style={{ display: 'flex', justifyContent: 'space-around', paddingBottom: '25px', marginTop: '20px' }}>
+                    <div style={{ width: '30%', minWidth: '280px', maxWidth: '320px' }}>
+                        <FormControl variant="outlined" fullWidth>
+                            <InputLabel>Select a source</InputLabel>
+                            <Select
+                                value={searchInputs.Source.value || '-1'}
+                                onChange={(e) => handleSelectorChange('Source')(e.target.value)}
+                                label="Select a source"
+                            >
+                                <MenuItem value="-1">Use all sources</MenuItem>
+                                {sourceOptions.map((option) => (
+                                    <MenuItem key={option.value} value={option.value}>{option.label}</MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
+                    </div>
+
+                    <div style={{ width: '30%', minWidth: '280px', maxWidth: '320px' }}>
+                        <FormControl variant="outlined" fullWidth>
+                            <InputLabel>Select a Region</InputLabel>
+                            <Select
+                                value={searchInputs.Region.value || '-1'}
+                                onChange={(e) => handleSelectorChange('Region')(e.target.value)}
+                                label="Select a Region"
+                            >
+                                <MenuItem value="-1">Use all regions</MenuItem>
+                                {regionOptions.map((option) => (
+                                    <MenuItem key={option.value} value={option.value}>{option.label}</MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
+                    </div>
+
+                    <div style={{ width: '30%', minWidth: '280px', maxWidth: '320px' }}>
+                         <FormControl variant="outlined" fullWidth>
+                            <InputLabel>Select a Store</InputLabel>
+                            <Select
+                                value={searchInputs.Store.value || '-1'}
+                                onChange={(e) => handleSelectorChange('Store')(e.target.value)}
+                                label="Select a Store"
+                            >
+                                <MenuItem value="-1">Use all stores</MenuItem>
+                                {storeOptions.map((option) => (
+                                    <MenuItem key={option.value} value={option.value}>{option.label}</MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
+                    </div>
+               </div>
+               {/* <Divider style={{ width: '60vw', margin: '10px auto' }}/>
+
+               <Typography variant="h5" style={{ padding: '10px' }}>Physical Properties</Typography> */}
+
+               <div style={{ display: 'flex', justifyContent: 'space-around', paddingBottom: '25px' }}>
+                    <div style={{ width: '45%', minWidth: '280px' }}>
+                        <FormControl variant="outlined" fullWidth>
+                            <InputLabel>Storage Condition</InputLabel>
+                            <Select
+                                value={searchInputs.Storage || '-1'}
+                                onChange={handleSelectChange('Storage')}
+                                label="Storage Condition"
+                            >
+                                <MenuItem value="-1">Use all storage conditions</MenuItem>
+                                {storageOptions.map((option) => (
+                                    <MenuItem key={option.value} value={option.value}>{option.label}</MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
+                    </div>
+
+                    <div style={{ width: '45%', minWidth: '280px' }}>
+                        <FormControl variant="outlined" fullWidth>
+                            <InputLabel>Packaging Material</InputLabel>
+                            <Select
+                                value={searchInputs.Packaging || '-1'}
+                                onChange={handleSelectChange('Packaging')}
+                                label="Packaging Material"
+                            >
+                                <MenuItem value="-1">Use all packaging materials</MenuItem>
+                                {packagingOptions.map((option) => (
+                                    <MenuItem key={option.value} value={option.value}>{option.label}</MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
+                    </div>
+               </div>
+
+               <div style={{ display: 'flex', justifyContent: 'space-around', paddingBottom: '25px' }}>
+                    <div style={{ width: '45%', minWidth: '280px' }}>
+                        <TextField
+                            label="Allergens (Text Search)"
+                            placeholder="e.g. Peanuts, Soy"
+                            value={searchInputs.Allergens}
+                            onChange={handleTextFieldChange('Allergens')}
+                            variant="outlined"
+                            fullWidth
+                            helperText="Searches 'Contains' and 'May Contain'"
+                        />
+                    </div>
+
+                    <div style={{ width: '45%', minWidth: '280px' }}>
+                        <TextField
+                            label="Ingredients (Text Search)"
+                            placeholder="e.g. Sugar, Wheat Flour"
+                            value={searchInputs.Ingredients}
+                            onChange={handleTextFieldChange('Ingredients')}
+                            variant="outlined"
+                            fullWidth
+                            helperText={
+                                searchInputs.IngredientsMatch === 'any'
+                                    ? "Matches products with any of the listed ingredients (English & French)"
+                                    : "Matches products with all of the listed ingredients (English & French)"
+                            }
+                        />
+                        <ToggleButtonGroup
+                            value={searchInputs.IngredientsMatch}
+                            exclusive
+                            size="small"
+                            onChange={(e, value) => { if (value) handleInputChange('IngredientsMatch', value); }}
+                            aria-label="Ingredient match mode"
+                            style={{ marginTop: '8px' }}
+                        >
+                            <ToggleButton value="all" aria-label="Match all ingredients">Match all</ToggleButton>
+                            <ToggleButton value="any" aria-label="Match any ingredient">Match any</ToggleButton>
+                        </ToggleButtonGroup>
+                    </div>
                </div>
 
                 <Grid container spacing={1} direction="row" justifyContent="space-between" >
@@ -274,7 +440,6 @@ const AdvancedSearch = () => {
                     <Grid item xs={12} md={6}>
                         <Typography variant="h5" style={{ padding: '10px 20px 20px 20px' }}>Select a date range</Typography>
                         <div style={{ display: 'flex', justifyContent: 'space-around', padding: '15px 20px' }}>
-                            
                             <SingleDatePicker
                                 key={`start-${resetKey}`}
                                 label="Start Date"
@@ -297,16 +462,16 @@ const AdvancedSearch = () => {
                         </div>
                     </Grid>
                 </Grid>
-                
+
                 <div style={{ marginTop: '20px', display: 'flex', gap: '10px' }}>
-                    <Button variant="contained" onClick={() => handleSearch(0, rowsPerPage)} disabled={isLoading} >
+                    <Button variant="contained" onClick={() => { setPage(0); search(0, rowsPerPage); }} disabled={isLoading}>
                         Search
                     </Button>
-                    <ResetButton  variant="contained" onClick={handleReset}>Reset Search</ResetButton>
-                    <DownloadResultButton 
-                        queryBody={currentQueryBody} 
-                        totalProducts={totalProducts} 
-                        fileNamePrefix="advanced_search" 
+                    <ResetButton variant="contained" onClick={handleReset}>Reset Search</ResetButton>
+                    <DownloadResultButton
+                        queryBody={currentQueryBody}
+                        totalProducts={totalProducts}
+                        fileNamePrefix="advanced_search"
                     />
                 </div>
                 <SearchResultSummary totalProducts={totalProducts} />
@@ -320,7 +485,7 @@ const AdvancedSearch = () => {
                     {isLoading ? (
                         <p>Loading...</p>
                     ) : (
-                        <ToolTable 
+                        <ToolTable
                             columns={selectedColumns}
                             data={searchResults}
                             totalCount={totalProducts}
@@ -328,6 +493,9 @@ const AdvancedSearch = () => {
                             rowsPerPage={rowsPerPage}
                             onPageChange={handlePageChange}
                             onRowsPerPageChange={handleRowsPerPageChange}
+                            sortField={sortState.field}
+                            sortOrder={sortState.order}
+                            onSortChange={handleSortChange}
                         />
                     )}
                 </>
