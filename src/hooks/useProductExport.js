@@ -82,7 +82,9 @@ const buildFullExportRows = (allData) => {
 
   const header = [
     'Assigned Flaime ID', 'External ID', 'Store Name', 'Data Source', 'Product Name',
-    'Category Name', 'UPC', 'Ingredients (EN)', 'Total Size', 'Serving Size',
+    'Category Name', 'UPC', 'Ingredients (EN)',
+    'Storage', 'Primary Packaging', 'Secondary Packaging', 'Allergens',
+    'Total Size', 'Serving Size',
     ...nutrientColumns.map(escapeCsvField)
   ];
 
@@ -96,6 +98,14 @@ const buildFullExportRows = (allData) => {
       });
     }
 
+    let allergenText = "";
+    if (product.allergens_warnings && Array.isArray(product.allergens_warnings)) {
+        const validTexts = product.allergens_warnings
+            .flatMap(w => [w.contains_en, w.may_contain_en])
+            .filter(text => text);
+        allergenText = [...new Set(validTexts)].join("; ");
+    }
+
     const baseData = [
       escapeCsvField(product.id),
       escapeCsvField(product.external_id),
@@ -105,6 +115,10 @@ const buildFullExportRows = (allData) => {
       escapeCsvField(product.categories?.map(c => c.name).join(' > ')),
       escapeCsvField(product.raw_upc),
       escapeCsvField(product.ingredients?.en),
+      escapeCsvField(product.storage_condition),
+      escapeCsvField(product.primary_package_material),
+      escapeCsvField(product.secondary_package_material),
+      escapeCsvField(allergenText),
       escapeCsvField(product.total_size),
       escapeCsvField(product.raw_serving_size),
     ];
