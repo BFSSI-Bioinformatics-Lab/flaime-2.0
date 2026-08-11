@@ -84,7 +84,7 @@ const buildFullExportRows = (allData) => {
     'Assigned Flaime ID', 'External ID', 'Store Name', 'Data Source', 'Product Name',
     'Category Name', 'UPC', 'Ingredients (EN)',
     'Storage', 'Primary Packaging', 'Secondary Packaging', 'Allergens',
-    'Total Size', 'Serving Size Text', 'Serving Size Amount', 'Serving Size Unit',
+    'Total Size', 'Serving Size Text', 'Serving Size Amount', 'Serving Size Unit', 'Verified',
     ...nutrientColumns.map(escapeCsvField)
   ];
 
@@ -123,6 +123,7 @@ const buildFullExportRows = (allData) => {
       escapeCsvField(product.raw_serving_size),
       escapeCsvField(product.serving_size),
       escapeCsvField(product.serving_size_unit),
+      escapeCsvField(product.verified),
     ];
 
     // Fill in nutrient data in the correct order
@@ -172,6 +173,9 @@ export const useProductExport = (queryBody, totalProducts) => {
         headers: { 'Content-Type': 'application/json' },
         withCredentials: false,
       });
+      console.log("!!!!!!!!!!!!!!!!!");
+      console.log(response.data.hits.hits.map(hit => hit._source));
+      console.log("!!!!!!!!!!!!!!!!!");
       return response.data.hits.hits.map(hit => hit._source);
     } catch (error) {
       console.error("Export fetch failed", error);
