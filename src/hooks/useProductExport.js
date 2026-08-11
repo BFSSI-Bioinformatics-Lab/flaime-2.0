@@ -84,7 +84,7 @@ const buildFullExportRows = (allData) => {
     'Assigned Flaime ID', 'External ID', 'Store Name', 'Data Source', 'Product Name',
     'Category Name', 'UPC', 'Ingredients (EN)',
     'Storage', 'Primary Packaging', 'Secondary Packaging', 'Allergens',
-    'Total Size', 'Serving Size',
+    'Total Size', 'Serving Size Text', 'Serving Size Amount', 'Serving Size Unit',
     ...nutrientColumns.map(escapeCsvField)
   ];
 
@@ -121,6 +121,8 @@ const buildFullExportRows = (allData) => {
       escapeCsvField(allergenText),
       escapeCsvField(product.total_size),
       escapeCsvField(product.raw_serving_size),
+      escapeCsvField(product.serving_size),
+      escapeCsvField(product.serving_size_unit),
     ];
 
     // Fill in nutrient data in the correct order
