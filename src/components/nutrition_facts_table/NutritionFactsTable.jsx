@@ -3,7 +3,7 @@ import {
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
   Paper, Typography, Divider, Box
 } from '@mui/material';
-import { nft_order, nutrientMatches } from './nft_flaime_nutrients';
+import { nutrientMatches } from './nft_flaime_nutrients';
 
 const paddingStyle = { padding: '10px' };
 const cellPaddingStyle = { padding: '0px' };
@@ -21,8 +21,10 @@ const getLocalizedNutrients = (nutritionFacts, supplementedOnly = false) => nutr
     ) || nutritionFact.nutrient.name
   }))
   .sort((a, b) => {
-    const aOrder = nft_order[a.localizedKey] || 9999;
-    const bOrder = nft_order[b.localizedKey] || 9999;
+    // Ordering is now sourced from the database (Nutrient.sort_order) so that it
+    // stays a single source of truth shared with the admin panel. 
+    const aOrder = a.nutrient.sort_order ?? 9999;
+    const bOrder = b.nutrient.sort_order ?? 9999;
     return aOrder - bOrder;
   });
 
