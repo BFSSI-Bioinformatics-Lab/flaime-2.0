@@ -90,23 +90,23 @@ const ProductDetail = () => {
         return linkedProduct.upcs.map(item => item.code).join(", ");
     };
 
-    const linkedUpcValue = getLinkedUpcs(product.product);
+    // The `product` sub-object is now a deprecated compatibility shim; UPCs are a
+    // top-level field on the store product (DetailedStoreProduct.upcs).
+    const linkedUpcValue = getLinkedUpcs(product);
 
+    // Brand / raw_brand, price, external_id, sku and site_url were dropped from the
+    // store product in the FSDH migration and are no longer returned by the API.
     const productDescItems = [
         { name: "Product Name", value: product.site_name },
-        { name: "Brand", value: product.raw_brand || product.product?.brand || "None" },
         { name: "Store", value: product.store },
         { name: "Source", value: product.source },
-        { name: "External ID", value: product.external_id },
         { name: "Product Code", value: product.store_product_code || "None" },
         { name: "UPC", value: linkedUpcValue || "None" },
-        { name: "Price", value: product.reading_price || "Not available" },
         { name: "Total Size", value: product.total_size || "Not specified" },
         { name: "Serving Size", value: product.raw_serving_size || "Not specified" },
-        { name: "Storage Condition", value: product.storage_condition || "Not available" }, 
-        { name: "Packaging (Primary)", value: product.primary_package_material || "Not available" }, 
+        { name: "Storage Condition", value: product.storage_condition || "Not available" },
+        { name: "Packaging (Primary)", value: product.primary_package_material || "Not available" },
         { name: "Packaging (Secondary)", value: product.secondary_package_material || "Not available" },
-        { name: "URL", value: product.site_url ? <a href={product.site_url} target="_blank" rel="noopener noreferrer">{product.site_name}</a> : "Not available" }
     ].filter(item => item.value); // null or undefined values are filtered out
 
     const isFlagged = product.needs_manual_verification === true || product.needs_manual_verification === 'true';
@@ -165,15 +165,15 @@ const ProductDetail = () => {
                                     </Collapse>
                                 </DetailItem>
                             )}
-                            {product.product?.categories && 
-                            Object.values(product.product.categories).some(data => 
+                            {product.categories &&
+                            Object.values(product.categories).some(data =>
                             data.manual?.length > 0 || data.predicted?.length > 0
                             ) && (
                                     <div style={{ marginTop: '20px' }}>
                                     <ProductIngredientsHeadingContainer>
                                         <Divider> Categories </Divider>
                                     </ProductIngredientsHeadingContainer>
-                                    <CategoryDisplay categories={product.product.categories} />
+                                    <CategoryDisplay categories={product.categories} />
                                 </div>
                             )}
                             {(product.ingredient_en || product.ingredient_fr) && (
@@ -239,7 +239,7 @@ const ProductDetail = () => {
                                 )}
                             </div>
                             
-                            {product.product?.supplemented_food && product.label_flags && (
+                            {product.supplemented_food && product.label_flags && (
                                 <div style={{ marginTop: '20px' }}>
                                     <ProductIngredientsHeadingContainer>
                                         <Divider> Supplemented Food Flags </Divider>
