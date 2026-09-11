@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
 import {
   TableContainer, Table, TableHead, TableRow, TableCell, TableBody,
   Pagination, TextField, Paper, Typography, Card, CardContent, Divider, TableSortLabel
@@ -8,125 +7,61 @@ import { Link } from 'react-router-dom';
 import SourceSelector from '../../../components/inputs/SourceSelector';
 import { ResetButton } from '../../../components/buttons/ResetButton';
 import { DownloadResultButton } from '../../../components/buttons/DownloadResultButton';
-import { buildProductNameClause } from '../util';
+import { buildProductBrowserBody } from '../util';
+import { SearchStoreProducts, GetStoreCounts } from '../../../api/services/StoreProductSearchService';
 
-const SORTABLE_ES_FIELDS = {
+// ProductTable column key -> API sort field (POST /api/storeproducts/search/).
+const SORT_FIELD_MAP = {
   id: 'id',
-  external_id: 'external_id.keyword',
-  store: 'store.name.keyword',
-  source: 'source.name.keyword',
-  name: 'site_name.keyword',
+  external_id: 'external_id',
+  store: 'store',
+  source: 'source',
+  name: 'site_name',
 };
 
-// Returns the ES clause for a single search field. Evaluated lazily per key so
-// that e.g. buildProductNameClause (which lowercases its input) is never called
-// with a non-string value such as the numeric source id.
-const buildFieldClause = (key, value) => {
-  switch (key) {
-    case 'id':
-      return { term: { id: value } };
-    case 'external_id':
-      return { term: { external_id: value } };
-    case 'storeName':
-      return { match: { "store.name": { query: value, operator: "and" } } };
-    case 'sourceName':
-      return { term: { "source.id": value } };
-    case 'siteName':
-      return buildProductNameClause(value);
-    case 'category':
-      return {
-        nested: {
-          path: "categories",
-          query: { match: { "categories.name": { query: value, operator: "and" } } }
-        }
-      };
-    default:
-      return null;
-  }
-};
+const ROWS_PER_PAGE = 15;
 
 const ProductBrowser = () => {
   const [products, setProducts] = useState([]);
   const [page, setPage] = useState(1);
-  const [rowsPerPage] = useState(15);
   const [totalProducts, setTotalProducts] = useState(0);
   const [searchTerms, setSearchTerms] = useState({
     id: '',
-    storeName: '',
+    external_id: '',
     sourceName: '',
     siteName: '',
-    category: ''
   });
-  const [aggregationResponse, setAggregationResponse] = useState(null);
+  const [storeCounts, setStoreCounts] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
   const [sortState, setSortState] = useState({ field: null, order: 'asc' });
 
-  const fetchData = useCallback(async (url, body) => {
-    try {
-      const axiosInstance = axios.create();
-      const response = await axiosInstance.post(url, body, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        withCredentials: false,
-      });
-      setProducts(response.data.hits.hits.map(hit => hit._source));
-      setTotalProducts(response.data.hits.total.value);
-      setAggregationResponse(response.data.aggregations);
-    } catch (error) {
-      console.error('Error fetching data:', error);
+  const buildBody = useCallback(() => {
+    const body = buildProductBrowserBody(searchTerms);
+    if (sortState.field) {
+      body.sort = { field: SORT_FIELD_MAP[sortState.field], order: sortState.order };
     }
-  }, []);
+    return body;
+  }, [searchTerms, sortState]);
 
-  const buildQueryObject = useCallback(() => {
-    const queryObject = {
-      bool: {
-        must: [{ match: { most_recent_flag: { query: true } } }]
-      }
-    };
+  const fetchProducts = useCallback(async () => {
+    const body = buildBody();
 
-    Object.entries(searchTerms).forEach(([key, value]) => {
-      if (value) {
-        const clause = buildFieldClause(key, value);
-        if (clause) queryObject.bool.must.push(clause);
-      }
-    });
-    return queryObject;
-  }, [searchTerms]);
+    const [searchRes, countsRes] = await Promise.all([
+      SearchStoreProducts({ ...body, page, page_size: ROWS_PER_PAGE }),
+      GetStoreCounts(body),
+    ]);
 
-  const buildAggregations = useCallback(() => {
-    const filters = Object.entries(searchTerms)
-      .filter(([, value]) => value)
-      .map(([key, value]) => buildFieldClause(key, value))
-      .filter(Boolean);
+    if (!searchRes.error && searchRes.data) {
+      setProducts(searchRes.data.results);
+      setTotalProducts(searchRes.data.count);
+    } else {
+      console.error('Product browser search failed:', searchRes.message);
+      setProducts([]);
+      setTotalProducts(0);
+    }
 
-    return {
-      group_by_store: {
-        filter: { bool: { must: filters } },
-        aggs: {
-          store_bucket: {
-            terms: { 
-              field: "store.name.keyword",
-              size: 100
-            }
-          }
-        }
-      }
-    };
-  }, [searchTerms]);
-
-  const fetchProducts = useCallback(() => {
-    const elasticUrl = `${process.env.REACT_APP_ELASTIC_URL}/_search`;
-    const sort = sortState.field ? [{ [SORTABLE_ES_FIELDS[sortState.field]]: { order: sortState.order } }] : undefined;
-    const body = {
-      query: buildQueryObject(),
-      aggs: buildAggregations(),
-      from: (page - 1) * rowsPerPage,
-      size: rowsPerPage,
-      ...(sort ? { sort } : {}),
-    };
-    fetchData(elasticUrl, body);
-  }, [fetchData, buildQueryObject, buildAggregations, page, rowsPerPage, sortState]);
+    setStoreCounts(!countsRes.error && Array.isArray(countsRes.data) ? countsRes.data : []);
+  }, [buildBody, page]);
 
   useEffect(() => {
     fetchProducts();
@@ -153,22 +88,21 @@ const ProductBrowser = () => {
   }, []);
 
   const handleReset = useCallback(() => {
-    setSearchTerms({ id: '', storeName: '', sourceName: '', siteName: '', category: '' });
+    setSearchTerms({ id: '', external_id: '', sourceName: '', siteName: '' });
     setPage(1);
     setIsSearching(false);
     setSortState({ field: null, order: 'asc' });
   }, []);
 
-  const currentQueryBody = buildQueryObject();
+  const currentQueryBody = buildProductBrowserBody(searchTerms);
 
   return (
     <div style={{ width: '80vw', margin: '0 auto' }}>
       <Typography variant="h4" style={{ padding: '10px' }}>Product Browser</Typography>
       <Typography variant="body1" style={{ padding: '10px', width: '80vw', margin: '0 auto' }}>
-        Search for products by ID, external ID (e.g. FLIP product ID), store name, data source, product name or category. Use the form below to search for products. Note that you can also search by more than one search term at once.
+        Search for products by ID, external ID (e.g. FLIP product ID), data source or product name. Use the form below to search for products. Note that you can also search by more than one search term at once.
         <ul>
-          <li>Product name search supports fuzzy and partial matching (e.g. "cone" will also match "cones", and "School" will match "SchoolSafe").</li>
-          <li>If there are over 10000 products as a result of your search, only the first 10000 will be shown.</li>
+          <li>Product name search supports partial matching (e.g. "cone" will also match "cones", and "School" will match "SchoolSafe").</li>
         </ul>
       </Typography>
       <Divider variant="middle" />
@@ -182,7 +116,7 @@ const ProductBrowser = () => {
         totalProducts={totalProducts}
       />
 
-      <StoreCards aggregationResponse={aggregationResponse} />
+      <StoreCards storeCounts={storeCounts} />
 
       {isSearching && (
         <SearchResults totalProducts={totalProducts} />
@@ -191,7 +125,7 @@ const ProductBrowser = () => {
       <ProductTable products={products} sortField={sortState.field} sortOrder={sortState.order} onSortChange={handleSortChange} />
 
       <Pagination
-        count={Math.ceil(totalProducts / rowsPerPage)}
+        count={Math.ceil(totalProducts / ROWS_PER_PAGE)}
         page={page}
         onChange={(_, newPage) => setPage(newPage)}
         siblingCount={1}
@@ -205,7 +139,6 @@ const SearchForm = React.memo(({ searchTerms, handleSearchChange, handleSourceNa
     <div style={{ display: 'flex', justifyContent: 'space-evenly', margin: '20px 20px', alignItems: 'center' }}>
       <SearchField label="Search ID" value={searchTerms.id} onChange={handleSearchChange('id')} />
       <SearchField label="External ID" value={searchTerms.external_id} onChange={handleSearchChange('external_id')} />
-      <SearchField label="Search by Store Name" value={searchTerms.storeName} onChange={handleSearchChange('storeName')} />
       <SourceSelector
         value={searchTerms.sourceName}
         onSelect={handleSourceNameSearch}
@@ -215,7 +148,6 @@ const SearchForm = React.memo(({ searchTerms, handleSearchChange, handleSourceNa
     </div>
     <div style={{ display: 'flex', justifyContent: 'space-evenly', margin: '10px 20px' }}>
       <SearchField label="Search by Product Name" value={searchTerms.siteName} onChange={handleSearchChange('siteName')} style={{ maxWidth: '480px' }} />
-      <SearchField label="Search by category" value={searchTerms.category} onChange={handleSearchChange('category')} style={{ maxWidth: '480px' }} />
       <div style={{ display: 'flex', gap: '10px' }}>
         <ResetButton variant="contained" onClick={handleReset}>Reset Search</ResetButton>
         <DownloadResultButton queryBody={queryBody} totalProducts={totalProducts} fileNamePrefix="product_browser" />
@@ -236,36 +168,32 @@ const SearchField = React.memo(({ label, value, onChange, style = {} }) => (
   </Paper>
 ));
 
-const StoreCards = React.memo(({ aggregationResponse }) => {
-  const stores = aggregationResponse?.group_by_store?.store_bucket?.buckets || [];
-
-  return (
-    <div>
-      <Divider style={{ marginTop: '20px', color: '#424242', marginBottom: '15px' }}>
-        Products per store:
-      </Divider>
-      <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-evenly', maxWidth: '880px', margin: '0 auto' }}>
-        {stores.map((store) => (
-          <Card key={store.key} style={{ flex: '1 0 calc(25% - 10px)', maxWidth: '180px', boxSizing: 'border-box', textAlign: 'center', marginBottom: '10px' }}>
-            <CardContent>
-              <Typography variant="h6" component="h2" style={{ fontSize: '14px' }}>
-                {store.key}
-              </Typography>
-              <Typography color="textSecondary">
-                {store.doc_count.toLocaleString()}
-              </Typography>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+const StoreCards = React.memo(({ storeCounts }) => (
+  <div>
+    <Divider style={{ marginTop: '20px', color: '#424242', marginBottom: '15px' }}>
+      Products per store:
+    </Divider>
+    <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-evenly', maxWidth: '880px', margin: '0 auto' }}>
+      {storeCounts.map((row) => (
+        <Card key={row.store ?? 'unknown'} style={{ flex: '1 0 calc(25% - 10px)', maxWidth: '180px', boxSizing: 'border-box', textAlign: 'center', marginBottom: '10px' }}>
+          <CardContent>
+            <Typography variant="h6" component="h2" style={{ fontSize: '14px' }}>
+              {row.store ?? '—'}
+            </Typography>
+            <Typography color="textSecondary">
+              {row.count.toLocaleString()}
+            </Typography>
+          </CardContent>
+        </Card>
+      ))}
     </div>
-  );
-});
+  </div>
+));
 
 const SearchResults = React.memo(({ totalProducts }) => (
   <div>
     <Divider style={{ marginTop: '20px', color: '#424242', marginBottom: '15px' }}>
-      Based on your search, there is a total of {totalProducts === 10000 ? "over 10,000" : totalProducts} products.
+      Based on your search, there is a total of {totalProducts.toLocaleString()} products.
     </Divider>
   </div>
 ));
@@ -311,7 +239,7 @@ const ProductTable = React.memo(({ products, sortField, sortOrder, onSortChange 
             <TableCell style={{ width: '375px' }}>{product.site_name}</TableCell>
             <TableCell style={{ textAlign: 'left' }}>
               {product.categories && product.categories.length > 0
-                ? product.categories
+                ? [...product.categories]
                     .sort((a, b) => a.level - b.level)
                     .map(cat => cat.name)
                     .join(' > ')

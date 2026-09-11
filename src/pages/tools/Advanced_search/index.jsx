@@ -5,29 +5,16 @@ import PageContainer from '../../../components/page/PageContainer';
 import SingleDatePicker from '../../../components/inputs/SingleDatePicker';
 import CategorySelector from '../../../components/inputs/CategorySelector';
 import NutritionFilter from '../../../components/inputs/NutritionFilter';
-import { useSearchFilters, buildTextMustClausesForAllFields } from '../util';
+import { useSearchFilters, buildAdvancedSearchBody, SORT_FIELD_MAP } from '../util';
 import ColumnSelection  from '../../../components/table/ColumnSelection';
 import ToolTable  from '../../../components/table/ToolTable';
 import SearchResultSummary from '../../../components/misc/SearchResultSummary';
 import { ResetButton } from '../../../components/buttons/ResetButton';
 import { DownloadResultButton } from '../../../components/buttons/DownloadResultButton';
 import useSearchOptions from '../../../hooks/useSearchOptions';
-import useElasticsearch from '../../../hooks/useElasticsearch';
+import useProductSearch from '../../../hooks/useProductSearch';
 import usePagination from '../../../hooks/usePagination';
 import useColumnSelection from '../../../hooks/useColumnSelection';
-
-const SORTABLE_ES_FIELDS = {
-    id: 'id',
-    external_id: 'external_id.keyword',
-    name: 'site_name.keyword',
-    price: 'reading_price.keyword',
-    source: 'source.name.keyword',
-    store: 'store.name.keyword',
-    date: 'scrape_batch.datetime',
-    region: 'scrape_batch.region.keyword',
-    storage_condition: 'storage_condition.keyword',
-    primary_package_material: 'primary_package_material.keyword',
-};
 
 const COLUMN_ORDER = [
     'id',
@@ -59,20 +46,16 @@ const INITIAL_COLUMNS_VISIBILITY = {
     allergens_warnings: true,
 };
 
-const processAllergenHits = (hits) => hits.map(hit => {
-    const productData = hit._source;
-    let allergenText = "";
-
-    if (productData.allergens_warnings && Array.isArray(productData.allergens_warnings)) {
-        const validTexts = productData.allergens_warnings
+// Flatten the nested allergen array into a single "; "-joined string so the
+// `allergens_warnings` table column can render it directly.
+const processAllergenRows = (rows) => rows.map(row => {
+    const validTexts = Array.isArray(row.allergens_warnings)
+        ? row.allergens_warnings
             .flatMap(w => [w.contains_en, w.may_contain_en])
-            .filter(text => text);
+            .filter(Boolean)
+        : [];
 
-        allergenText = [...new Set(validTexts)].join("; ");
-    }
-    hit._source.allergens_warnings = allergenText;
-
-    return hit;
+    return { ...row, allergens_warnings: [...new Set(validTexts)].join("; ") };
 });
 
 const AdvancedSearch = () => {
@@ -105,95 +88,20 @@ const AdvancedSearch = () => {
     const [errorMessage, setErrorMessage] = useState('');
     const [resetKey, setResetKey] = useState(0);
 
-    const { results: searchResults, isLoading, totalProducts, setResults: setSearchResults, setTotalProducts, executeSearch } = useElasticsearch();
+    const { results: searchResults, isLoading, totalProducts, setResults: setSearchResults, setTotalProducts, executeSearch } = useProductSearch();
     const { columnsVisibility, selectedColumns, setSelectedColumns, handleColumnSelection } = useColumnSelection(INITIAL_COLUMNS_VISIBILITY, COLUMN_ORDER);
 
     const [sortState, setSortState] = useState({ field: null, order: 'asc' });
     const sortRef = useRef({ field: null, order: 'asc' });
 
     const buildQueryObject = useCallback(() => {
-        const textMustClauses = buildTextMustClausesForAllFields(searchInputs);
-
-        if (searchInputs.Storage && searchInputs.Storage !== '-1') {
-            textMustClauses.push({
-                match: { "storage_condition": searchInputs.Storage }
-            });
-        }
-
-        if (searchInputs.Packaging && searchInputs.Packaging !== '-1') {
-            textMustClauses.push({
-                match: { "primary_package_material": searchInputs.Packaging }
-            });
-        }
-
-        if (searchInputs.Allergens) {
-            textMustClauses.push({
-                nested: {
-                    path: "allergens_warnings",
-                    query: {
-                        multi_match: {
-                            query: searchInputs.Allergens,
-                            fields: [
-                                "allergens_warnings.contains_en",
-                                "allergens_warnings.may_contain_en"
-                            ],
-                            type: "phrase_prefix"
-                        }
-                    }
-                }
-            });
-        }
-
-        let nutrientQuery = {
-            nested: {
-                path: "nutrition_details",
-                query: {
-                    bool: {
-                        must: []
-                    }
-                }
-            }
-        };
-
-        if (searchInputs.Nutrition.nutrient) {
-            nutrientQuery.nested.query.bool.must.push({
-                term: {
-                    "nutrition_details.nutrient_id": searchInputs.Nutrition.nutrient
-                }
-            });
-        }
-
-        let amountRange = {};
-        if (searchInputs.Nutrition.minAmount) {
-            amountRange.gte = parseFloat(searchInputs.Nutrition.minAmount);
-        }
-        if (searchInputs.Nutrition.maxAmount) {
-            amountRange.lte = parseFloat(searchInputs.Nutrition.maxAmount);
-        }
-
-        if (Object.keys(amountRange).length > 0) {
-            nutrientQuery.nested.query.bool.must.push({
-                range: {
-                    "nutrition_details.amount": amountRange
-                }
-            });
-        }
-
-        return {
-            bool: {
-                must: [
-                    ...textMustClauses,
-                    ...(nutrientQuery.nested.query.bool.must.length > 0 ? [nutrientQuery] : [])
-                ]
-            }
-        };
-
+        return buildAdvancedSearchBody(searchInputs);
     }, [searchInputs]);
 
     const search = useCallback((page, rowsPerPage) => {
         const { field, order } = sortRef.current;
-        const sort = field ? [{ [SORTABLE_ES_FIELDS[field]]: { order } }] : null;
-        executeSearch(buildQueryObject(), page, rowsPerPage, processAllergenHits, sort);
+        const sort = field ? { field: SORT_FIELD_MAP[field], order } : null;
+        executeSearch(buildQueryObject(), page, rowsPerPage, processAllergenRows, sort);
     }, [buildQueryObject, executeSearch]);
 
     const { page, setPage, rowsPerPage, setRowsPerPage, handlePageChange, handleRowsPerPageChange } = usePagination(search);
