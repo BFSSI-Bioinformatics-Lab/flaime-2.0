@@ -7,29 +7,16 @@ import StoreSelector from '../../../components/inputs/StoreSelector';
 import SourceSelector from '../../../components/inputs/SourceSelector';
 import RegionSelector from '../../../components/inputs/RegionSelector';
 import SingleDatePicker from '../../../components/inputs/SingleDatePicker';
-import { useSearchFilters, buildFilterClauses, buildTextMustClauses, getFieldKey } from '../util';
+import { useSearchFilters, buildProductFinderBody, SORT_FIELD_MAP } from '../util';
 import { ResetButton } from '../../../components/buttons/ResetButton';
 import { DownloadResultButton } from '../../../components/buttons/DownloadResultButton';
 import ColumnSelection  from '../../../components/table/ColumnSelection';
 import ToolTable  from '../../../components/table/ToolTable';
 import SearchResultSummary from '../../../components/misc/SearchResultSummary';
-import useElasticsearch from '../../../hooks/useElasticsearch';
+import useProductSearch from '../../../hooks/useProductSearch';
 import usePagination from '../../../hooks/usePagination';
 import useColumnSelection from '../../../hooks/useColumnSelection';
 
-
-const SORTABLE_ES_FIELDS = {
-  id: 'id',
-  external_id: 'external_id.keyword',
-  name: 'site_name.keyword',
-  price: 'reading_price.keyword',
-  source: 'source.name.keyword',
-  store: 'store.name.keyword',
-  date: 'scrape_batch.datetime',
-  region: 'scrape_batch.region.keyword',
-  storage_condition: 'storage_condition.keyword',
-  primary_package_material: 'primary_package_material.keyword',
-};
 
 const INITIAL_COLUMNS_VISIBILITY = {
   id: true,
@@ -61,31 +48,14 @@ const ProductFinder = () => {
   const [searchInputs, handleInputChange] = useSearchFilters(initialFilters);
   const [inputError, setInputError] = useState(false);
 
-  const { results: searchResults, isLoading: searchResultsIsLoading, totalProducts, setResults: setSearchResults, setTotalProducts, executeSearch } = useElasticsearch();
+  const { results: searchResults, isLoading: searchResultsIsLoading, totalProducts, setResults: setSearchResults, setTotalProducts, executeSearch } = useProductSearch();
   const { columnsVisibility, selectedColumns, setSelectedColumns, handleColumnSelection } = useColumnSelection(INITIAL_COLUMNS_VISIBILITY);
 
   const [sortState, setSortState] = useState({ field: null, order: 'asc' });
   const sortRef = useRef({ field: null, order: 'asc' });
 
   const buildQueryObject = useCallback(() => {
-    const cleanTextEntries = [...new Set(
-      searchInputs.TextEntries.value
-        .map(line => line.trim())
-        .filter(line => line !== "")
-    )];
-
-    if (cleanTextEntries.length === 0) return null;
-
-    const filters = buildFilterClauses(searchInputs);
-    const fieldKey = getFieldKey(inputMode);
-    const textQueries = buildTextMustClauses({ value: cleanTextEntries }, fieldKey);
-
-    return {
-      bool: {
-        must: textQueries,
-        filter: filters
-      }
-    };
+    return buildProductFinderBody(searchInputs, inputMode);
   }, [searchInputs, inputMode]);
 
   const search = useCallback(async (page, rowsPerPage) => {
@@ -101,7 +71,7 @@ const ProductFinder = () => {
 
     setInputError(false);
     const { field, order } = sortRef.current;
-    const sort = field ? [{ [SORTABLE_ES_FIELDS[field]]: { order } }] : null;
+    const sort = field ? { field: SORT_FIELD_MAP[field], order } : null;
     await executeSearch(buildQueryObject(), page, rowsPerPage, null, sort);
   }, [buildQueryObject, executeSearch, searchInputs.TextEntries.value]);
 

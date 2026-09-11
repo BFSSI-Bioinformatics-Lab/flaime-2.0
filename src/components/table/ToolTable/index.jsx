@@ -3,45 +3,46 @@ import { Table, TableHead, TableBody, TableRow, TableCell, TableContainer, Paper
 import { StyledTableCell } from './styles';
 import { Link } from 'react-router-dom';
 
+// Columns the API can sort on (POST /api/storeproducts/search/ `sort.field`).
 const SORTABLE_COLUMNS = {
   id: 'id',
-  external_id: 'external_id.keyword',
-  name: 'site_name.keyword',
-  price: 'reading_price.keyword',
-  source: 'source.name.keyword',
-  store: 'store.name.keyword',
-  date: 'scrape_batch.datetime',
-  region: 'scrape_batch.region.keyword',
-  storage_condition: 'storage_condition.keyword',
-  primary_package_material: 'primary_package_material.keyword',
+  external_id: 'external_id',
+  name: 'site_name',
+  price: 'price',
+  source: 'source',
+  store: 'store',
+  date: 'date',
+  region: 'region',
+  storage_condition: 'storage_condition',
+  primary_package_material: 'primary_package_material',
 };
 
 const ToolTable = ({ columns, data, totalCount, page, rowsPerPage, onPageChange, onRowsPerPageChange, sortField, sortOrder, onSortChange }) => {
   const renderCell = (column, item) => {
     switch (column) {
       case 'id':
-        return <Link to={`/tools/product-browser/${item._id}`} target="_blank">{item._id}</Link>;
+        return <Link to={`/tools/product-browser/${item.id}`} target="_blank">{item.id}</Link>;
       case 'name':
-        return item._source.site_name;
+        return item.site_name;
       case 'price':
-        return item._source.reading_price;
+        return item.price;
       case 'source':
-        return item._source.source.name;
+        return item.source?.name ?? '';
       case 'store':
-        return item._source.store.name;
+        return item.store?.name ?? '';
       case 'date':
-        return item._source.scrape_batch.datetime;
+        return item.scrape_batch?.datetime ?? '';
       case 'region':
-        return item._source.scrape_batch.region;
+        return item.scrape_batch?.region ?? '';
       case 'categories':
-        return item._source.categories && item._source.categories.length > 0
-          ? item._source.categories
+        return item.categories && item.categories.length > 0
+          ? [...item.categories]
               .sort((a, b) => a.level - b.level)
               .map(cat => cat.name)
               .join(' > ')
           : 'No category';
       default:
-        return item._source[column] || '';
+        return item[column] ?? '';
     }
   };
 
@@ -84,7 +85,7 @@ const ToolTable = ({ columns, data, totalCount, page, rowsPerPage, onPageChange,
         </TableHead>
         <TableBody>
           {data.map((item, index) => (
-            <TableRow key={index}>
+            <TableRow key={item.id ?? index}>
               {columns.map((column) => (
                 <TableCell key={column}>
                   {renderCell(column, item)}

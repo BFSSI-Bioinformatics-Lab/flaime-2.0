@@ -9,9 +9,21 @@ const paddingStyle = { padding: '10px' };
 const cellPaddingStyle = { padding: '0px' };
 const smallFontSizeStyle = { textTransform: 'capitalize', fontSize: 'smaller' };
 
+// The energy/calories fact is shown on its own line, not in the nutrient table.
+// The API's nutrient naming changed in the FSDH migration ("ENERGY (KILOCALORIES)"
+// -> "Calories"), so match on the stable USDA symbol/code and keep the old name
+// as a fallback.
+const isCaloriesFact = (nutritionFact) => {
+  const nutrient = nutritionFact.nutrient || {};
+  return nutrient.symbol === "KCAL"
+    || nutrient.nutrient_code === 208
+    || nutrient.name === "ENERGY (KILOCALORIES)"
+    || nutrient.name === "Calories";
+};
+
 const getLocalizedNutrients = (nutritionFacts, supplementedOnly = false) => nutritionFacts
-  .filter(nutritionFact => 
-    nutritionFact.nutrient.name !== "ENERGY (KILOCALORIES)" && 
+  .filter(nutritionFact =>
+    !isCaloriesFact(nutritionFact) &&
     nutritionFact.supplemented === supplementedOnly
   )
   .map(nutritionFact => ({
@@ -27,7 +39,7 @@ const getLocalizedNutrients = (nutritionFacts, supplementedOnly = false) => nutr
   });
 
 const NutritionFactsTable = ({ product }) => {
-  const isSupplemented = product.product?.supplemented_food === true;
+  const isSupplemented = product.supplemented_food === true;
   const supplementedNutrients = isSupplemented ? 
     getLocalizedNutrients(product.nutrition_facts, true) : [];
 
@@ -43,7 +55,7 @@ const NutritionFactsTable = ({ product }) => {
         {product.nutrition_facts && (
           <Typography variant="body2" style={paddingStyle}>
             {product.nutrition_facts
-              .filter(nutritionFact => nutritionFact.nutrient.name === "ENERGY (KILOCALORIES)")
+              .filter(isCaloriesFact)
               .map(nutritionFact => `Calories: ${nutritionFact.amount}${nutritionFact.amount_unit ? ` ${nutritionFact.amount_unit.name}` : ''}`)
               .join(', ')}
           </Typography>
